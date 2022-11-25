@@ -1,0 +1,230 @@
+# General
+import argparse
+from os import mkdir
+from collections import OrderedDict
+import numpy as np
+
+import sys
+
+# import pypangolin as pango
+
+# Torch
+import torch
+
+# loc
+
+from loc.utils.configurations import make_config
+from loc.utils.logging import setup_logger
+
+from loc.dataset import ImagesFromList, ImagesTransform
+from loc.extract_features import FeatureManager
+from loc.retrieve import do_retrieve
+from loc.matchers import do_matching
+from loc.localize import main as localize
+
+from loc.config import *
+
+# from loc.estimate import do_estimation
+from loc.colmap_nvm      import main as colmap_from_nvm
+from loc.covisibility    import main as covisibility
+from loc.triangulation   import main as triangulation
+from loc.vis   import visualize_loc, visualize_sfm_2d, visualize_sfm_3d
+from loc.utils.read_write_model import read_model
+from loc.utils.database import COLMAPDatabase
+
+from pathlib import Path
+
+# Viewer
+
+from loc.viewer import Viewer3D
+
+import multiprocessing as mp
+
+def make_parser():
+    # ArgumentParser
+    parser = argparse.ArgumentParser(description='PyTorch CNN Image Retrieval Training')
+
+    # Export directory, training and val datasets, test datasets
+    parser.add_argument("--local_rank", type=int)
+
+    parser.add_argument('--directory', metavar='EXPORT_DIR',
+                        help='destination where trained network should be saved')
+
+    parser.add_argument('--data', metavar='EXPORT_DIR',
+                        help='destination where trained network should be saved')
+
+    parser.add_argument("--config", metavar="FILE", type=str, help="Path to configuration file",
+                        default='./cirtorch/configuration/defaults/global_config.ini')
+
+    parser.add_argument("--eval", action="store_true", help="Do a single validation run")
+
+    parser.add_argument('--resume', metavar='FILENAME', type=str,
+                        help='name of the latest checkpoint (default: None)')
+
+    parser.add_argument("--pre_train", metavar="FILE", type=str, nargs="*",
+                        help="Start from the given pre-trained snapshots, overwriting each with the next one in the list. "
+                             "Snapshots can be given in the format '{module_name}:{path}', where '{module_name} is one of "
+                             "'body', 'rpn_head', 'roi_head' or 'sem_head'. In that case only that part of the network "
+                             "will be loaded from the snapshot")
+
+
+    args = parser.parse_args()
+
+    for arg in vars(args):
+        print(' {}\t  {}'.format(arg, getattr(args, arg)))
+
+    print('\n ')
+
+    return parser
+
+
+def main(args):
+    
+    # Initialize multi-processing
+    device_id, device = args.local_rank, torch.device(args.local_rank)
+    rank, world_size = 0, 1
+
+    # Set device
+    torch.cuda.set_device(device_id)
+
+    # Set seed
+    torch.manual_seed(0)
+    torch.cuda.manual_seed_all(0)
+    np.random.seed(0)
+    
+    # Load configuration
+    config = make_config(args, defauls=DEFAULT_CONFIGS["default"])
+
+    # Initialize logging
+
+    # TODO: add file logging, use loger
+
+    # dataset_path    = Path('/media/dl/Data/datasets/2020Visualloc/Aachen-Day-Night/')
+    # outputs         = Path('/media/dl/Data/datasets/2020Visualloc/Aachen-Day-Night//outputs/')
+    
+    dataset_path    = Path('/media/loc/ssd_5126/vis2020/Aachen-Day-Night/')
+    outputs         = Path('/media/loc/ssd_5126/vis2020/Aachen-Day-Night/outputs/')
+
+    image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
+    
+    sfm_pairs       = outputs / 'pairs-db-covis20.txt'    
+    reference_sfm   = outputs / 'sfm_superpoint+superglue'  
+    results         = outputs / 'Aachen_hloc_superpoint+superglue_netvlad20.txt'  
+    
+    # outfolder
+    if not outputs.exists():
+        mkdir(outputs)
+    
+    # Set the 3D viewer
+    # viewer3D = Viewer3D()
+    viewer3D = None
+
+   
+    # Feature manager
+    opts = FeatureManagerConfigs.GF_SUPERPOINT
+    feature_manager = FeatureManager(config, **opts,   logger=logger)
+    
+    # names
+    meta = OrderedDict() 
+    
+    for split in ["query", "db"]:
+        
+        # Dataset
+        data_config = make_data_config(name=config["dataloader"].get("dataset"))
+        image_set   = ImagesFromList(images_path=dataset_path/data_config[split]["images"], 
+                                     cameras_path=dataset_path/data_config[split]["cameras"] if data_config[split]["cameras"] else None,
+                                     split=split,
+                                     max_size=config["dataloader"].getint("max_size"),
+                                     logger=logger)
+        
+        # Meta
+        meta[split] = dict()
+        meta[split]["names"]    = image_set.get_names()
+        meta[split]["cameras"]  = image_set.get_cameras()
+
+        # Extract both, globals and locals  
+        features_path = feature_manager.extract(dataset=image_set,
+                                                path=outputs/split,
+                                                override=True,
+                                                logger=logger) 
+        
+        meta[split]["path"] = features_path
+                
+    
+    # Nvm to colmap
+    model_path = dataset_path / 'sfm_sift'
+
+    colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
+                    dataset_path / '3D-models/database_intrinsics.txt',
+                    dataset_path / 'aachen.db',
+                    model_path, 
+                    logger=logger,
+                    override=True) 
+    
+    # Covisibility
+    covisibility(model_path, sfm_pairs, num_matched=20, logger=logger)
+        
+    # Match SFM
+    sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
+
+    do_matching(src_path=Path(meta["db"]["path"] ), 
+                dst_path=Path(meta["db"]["path"] ), 
+                pairs_path=sfm_pairs, 
+                output=sfm_matches_path, 
+                override=True,
+                logger=logger)
+    
+    # Triangulate
+    reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, meta["db"]["path"], sfm_matches_path,
+                                   skip_geometric_verification=False, 
+                                   estimate_two_view_geometries=False,
+                                   verbose=True, logger=logger)
+        
+    # Retrieve
+    num_top_matches = 20
+    loc_pairs_path = outputs / Path('pairs' + '_' +  opts["retrieval_name"] + '_' +str(num_top_matches)  + '.txt') 
+    do_retrieve(meta=meta, topK=num_top_matches, output=loc_pairs_path, override=False, logger=logger)
+    meta["loc_pairs_path"] = str(loc_pairs_path)
+    
+    # Match
+    loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
+
+    do_matching(src_path=Path(meta["query"]["path"] ), dst_path=Path(meta["db"]["path"] ), 
+                pairs_path=loc_pairs_path, 
+                output=loc_matches_path, 
+                logger=logger,
+                override=False)
+    
+    # localize
+    # localize(sfm_model=model_path,
+    #          queries=meta["query"]["cameras"],
+    #          retrieval_pairs_path=loc_pairs_path,
+    #          features=Path(meta["query"]["path"] ),
+    #          matches=loc_matches_path,
+    #          results=results,
+    #          covisibility_clustering=True,
+    #          logger=logger,
+    #          viewer=None
+    #         )
+    
+    # Visualization
+    # visualize_sfm_2d(model_path,  image_path,  n=4,    color_by='track_length'    )
+    # visualize_sfm_2d(model_path,  image_path,  n=5,    color_by='visibility'      )
+    # visualize_sfm_2d(model_path,  image_path,  n=5,    color_by='depth'           )
+    # visualize_loc(results, image_path, model_path, n=5, top_k_db=2, prefix='query/night', seed=2)
+    
+
+
+    
+    
+
+    
+    # if viewer3D is not None:
+    #     viewer3D.draw_map()
+    
+    
+if __name__ == '__main__':
+  
+    parser = make_parser()
+
+    main(parser.parse_args())

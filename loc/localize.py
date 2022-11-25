@@ -12,8 +12,8 @@ import pycolmap
 from typing import Dict, List, Union, Tuple
 from collections import defaultdict
 
-from visloc.vis import visualize_localization_3d
-from visloc.utils.io import parse_retrieval_file
+from loc.vis import visualize_localization_3d
+from loc.utils.io import parse_retrieval_file
 
 def get_keypoints(path: Path, name: str,
                   return_uncertainty: bool = False) -> np.ndarray:

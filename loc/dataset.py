@@ -18,7 +18,7 @@ import pycolmap
 import cv2
 import h5py
 
-from visloc.utils.io import load_aachen_intrinsics
+from loc.utils.io import load_aachen_intrinsics
 
 _EXT = ['*.jpg', '*.png', '*.jpeg', '*.JPG', '*.PNG']
 

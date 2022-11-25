@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pycolmap
 
-from visloc import logger
+from loc import logger
 
 # 
 def load_aachen_intrinsics(paths):

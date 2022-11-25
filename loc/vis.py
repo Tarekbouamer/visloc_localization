@@ -8,11 +8,11 @@ import pickle
 
 import pycolmap
 import cv2
-from visloc import viewer
+from loc import viewer
 
 
 
-from visloc.utils.vis import plot_images, plot_keypoints, add_text , plot_matches, cm_RdGn
+from loc.utils.vis import plot_images, plot_keypoints, add_text , plot_matches, cm_RdGn
 
 def read_image(path, grayscale=False):
     if grayscale:

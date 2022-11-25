@@ -18,8 +18,8 @@ from pathlib import Path
 from core.utils.configurations import make_config
 
 # Visloc
-from visloc.configurations import DEFAULTS as DEFAULT_CONFIGS
-from visloc.config import *
+from loc.configurations import DEFAULTS as DEFAULT_CONFIGS
+from loc.config import *
  
 # Config    
 def import_from(module, name, method=None):
@@ -39,11 +39,11 @@ def import_from(module, name, method=None):
 
 
 # Nets
-# GF_NetFeatures         = import_from(  'visloc.models',    'GF_NetFeatures'       )         
-# SuperPointFeatures     = import_from(  'visloc.models',    'SuperPointFeatures'   )   
+# GF_NetFeatures         = import_from(  'loc.models',    'GF_NetFeatures'       )         
+# SuperPointFeatures     = import_from(  'loc.models',    'SuperPointFeatures'   )   
 
-from visloc.models import GF_NetFeatures
-from visloc.models import SuperPointFeatures
+from loc.models import GF_NetFeatures
+from loc.models import SuperPointFeatures
 
 # Manager
 class FeatureManager(object):
