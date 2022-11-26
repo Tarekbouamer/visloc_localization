@@ -11,3 +11,5 @@ matplotlib
 gdown==4.5.1
 timm==0.6.12
 pycolmap==0.3.0
+asmk
+# visloc_retrieval

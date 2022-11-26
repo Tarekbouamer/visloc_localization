@@ -25,6 +25,12 @@ from loc.triangulation  import main as triangulation
 from loc.colmap.colmap_nvm  import main as colmap_from_nvm
 from loc.colmap.database    import COLMAPDatabase
 
+# retrieval
+import retrieval as ret
+
+# configs
+from loc.config import *
+
 def make_parser():
     # ArgumentParser
     parser = argparse.ArgumentParser(description='PyTorch CNN Image Retrieval Training')
@@ -100,28 +106,30 @@ def main(args):
     if not outputs.exists():
         mkdir(outputs)
     
-    # Set the 3D viewer
-    # viewer3D = Viewer3D()
-    viewer3D = None
-
-   
-    # Feature manager
-    # opts = FeatureManagerConfigs.GF_SUPERPOINT
-    # feature_manager = FeatureManager(config, **opts,   logger=logger)
-    
     # names
     meta = OrderedDict() 
     
     for split in ["query", "db"]:
         
-        # Dataset
-        data_config = make_data_config(name=config["dataloader"].get("dataset"))
-        image_set   = ImagesFromList(images_path=dataset_path/data_config[split]["images"], 
-                                     cameras_path=dataset_path/data_config[split]["cameras"] if data_config[split]["cameras"] else None,
+        # data
+        data_config = make_data_config(name='Aachen')
+        
+        # init extractor
+        extractor = ret.FeatureExtractor(model_name='sfm_resnet50_gem_2048')
+        
+        
+        
+        image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], 
                                      split=split,
-                                     max_size=config["dataloader"].getint("max_size"),
+                                     max_size=600,
                                      logger=logger)
         
+        preds = extractor.extract_global(image_set)
+        
+        #
+        print(preds["features"].shape)
+        
+        print(len(image_set))
         # Meta
         meta[split] = dict()
         meta[split]["names"]    = image_set.get_names()

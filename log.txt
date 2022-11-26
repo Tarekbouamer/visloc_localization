@@ -1,1 +1,2 @@
-[11/26 15:59 loc]: init loc
+[11/26 18:38 loc]: init loc
+[11/26 18:38 loc]: Found 947 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/query

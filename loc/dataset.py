@@ -9,10 +9,11 @@ import numpy as np
 from pathlib import Path
 from types import SimpleNamespace
 
-from PIL import Image
+from PIL import Image, ImageFile
 
 from    torchvision.transforms import functional as tfn
 import  torchvision.transforms as transforms
+from  timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
 import pycolmap 
 import cv2
@@ -81,40 +82,50 @@ def parse_image_lists(paths, with_intrinsics=False):
   
 
 
+
 class ImagesTransform:
   
-    def __init__(self,
-                 max_size,
-                 mean=None,
-                 std=None):
+    def __init__(self, max_size, 
+                 mean=IMAGENET_DEFAULT_MEAN,
+                 std=IMAGENET_DEFAULT_STD):
         
+        # max_size
         self.max_size = max_size
-        self.mean     = mean
-        self.std      = std
-       
-        # self.tfn = transforms.Compose([
-        #     transforms.ToTensor(),
-        #     transforms.Normalize(mean=mean, std=std)
-        # ])
-
-    def __call__(self, img):
+        
+        # preprocessing 
+        self.postprocessing = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize(mean=mean, std=std)
+                ])
+    def __resize__(self, img):
+        
+        # scale
+        width, height   = img.size
+        max_size        = max(width, height)
+        
+        # scale
+        scale = self.max_size / max_size
+        
+        #
+        out_size = tuple(int(dim * scale) for dim in img.size)
 
         # resize
-        if self.max_size:
-            longest_size  = max(img.size[0], img.size[1])
-            scale         = self.max_size / longest_size
-            out_size      = tuple(int(dim * scale) for dim in img.size)
-            img           = img.resize(out_size, resample=Image.BILINEAR)
+        return img.resize(out_size, resample=Image.BILINEAR)
+    
+    def __call__(self, img):
         
-        # to Tensor,         
-        img = self.tfn(img)
-        
+        # resize
+        img = self.__resize__(img)
+
+        #
+        img = self.postprocessing(img)           
+
         return dict(img=img)
 
 
 class ImagesFromList(data.Dataset):
     
-    def __init__(self, images_path, cameras_path=None, split=None, max_size=None, logger=None): 
+    def __init__(self, images_path, cameras_path=None, split=None, transform=None, max_size=None, logger=None): 
         
         self.max_size       = max_size
         self.split          = split        
@@ -137,7 +148,9 @@ class ImagesFromList(data.Dataset):
         if self.cameras_path:
             self.cameras = load_aachen_intrinsics(self.cameras_path)
             logger.info('Imported %s from %s ', len(self.cameras), self.cameras_path)
-
+            
+        # transform
+        self.transform = ImagesTransform(max_size=max_size) if transform is None else transform
 
 
     def __len__(self):
@@ -150,11 +163,21 @@ class ImagesFromList(data.Dataset):
     def get_names(self):
         return [ self.split + "/" + str(p.relative_to(self.images_path)) for p in self.images_fn] 
          
-    def load_img(self, img_path):
+    # def load_img(self, img_path):
 
-        img = cv2.imread(str(img_path), cv2.IMREAD_COLOR)
+    #     img = cv2.imread(str(img_path), cv2.IMREAD_COLOR)
             
-        return img 
+    #     return img 
+    
+    def load_img(self, img_path):
+          
+        # for truncated images
+        ImageFile.LOAD_TRUNCATED_IMAGES = True     
+        
+        with open(img_path, 'rb') as f:
+            img = Image.open(f).convert('RGB')
+          
+        return img
     
     def get_cameras(self,):
         if hasattr(self, "cameras"):
@@ -162,26 +185,28 @@ class ImagesFromList(data.Dataset):
         else:
             None          
     
+    def get_name(self,  _path):
+        return path.basename(_path)   
+     
     def __getitem__(self, item):
         #
         out = {}
         
         #
-        img_path  = self.images_fn[item]
+        img_path    = self.images_fn[item]
+        img_name    = self.get_name(img_path)
         
-        # cv2
-        img             = self.load_img(img_path)
-        original_size   = np.array(img.shape[:2][::-1])
+        # pil
+        img  = self.load_img(img_path)
+        
+        # transform
+        if self.transform is not None:
+            out = self.transform(img)
+                        
 
-        # Resize    
-        if self.max_size :
-            scale       = self.max_size / max(original_size)
-            target_size = tuple(int(round(x * scale)) for x in original_size)
-            img         = self.resize_image(img, target_size)
 
         # Dict
         out["img"]              = img
-        out["img_name"]         = str(self.split + "/" + str(img_path.relative_to(self.images_path)))
-        out["original_size"]    = original_size
+        out["img_name"]         = img_name
         
         return out

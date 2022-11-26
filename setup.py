@@ -31,4 +31,16 @@ setup(
 
     # install  
     install_requires=dependencies,
+
+    # install_requires=[
+    #     # 'git+ssh://git@github.com:Tarekbouamer/visloc_retrieval.git#egg=visloc_retrieval'
+    #     # 'git+ssh://git@github.com/Tarekbouamer/visloc_retrieval.git'
+    #     'visloc_retrieval @ git+ssh:/git@github.com/Tarekbouamer/visloc_retrieval.git'
+
+    # ]
+    dependency_links=[
+        # 'git+https://github.com/Tarekbouamer/visloc_retrieval#egg=visloc_retrieval',
+        'git+https://github.com/jenicek/asmk#egg=asmk'
+        ]
+
 )
