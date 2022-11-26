@@ -1,44 +1,29 @@
 # General
+from collections import OrderedDict
 import argparse
 from os import mkdir
-from collections import OrderedDict
 import numpy as np
-
-import sys
-
-# import pypangolin as pango
-
-# Torch
-import torch
-
-# loc
-
-from loc.utils.configurations import make_config
-from loc.utils.logging import setup_logger
-
-from loc.dataset import ImagesFromList, ImagesTransform
-from loc.extract_features import FeatureManager
-from loc.retrieve import do_retrieve
-from loc.matchers import do_matching
-from loc.localize import main as localize
-
-from loc.config import *
-
-# from loc.estimate import do_estimation
-from loc.colmap_nvm      import main as colmap_from_nvm
-from loc.covisibility    import main as covisibility
-from loc.triangulation   import main as triangulation
-from loc.vis   import visualize_loc, visualize_sfm_2d, visualize_sfm_3d
-from loc.utils.read_write_model import read_model
-from loc.utils.database import COLMAPDatabase
-
 from pathlib import Path
 
-# Viewer
+# torch
+import torch
 
-from loc.viewer import Viewer3D
+# utils
+from loc.utils.read_write_model import read_model
+from loc.utils.configurations   import make_config
+from loc.utils.logging          import setup_logger
 
-import multiprocessing as mp
+# loc
+from loc.dataset        import ImagesFromList, ImagesTransform
+from loc.retrieve       import do_retrieve
+from loc.matchers       import do_matching
+from loc.localize       import main as localize
+from loc.covisibility   import main as covisibility
+from loc.triangulation  import main as triangulation
+
+# colmap
+from loc.colmap.colmap_nvm  import main as colmap_from_nvm
+from loc.colmap.database    import COLMAPDatabase
 
 def make_parser():
     # ArgumentParser
@@ -78,8 +63,8 @@ def make_parser():
     return parser
 
 
-def main(args):
-    
+def init_device(args):
+    """ Not used for the moment """
     # Initialize multi-processing
     device_id, device = args.local_rank, torch.device(args.local_rank)
     rank, world_size = 0, 1
@@ -91,20 +76,20 @@ def main(args):
     torch.manual_seed(0)
     torch.cuda.manual_seed_all(0)
     np.random.seed(0)
+
+
+def main(args):
     
-    # Load configuration
-    config = make_config(args, defauls=DEFAULT_CONFIGS["default"])
-
-    # Initialize logging
-
+    logger = setup_logger(output=".", name="loc")
+    logger.info("init loc")
+    
     # TODO: add file logging, use loger
 
     # dataset_path    = Path('/media/dl/Data/datasets/2020Visualloc/Aachen-Day-Night/')
     # outputs         = Path('/media/dl/Data/datasets/2020Visualloc/Aachen-Day-Night//outputs/')
     
-    dataset_path    = Path('/media/loc/ssd_5126/vis2020/Aachen-Day-Night/')
-    outputs         = Path('/media/loc/ssd_5126/vis2020/Aachen-Day-Night/outputs/')
-
+    dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/')
+    outputs         = Path('//media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs/')
     image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
     
     sfm_pairs       = outputs / 'pairs-db-covis20.txt'    
@@ -121,8 +106,8 @@ def main(args):
 
    
     # Feature manager
-    opts = FeatureManagerConfigs.GF_SUPERPOINT
-    feature_manager = FeatureManager(config, **opts,   logger=logger)
+    # opts = FeatureManagerConfigs.GF_SUPERPOINT
+    # feature_manager = FeatureManager(config, **opts,   logger=logger)
     
     # names
     meta = OrderedDict() 

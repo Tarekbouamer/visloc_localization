@@ -2,6 +2,8 @@
 clear
 python3 setup.py install
 
+clear
+
 EXPERIMENT='./experiments/'
 DATA_DIR='/media/dl/Data/datasets/'
 

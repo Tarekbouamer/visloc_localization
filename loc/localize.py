@@ -2,17 +2,14 @@ import argparse
 from pathlib import Path
 import numpy as np
 import h5py
-from scipy.io import loadmat
-import torch
 from tqdm import tqdm
 import pickle
-import cv2
 import pycolmap
 
 from typing import Dict, List, Union, Tuple
 from collections import defaultdict
 
-from loc.vis import visualize_localization_3d
+# from loc.vis import visualize_localization_3d
 from loc.utils.io import parse_retrieval_file
 
 def get_keypoints(path: Path, name: str,

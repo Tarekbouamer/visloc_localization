@@ -12,7 +12,8 @@ with open(str(root / '_version.py'), 'r') as f:
 
 with open(str(root / 'requirements.txt'), 'r') as f:
     dependencies = f.read().split('\n')
-    print(dependencies)
+
+
     
 setup(
     name='visloc_localization',
