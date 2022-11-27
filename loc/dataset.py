@@ -97,6 +97,7 @@ class ImagesTransform:
                 transforms.ToTensor(),
                 transforms.Normalize(mean=mean, std=std)
                 ])
+    
     def __resize__(self, img):
         
         # scale
@@ -152,7 +153,6 @@ class ImagesFromList(data.Dataset):
         # transform
         self.transform = ImagesTransform(max_size=max_size) if transform is None else transform
 
-
     def __len__(self):
         return len(self.images_fn)
 
@@ -163,12 +163,6 @@ class ImagesFromList(data.Dataset):
     def get_names(self):
         return [ self.split + "/" + str(p.relative_to(self.images_path)) for p in self.images_fn] 
          
-    # def load_img(self, img_path):
-
-    #     img = cv2.imread(str(img_path), cv2.IMREAD_COLOR)
-            
-    #     return img 
-    
     def load_img(self, img_path):
           
         # for truncated images
@@ -203,10 +197,7 @@ class ImagesFromList(data.Dataset):
         if self.transform is not None:
             out = self.transform(img)
                         
-
-
         # Dict
-        out["img"]              = img
-        out["img_name"]         = img_name
+        out["name"]         = img_name
         
         return out

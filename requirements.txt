@@ -8,8 +8,10 @@ opencv-python==4.6.0.66
 h5py
 scipy
 matplotlib
-gdown==4.5.1
+termcolor  
+gdown==4.5.4
 timm==0.6.12
 pycolmap==0.3.0
+tabulate==0.8.10
 asmk
 # visloc_retrieval

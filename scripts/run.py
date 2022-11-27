@@ -89,13 +89,13 @@ def main(args):
     logger = setup_logger(output=".", name="loc")
     logger.info("init loc")
     
-    # TODO: add file logging, use loger
-
-    # dataset_path    = Path('/media/dl/Data/datasets/2020Visualloc/Aachen-Day-Night/')
-    # outputs         = Path('/media/dl/Data/datasets/2020Visualloc/Aachen-Day-Night//outputs/')
+    #
+    dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
     
-    dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/')
-    outputs         = Path('//media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs/')
+    # dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/')
+    # outputs         = Path('//media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs/')
+    
     image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
     
     sfm_pairs       = outputs / 'pairs-db-covis20.txt'    
@@ -106,6 +106,9 @@ def main(args):
     if not outputs.exists():
         mkdir(outputs)
     
+    # init extractor
+    extractor = ret.FeatureExtractor(model_name='sfm_resnet50_gem_2048')
+    
     # names
     meta = OrderedDict() 
     
@@ -114,34 +117,33 @@ def main(args):
         # data
         data_config = make_data_config(name='Aachen')
         
-        # init extractor
-        extractor = ret.FeatureExtractor(model_name='sfm_resnet50_gem_2048')
-        
-        
-        
+        #
         image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], 
                                      split=split,
                                      max_size=600,
                                      logger=logger)
         
-        preds = extractor.extract_global(image_set)
+        #
+        save_path = Path(str(outputs) + '/' + str(split) + '.h5')
+
+        preds = extractor.extract_global(image_set, save_path=save_path)
         
         #
         print(preds["features"].shape)
-        
-        print(len(image_set))
-        # Meta
-        meta[split] = dict()
-        meta[split]["names"]    = image_set.get_names()
-        meta[split]["cameras"]  = image_set.get_cameras()
+        print(preds["save_path"])
 
-        # Extract both, globals and locals  
-        features_path = feature_manager.extract(dataset=image_set,
-                                                path=outputs/split,
-                                                override=True,
-                                                logger=logger) 
+        # # Meta
+        # meta[split] = dict()
+        # meta[split]["names"]    = image_set.get_names()
+        # meta[split]["cameras"]  = image_set.get_cameras()
+
+        # # Extract both, globals and locals  
+        # features_path = feature_manager.extract(dataset=image_set,
+        #                                         path=outputs/split,
+        #                                         override=True,
+        #                                         logger=logger) 
         
-        meta[split]["path"] = features_path
+        # meta[split]["path"] = features_path
                 
     
     # Nvm to colmap

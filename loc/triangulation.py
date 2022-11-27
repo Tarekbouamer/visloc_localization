@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 import pycolmap
 
-from .utils.database import COLMAPDatabase
+from loc.colmap.database import COLMAPDatabase
 
 import h5py
 from collections import defaultdict
