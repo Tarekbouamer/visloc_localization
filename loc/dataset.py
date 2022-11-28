@@ -21,6 +21,11 @@ import h5py
 
 from loc.utils.io import load_aachen_intrinsics
 
+# logger
+import logging
+logger = logging.getLogger("loc")
+
+
 _EXT = ['*.jpg', '*.png', '*.jpeg', '*.JPG', '*.PNG']
 
 def read_image(path, grayscale=False):
@@ -126,7 +131,7 @@ class ImagesTransform:
 
 class ImagesFromList(data.Dataset):
     
-    def __init__(self, images_path, cameras_path=None, split=None, transform=None, max_size=None, logger=None): 
+    def __init__(self, images_path, cameras_path=None, split=None, transform=None, max_size=None): 
         
         self.max_size       = max_size
         self.split          = split        

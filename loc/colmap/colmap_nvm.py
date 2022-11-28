@@ -9,7 +9,12 @@ from ..utils.read_write_model import Camera, Image, Point3D, CAMERA_MODEL_NAMES
 from ..utils.read_write_model import write_model
 
 
-def recover_database_images_and_ids(database_path, logger=None):
+# logger
+import logging
+logger = logging.getLogger("loc")
+
+
+def recover_database_images_and_ids(database_path):
     images = {}
     cameras = {}
     db = sqlite3.connect(str(database_path))
@@ -19,9 +24,7 @@ def recover_database_images_and_ids(database_path, logger=None):
         cameras[name] = camera_id
     db.close()
     
-    if logger:
-        logger.info(
-            f'Found {len(images)} images and {len(cameras)} cameras in database.')
+    logger.info(f'3D model has {len(images)} images and {len(cameras)} cameras in database.')
         
     return images, cameras
 
@@ -41,13 +44,14 @@ def camera_center_to_translation(c, qvec):
     return (-1) * np.matmul(R, c)
 
 
-def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points=False, logger=None):
+def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points=False):
+
+    logger.info('reading the NVM model...')
 
     with open(intrinsics_path, 'r') as f:
         raw_intrinsics = f.readlines()
 
-    if logger:
-        logger.info(f'Reading {len(raw_intrinsics)} cameras...')
+    logger.info(f'reading {len(raw_intrinsics)} cameras')
         
     cameras = {}
     for intrinsics in raw_intrinsics:
@@ -69,8 +73,7 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
     num_images = int(line)
     assert num_images == len(cameras)
     
-    if logger:
-        logger.info(f'Reading {num_images} images...')
+    logger.info(f'reading {num_images} images...')
         
     image_idx_to_db_image_id = []
     image_data = []
@@ -93,8 +96,7 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
         logger.info(f'Skipping {num_points} points.')
         num_points = 0
     else:
-        if logger:
-            logger.info(f'Reading {num_points} points...')
+        logger.info(f'reading {num_points} points...')
             
     points3D = {}
     image_idx_to_keypoints = defaultdict(list)
@@ -130,8 +132,8 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
         pbar.update(1)
     pbar.close()
     
-    if logger:
-        logger.info('Parsing image data...')
+    # parsing 
+    logger.info('parsing image data')
     
     images = {}
     for i, data in enumerate(image_data):
@@ -171,28 +173,22 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
     return cameras, images, points3D
 
 
-def main(nvm, intrinsics, database, output, skip_points=False, override=False, logger=None):
+def main(nvm, intrinsics, database, output, skip_points=False, override=False):
+    
     assert nvm.exists(),         nvm
     assert intrinsics.exists(), intrinsics
     assert database.exists(),   database
 
 
-    image_ids, camera_ids = recover_database_images_and_ids(database, logger=logger)
-    
-    if logger:
-        logger.info('Reading the NVM model...')
-    
-    model = read_nvm_model(nvm, intrinsics, image_ids, camera_ids, skip_points=skip_points, logger=logger)
-
-    if logger:
-        logger.info('Writing the COLMAP model...')
-    
+    image_ids, camera_ids = recover_database_images_and_ids(database)
+        
+    model = read_nvm_model(nvm, intrinsics, image_ids, camera_ids, skip_points=skip_points)
+        
     output.mkdir(exist_ok=True, parents=True)
     
     write_model(*model, path=str(output), ext='.bin')
     
-    if logger:
-        logger.info('Done.')
+    logger.info('NVM to Colmap conversion done !')
 
 
 if __name__ == '__main__':

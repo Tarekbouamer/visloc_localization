@@ -57,7 +57,7 @@ def setup_logger(output=None, *, color=True, name="visloc", abbrev_name=None, su
     """
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
-    logger.propagate = False
+    logger.propagate = True
     
     # Formaters 
      
@@ -117,8 +117,6 @@ def create_small_table(small_dict):
     )
     return 
 
-# def get_logger():
-#     return logging.getLogger(_NAME)
 
 def _current_total_formatter(current, total):
     width = int(log10(total)) + 1

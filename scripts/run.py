@@ -16,7 +16,7 @@ from loc.utils.logging          import setup_logger
 # loc
 from loc.dataset        import ImagesFromList, ImagesTransform
 from loc.retrieve       import do_retrieve
-from loc.matchers       import do_matching
+from loc.matching       import do_matching
 from loc.localize       import main as localize
 from loc.covisibility   import main as covisibility
 from loc.triangulation  import main as triangulation
@@ -90,11 +90,11 @@ def main(args):
     logger.info("init loc")
     
     #
-    dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
-    
-    # dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/')
-    # outputs         = Path('//media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs/')
+    # dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    # outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
+
+    dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
     
     image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
     
@@ -106,7 +106,7 @@ def main(args):
     if not outputs.exists():
         mkdir(outputs)
     
-    # init extractor
+    # extractor
     extractor = ret.FeatureExtractor(model_name='sfm_resnet50_gem_2048')
     
     # names
@@ -120,18 +120,17 @@ def main(args):
         #
         image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], 
                                      split=split,
-                                     max_size=600,
-                                     logger=logger)
+                                     max_size=640)
         
         #
         save_path = Path(str(outputs) + '/' + str(split) + '.h5')
 
-        preds = extractor.extract_global(image_set, save_path=save_path)
+        preds = extractor.extract_global(image_set, save_path=save_path, override=True)
         
         #
-        print(preds["features"].shape)
-        print(preds["save_path"])
-
+        meta[split] = dict()
+        meta[split]["path"] = Path(preds['save_path'])
+        
         # # Meta
         # meta[split] = dict()
         # meta[split]["names"]    = image_set.get_names()
@@ -149,25 +148,21 @@ def main(args):
     # Nvm to colmap
     model_path = dataset_path / 'sfm_sift'
 
-    colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
-                    dataset_path / '3D-models/database_intrinsics.txt',
-                    dataset_path / 'aachen.db',
-                    model_path, 
-                    logger=logger,
-                    override=True) 
+    # colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
+    #                 dataset_path / '3D-models/database_intrinsics.txt',
+    #                 dataset_path / 'aachen.db',
+    #                 model_path, 
+    #                 override=False) 
     
     # Covisibility
-    covisibility(model_path, sfm_pairs, num_matched=20, logger=logger)
+    # covisibility(model_path, sfm_pairs, num_matched=20)
         
     # Match SFM
     sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
-
-    do_matching(src_path=Path(meta["db"]["path"] ), 
-                dst_path=Path(meta["db"]["path"] ), 
+    do_matching(src_path=meta["db"]["path"], 
+                dst_path=meta["db"]["path"], 
                 pairs_path=sfm_pairs, 
-                output=sfm_matches_path, 
-                override=True,
-                logger=logger)
+                output=sfm_matches_path)
     
     # Triangulate
     reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, meta["db"]["path"], sfm_matches_path,

@@ -7,16 +7,18 @@ from collections import defaultdict
 
 from .utils.read_write_model import read_model
 
+# logger
+import logging
+logger = logging.getLogger("loc")
 
-def main(model, output, num_matched, logger=None):
 
-    if logger:
-        logger.info('Reading the COLMAP model...')
+def main(model, output, num_matched):
+
+    logger.info('reading Colmap model')
     
     cameras, images, points3D = read_model(model)
 
-    if logger:
-        logger.info('Extracting image pairs from covisibility info...')
+    logger.info('extracting image pairs from covisibility')
     
     pairs = []
     for image_id, image in tqdm(images.items()):
@@ -31,8 +33,7 @@ def main(model, output, num_matched, logger=None):
                     covis[image_covis_id] += 1
 
         if len(covis) == 0:
-            if logger:
-                logger.warn(f'Image {image_id} does not have any covisibility.')
+            logger.warning (f'image {image_id} does not have any covisibility.')
             continue
 
         covis_ids = np.array(list(covis.keys()))
@@ -56,8 +57,7 @@ def main(model, output, num_matched, logger=None):
             pair = (image.name, images[i].name)
             pairs.append(pair)
     
-    if logger:
-        logger.info(f'Found {len(pairs)} pairs.')
+    logger.info(f'found {len(pairs)} image pairs.')
     
     with open(output, 'w') as f:
         f.write('\n'.join(' '.join([i, j]) for i, j in pairs))

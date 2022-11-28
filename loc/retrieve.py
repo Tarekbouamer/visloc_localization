@@ -14,6 +14,8 @@ def get_descriptors(desc_path, names, key='global_descriptor'):
 
     for n in names:
         with h5py.File(str(desc_path), 'r') as fd:
+            x = fd[n][key].__array__()
+            print(x.shape)
             descs.append(fd[n][key].__array__())
             
     out = torch.from_numpy(np.stack(descs, 0)).float()

@@ -36,8 +36,9 @@ import struct
 import argparse
 import logging
 
-logger = logging.getLogger(__name__)
-
+# logger
+import logging
+logger = logging.getLogger("loc")
 
 CameraModel = collections.namedtuple(
     "CameraModel", ["model_id", "model_name", "num_params"])
@@ -447,6 +448,10 @@ def read_model(path, ext=""):
 
 
 def write_model(cameras, images, points3D, path, ext=".bin"):
+    
+    logger.info('writing Colmap model...')
+    
+
     if ext == ".txt":
         write_cameras_text(cameras, os.path.join(path, "cameras" + ext))
         write_images_text(images, os.path.join(path, "images" + ext))
