@@ -101,11 +101,11 @@ def main(args):
     logger.info("init loc")
     
     #
-    # dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    # outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
+    dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
 
-    dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
+    # dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    # outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
     
     image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
     
@@ -131,9 +131,9 @@ def main(args):
         # load images 
         image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], split=split, max_size=640)
         
-        # extract features
-        save_path = Path(str(outputs) + '/' + str(split) + '.h5')
-        preds = extractor.extract_global(image_set, save_path=save_path, override=True)
+        # extract features, normalize input data is required 
+        save_path = Path(str(outputs) + '/' + str(split) + '_global' + '.h5')
+        preds = extractor.extract_global(image_set, save_path=save_path, normalize=True, override=True)
         
         #
         meta[split] = dict()
@@ -153,13 +153,12 @@ def main(args):
         image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], split=split, max_size=640, gray=True, transform=None)
         
         # extract features
-        save_path = Path(str(outputs) + '/' + str(split) + '.h5')
-        
-        preds = detector.extract_keypoints(image_set)
+        save_path = Path(str(outputs) + '/' + str(split) + '_local' + '.h5')
+        preds = detector.extract_keypoints(image_set, normalize=False, save_path=save_path, override=True)
         
         #
         meta[split] = dict()
-        meta[split]["global_path"] = Path(preds['save_path'])
+        meta[split]["local_path"] = Path(preds['save_path'])
         
                 
         # # Meta
@@ -188,8 +187,8 @@ def main(args):
         
     # Match SFM
     sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
-    do_matching(src_path=meta["db"]["path"], 
-                dst_path=meta["db"]["path"], 
+    do_matching(src_path=meta["db"]["local_path"], 
+                dst_path=meta["db"]["local_path"], 
                 pairs_path=sfm_pairs, 
                 output=sfm_matches_path)
     

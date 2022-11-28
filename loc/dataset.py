@@ -100,7 +100,7 @@ class ImagesTransform:
         # preprocessing 
         self.postprocessing = transforms.Compose([
                 transforms.ToTensor(),
-                transforms.Normalize(mean=mean, std=std)
+                # transforms.Normalize(mean=mean, std=std)
                 ])
     
     def __resize__(self, img):
@@ -129,6 +129,8 @@ class ImagesTransform:
         return dict(img=img)
 
 
+
+
 class ImagesFromList(data.Dataset):
     
     def __init__(self, images_path, cameras_path=None, split=None, transform=None, max_size=None, **kwargs): 
@@ -138,41 +140,31 @@ class ImagesFromList(data.Dataset):
         self.images_path    = images_path
         self.cameras_path   = cameras_path
         
-        # Load images
+        # load images
         paths = []
         for ext in _EXT:
             paths += list(Path(self.images_path).glob('**/'+ ext)) 
                                         
         if len(paths) == 0:
-            raise ValueError(f'Could not find any image in path: {self.images_path}.')
+            raise ValueError(f'could not find any image in path: {self.images_path}.')
             
         self.images_fn = sorted(list(set(paths)))
                     
-        logger.info('Found %s images in %s', len(self.images_fn), self.images_path ) 
+        logger.info('found %s images in %s', len(self.images_fn), self.images_path ) 
         
         # Load intrinsics
         if self.cameras_path:
             self.cameras = load_aachen_intrinsics(self.cameras_path)
             logger.info('Imported %s from %s ', len(self.cameras), self.cameras_path)
         
-        # gray
+        # gray scale
         self.gray = kwargs.pop('gray', False)
             
-        # transform
-        if transform is True:
-            self.transform = ImagesTransform(max_size=max_size)
-        else:
-            self.transform = None
+        # transform numpy ->  tensor
+        self.transform = ImagesTransform(max_size=max_size) if transform is None else transform
    
     def __len__(self):
         return len(self.images_fn)
-
-    def resize_image(self, img, size):
-        img     = cv2.resize(img, size, interpolation=cv2.INTER_LINEAR)
-        return  img     
-    
-    def get_names(self):
-        return [ self.split + "/" + str(p.relative_to(self.images_path)) for p in self.images_fn] 
          
     def load_img(self, img_path):
           
@@ -207,6 +199,7 @@ class ImagesFromList(data.Dataset):
         
         # pil
         img  = self.load_img(img_path)
+        size = img.size
         
         # transform
         if self.transform is not None:
@@ -214,7 +207,8 @@ class ImagesFromList(data.Dataset):
         else:
             out['img'] = img
                         
-        # Dict
-        out["name"]         = img_name
+        # dict
+        out["name"]  = img_name
+        out["size"]  = np.array(size, dtype=float)
         
         return out
