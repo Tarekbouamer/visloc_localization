@@ -131,7 +131,7 @@ class ImagesTransform:
 
 class ImagesFromList(data.Dataset):
     
-    def __init__(self, images_path, cameras_path=None, split=None, transform=None, max_size=None): 
+    def __init__(self, images_path, cameras_path=None, split=None, transform=None, max_size=None, **kwargs): 
         
         self.max_size       = max_size
         self.split          = split        
@@ -154,10 +154,16 @@ class ImagesFromList(data.Dataset):
         if self.cameras_path:
             self.cameras = load_aachen_intrinsics(self.cameras_path)
             logger.info('Imported %s from %s ', len(self.cameras), self.cameras_path)
+        
+        # gray
+        self.gray = kwargs.pop('gray', False)
             
         # transform
-        self.transform = ImagesTransform(max_size=max_size) if transform is None else transform
-
+        if transform is True:
+            self.transform = ImagesTransform(max_size=max_size)
+        else:
+            self.transform = None
+   
     def __len__(self):
         return len(self.images_fn)
 
@@ -170,12 +176,16 @@ class ImagesFromList(data.Dataset):
          
     def load_img(self, img_path):
           
-        # for truncated images
+        # truncated images
         ImageFile.LOAD_TRUNCATED_IMAGES = True     
         
+        # open 
         with open(img_path, 'rb') as f:
-            img = Image.open(f).convert('RGB')
-          
+            if self.gray:
+                img = Image.open(f).convert('L')
+            else:
+                img = Image.open(f).convert('RGB')
+                
         return img
     
     def get_cameras(self,):
@@ -201,6 +211,8 @@ class ImagesFromList(data.Dataset):
         # transform
         if self.transform is not None:
             out = self.transform(img)
+        else:
+            out['img'] = img
                         
         # Dict
         out["name"]         = img_name

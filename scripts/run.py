@@ -1,4 +1,5 @@
 # General
+import sys
 from collections import OrderedDict
 import argparse
 from os import mkdir
@@ -7,6 +8,9 @@ from pathlib import Path
 
 # torch
 import torch
+
+# append
+sys.path.append(str(Path(__file__).parent / '../'))
 
 # utils
 from loc.utils.read_write_model import read_model
@@ -27,6 +31,13 @@ from loc.colmap.database    import COLMAPDatabase
 
 # retrieval
 import retrieval as ret
+
+# detectors
+from loc.detectors      import SuperPoint
+
+# third 
+
+
 
 # configs
 from loc.config import *
@@ -106,31 +117,51 @@ def main(args):
     if not outputs.exists():
         mkdir(outputs)
     
-    # extractor
-    extractor = ret.FeatureExtractor(model_name='sfm_resnet50_gem_2048')
+    # data config
+    data_config = make_data_config(name='Aachen')
     
-    # names
+    # globals
+    logger.info("extract global features")
+
+    extractor = ret.FeatureExtractor(model_name='sfm_resnet50_gem_2048')
     meta = OrderedDict() 
     
     for split in ["query", "db"]:
         
-        # data
-        data_config = make_data_config(name='Aachen')
+        # load images 
+        image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], split=split, max_size=640)
         
-        #
-        image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], 
-                                     split=split,
-                                     max_size=640)
-        
-        #
+        # extract features
         save_path = Path(str(outputs) + '/' + str(split) + '.h5')
-
         preds = extractor.extract_global(image_set, save_path=save_path, override=True)
         
         #
         meta[split] = dict()
-        meta[split]["path"] = Path(preds['save_path'])
+        meta[split]["global_path"] = Path(preds['save_path'])
+
+
+
+
+    # locals
+    logger.info("extract local features")
+    detector = SuperPoint()
+    meta = OrderedDict() 
+    
+    for split in ["query", "db"]:
         
+        # load images 
+        image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], split=split, max_size=640, gray=True, transform=None)
+        
+        # extract features
+        save_path = Path(str(outputs) + '/' + str(split) + '.h5')
+        
+        preds = detector.extract_keypoints(image_set)
+        
+        #
+        meta[split] = dict()
+        meta[split]["global_path"] = Path(preds['save_path'])
+        
+                
         # # Meta
         # meta[split] = dict()
         # meta[split]["names"]    = image_set.get_names()
@@ -141,9 +172,7 @@ def main(args):
         #                                         path=outputs/split,
         #                                         override=True,
         #                                         logger=logger) 
-        
-        # meta[split]["path"] = features_path
-                
+                        
     
     # Nvm to colmap
     model_path = dataset_path / 'sfm_sift'

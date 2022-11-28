@@ -1,5 +1,6 @@
-[11/28 14:51 loc]: init loc
-[11/28 14:51 loc]: Found 947 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/query
-[11/28 14:51 loc]: Found 4479 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/db
-[11/28 14:51 loc]: Match 85515 pairs
-[11/28 14:51 loc]: Matcher type ( mutual_nearest_neighbor ) is initialized
+[11/28 17:27 loc]: init loc
+[11/28 17:27 loc]: extract global features
+[11/28 17:27 loc]: Found 947 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/query
+[11/28 17:27 loc]: Found 4479 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/db
+[11/28 17:27 loc]: extract local features
+[11/28 17:27 loc]: Found 947 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/query
