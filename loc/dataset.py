@@ -19,7 +19,7 @@ import pycolmap
 import cv2
 import h5py
 
-from loc.utils.io import load_aachen_intrinsics
+from loc.utils.io import load_aachen_intrinsics, parse_name
 
 # logger
 import logging
@@ -133,13 +133,17 @@ class ImagesTransform:
 
 class ImagesFromList(data.Dataset):
     
-    def __init__(self, images_path, cameras_path=None, split=None, transform=None, max_size=None, **kwargs): 
+    def __init__(self, root, cameras_path=None, split=None, transform=None, max_size=None, **kwargs): 
         
         self.max_size       = max_size
-        self.split          = split        
-        self.images_path    = images_path
+        self.root           = root
         self.cameras_path   = cameras_path
         
+        if split is not None:
+            self.images_path  = Path(self.root) / str(split)
+        else:
+            self.images_path  = Path(self.root)
+
         # load images
         paths = []
         for ext in _EXT:
@@ -149,7 +153,8 @@ class ImagesFromList(data.Dataset):
             raise ValueError(f'could not find any image in path: {self.images_path}.')
             
         self.images_fn = sorted(list(set(paths)))
-                    
+        self.names = [i.relative_to(root).as_posix() for i in self.images_fn]         
+        
         logger.info('found %s images in %s', len(self.images_fn), self.images_path ) 
         
         # Load intrinsics
@@ -186,8 +191,9 @@ class ImagesFromList(data.Dataset):
         else:
             None          
     
-    def get_name(self,  _path):
-        return path.basename(_path)   
+    def get_name(self, _path):
+        name = _path.relative_to(self.root).as_posix()
+        return name
      
     def __getitem__(self, item):
         #
@@ -196,7 +202,7 @@ class ImagesFromList(data.Dataset):
         #
         img_path    = self.images_fn[item]
         img_name    = self.get_name(img_path)
-        
+                        
         # pil
         img  = self.load_img(img_path)
         size = img.size

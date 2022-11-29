@@ -30,10 +30,10 @@ from loc.colmap.colmap_nvm  import main as colmap_from_nvm
 from loc.colmap.database    import COLMAPDatabase
 
 # retrieval
-import retrieval as ret
+# import retrieval as ret
 
 # detectors
-from loc.detectors      import SuperPoint
+from loc.extractors      import SuperPoint, FeatureExtractor
 
 # third 
 
@@ -101,11 +101,11 @@ def main(args):
     logger.info("init loc")
     
     #
-    dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
+    # dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    # outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
 
-    # dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    # outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
+    dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
     
     image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
     
@@ -123,15 +123,16 @@ def main(args):
     # globals
     logger.info("extract global features")
 
-    extractor = ret.FeatureExtractor(model_name='sfm_resnet50_gem_2048')
-    meta = OrderedDict() 
+    extractor = FeatureExtractor(model_name='sfm_resnet50_gem_2048')
+    detector  = SuperPoint()
+    meta      = OrderedDict() 
     
     for split in ["query", "db"]:
         
         # load images 
-        image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], split=split, max_size=640)
+        image_set = ImagesFromList(root=dataset_path/data_config[split]["images"], split=split, max_size=400)
         
-        # extract features, normalize input data is required 
+        # extract features
         save_path = Path(str(outputs) + '/' + str(split) + '_global' + '.h5')
         preds = extractor.extract_global(image_set, save_path=save_path, normalize=True, override=True)
         
@@ -139,72 +140,54 @@ def main(args):
         meta[split] = dict()
         meta[split]["global_path"] = Path(preds['save_path'])
 
-
-
-
     # locals
     logger.info("extract local features")
-    detector = SuperPoint()
-    meta = OrderedDict() 
-    
+   
     for split in ["query", "db"]:
         
         # load images 
-        image_set = ImagesFromList(images_path=dataset_path/data_config[split]["images"], split=split, max_size=640, gray=True, transform=None)
+        image_set = ImagesFromList(root=dataset_path/data_config[split]["images"], split=split, max_size=400, gray=True, transform=None)
         
         # extract features
         save_path = Path(str(outputs) + '/' + str(split) + '_local' + '.h5')
-        preds = detector.extract_keypoints(image_set, normalize=False, save_path=save_path, override=True)
+        preds = detector.extract_keypoints(image_set, save_path=save_path, normalize=False, override=True)
         
         #
         meta[split] = dict()
         meta[split]["local_path"] = Path(preds['save_path'])
         
-                
-        # # Meta
-        # meta[split] = dict()
-        # meta[split]["names"]    = image_set.get_names()
-        # meta[split]["cameras"]  = image_set.get_cameras()
-
-        # # Extract both, globals and locals  
-        # features_path = feature_manager.extract(dataset=image_set,
-        #                                         path=outputs/split,
-        #                                         override=True,
-        #                                         logger=logger) 
-                        
-    
-    # Nvm to colmap
+                 
+    # Nvm to Colmap
     model_path = dataset_path / 'sfm_sift'
-
     # colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
     #                 dataset_path / '3D-models/database_intrinsics.txt',
     #                 dataset_path / 'aachen.db',
     #                 model_path, 
     #                 override=False) 
     
-    # Covisibility
-    # covisibility(model_path, sfm_pairs, num_matched=20)
+    # covisibility
+    covisibility(model_path, sfm_pairs, num_matched=20)
         
-    # Match SFM
+    # sfm pairs
     sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
-    do_matching(src_path=meta["db"]["local_path"], 
-                dst_path=meta["db"]["local_path"], 
-                pairs_path=sfm_pairs, 
-                output=sfm_matches_path)
+    # do_matching(src_path=meta["db"]["local_path"], 
+    #             dst_path=meta["db"]["local_path"], 
+    #             pairs_path=sfm_pairs, 
+    #             output=sfm_matches_path)
     
-    # Triangulate
-    reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, meta["db"]["path"], sfm_matches_path,
+    # triangulate
+    reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, meta["db"]["local_path"], sfm_matches_path,
                                    skip_geometric_verification=False, 
                                    estimate_two_view_geometries=False,
                                    verbose=True, logger=logger)
         
-    # Retrieve
+    # retrieve
     num_top_matches = 20
     loc_pairs_path = outputs / Path('pairs' + '_' +  opts["retrieval_name"] + '_' +str(num_top_matches)  + '.txt') 
     do_retrieve(meta=meta, topK=num_top_matches, output=loc_pairs_path, override=False, logger=logger)
     meta["loc_pairs_path"] = str(loc_pairs_path)
     
-    # Match
+    # match
     loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
 
     do_matching(src_path=Path(meta["query"]["path"] ), dst_path=Path(meta["db"]["path"] ), 

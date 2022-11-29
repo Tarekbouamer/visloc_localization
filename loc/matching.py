@@ -16,28 +16,17 @@ import torch
 
 import loc.matchers as matchers
 
+from loc.utils.io import names_to_pair, get_pairs_from_txt, read_key_from_h5py
+
 # logger
 import logging
 logger = logging.getLogger("loc")
 
-   
-def names_to_pair(name0, name1, separator='/'):
-    return separator.join((name0.replace('/', '-'), name1.replace('/', '-')))
+      
+ 
 
-
-def get_pairs_from_txt(path):
-    pairs = []
-    with open(path, 'r') as f:
-        for line in f.read().rstrip('\n').split('\n'):
-            
-            if len(line) == 0:
-                continue
-            
-            q_name, db_name = line.split()
-            pairs.append((q_name, db_name))
-            
-    return pairs         
-       
+  
+    
         
 def do_matching(src_path, dst_path, pairs_path, output):
 
@@ -56,32 +45,30 @@ def do_matching(src_path, dst_path, pairs_path, output):
         logger.error('No Matches pairs found.')
         return
 
-    logger.info("Match %s pairs", len(pairs))    
+    logger.info("matching %s pairs", len(pairs))    
               
     # matcher
     matcher = matchers.MutualNearestNeighbor()
     
     # run
-    for (src_name, dst_name) in tqdm(pairs, total=len(pairs)):
+    for it, (src_name, dst_name) in enumerate(tqdm(pairs, total=len(pairs))):
+        
+        #
         data = {'src': {}, 'dst': {}}
         
-        # query 
-        with h5py.File(str(src_path), 'r') as fq:
-            group = fq[src_name]
+        # src 
+        data['src'] = read_key_from_h5py(src_name, src_path)
+        data['dst'] = read_key_from_h5py(dst_name, dst_path)
+
+        src_desc = data['src']['descriptors']
+        dst_desc = data['dst']['descriptors']
+        
+        if src_desc.shape[-1] != dst_desc.shape[-1]:
+            src_desc = src_desc.T
+            dst_desc = dst_desc.T
             
-            for key, v in group.items():
-                data["src"][key] = torch.from_numpy(v.__array__()).float().to(device)
-  
-        # db    
-        with h5py.File(str(dst_path), 'r') as fdb:
-            group = fdb[dst_name]
-            
-            for key, v in group.items():
-                data["dst"][key] = torch.from_numpy(v.__array__()).float().to(device)
- 
-        # Match
-        with torch.no_grad():
-             matches_dists, matches_idxs = matcher(  desc1=data['src']['descriptors'],   desc2=data['dst']['descriptors'])
+        # match
+        matches_dists, matches_idxs = matcher(src_desc, dst_desc)
         
         # Get key
         pair_key = names_to_pair(src_name, dst_name)

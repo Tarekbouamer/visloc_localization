@@ -8,7 +8,8 @@ logger = logging.getLogger("loc")
 class NearestNeighbor(BaseMatcher):
     def __init__(self, matcher_type='nearest_neighbor'):
         super().__init__(matcher_type)
-      
+    
+    @ torch.no_grad()  
     def forward(self, desc1, desc2):
         """"""
         cost = torch.cdist(desc1, desc2)
@@ -26,7 +27,8 @@ class NearestNeighbor(BaseMatcher):
 class MutualNearestNeighbor(BaseMatcher):
     def __init__(self, matcher_type='mutual_nearest_neighbor'):
         super().__init__(matcher_type)
-      
+    
+    @ torch.no_grad()  
     def forward(self, desc1, desc2):
         """"""
         #
@@ -58,7 +60,8 @@ class NearestNeighborRatio(BaseMatcher):
         super().__init__(matcher_type)
         
         self.thd = thd
-      
+    
+    @ torch.no_grad()  
     def forward(self, desc1, desc2):
         """"""
         cost = torch.cdist(desc1, desc2)

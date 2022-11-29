@@ -8,6 +8,7 @@ from tqdm import tqdm
 import pycolmap
 
 from loc.colmap.database import COLMAPDatabase
+from loc.utils.io import parse_name
 
 import h5py
 from collections import defaultdict
@@ -176,6 +177,7 @@ def import_features(image_ids, database_path, features_path, logger=None):
     db = COLMAPDatabase.connect(database_path)
         
     for image_name, image_id in tqdm(image_ids.items()):
+        image_name = parse_name(image_name)
         keypoints = get_keypoints(features_path, image_name)
         keypoints += 0.5  # COLMAP origin
         db.add_keypoints(image_id, keypoints)
@@ -198,6 +200,9 @@ def import_matches(image_ids, database_path, pairs_path, matches_path,
     matched = set()
     
     for name0, name1 in tqdm(pairs):
+        name0 = parse_name(name0)
+        name1 = parse_name(name1)
+
         id0, id1 = image_ids[name0], image_ids[name1]
         
         if len({(id0, id1), (id1, id0)} & matched) > 0:
@@ -318,8 +323,10 @@ def main(sfm_dir, model, image_dir, pairs, features, matches,
     database    = sfm_dir / 'database.db'
     reference   = pycolmap.Reconstruction(model)
 
+    # create database
     image_ids = create_db_from_model(reference, database, logger=logger)
     
+    # 
     import_features(image_ids, database, features, logger=logger)
     
     import_matches(image_ids, database, pairs, matches, min_match_score, skip_geometric_verification, logger=logger)

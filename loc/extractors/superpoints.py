@@ -23,7 +23,10 @@ class SuperPoint(torch.nn.Module):
         super().__init__()
         
         self.net = superpoint(config)
-
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.net.to(device=device) 
+        print(device)
+    
     def _forward(self, data):
         """ Run SuperPoint (optionally) and SuperGlue
         SuperPoint is skipped if ['keypoints0', 'keypoints1'] exist in input
@@ -100,6 +103,10 @@ class SuperPoint(torch.nn.Module):
     @torch.no_grad()      
     def extract_keypoints(self, dataset, save_path=None, **kwargs):
         
+        #
+        self.net.eval()
+
+        #
         if save_path is not None:
             if kwargs.pop('override', False):
                 return {'save_path': save_path}
@@ -111,7 +118,7 @@ class SuperPoint(torch.nn.Module):
         dataloader = self.__dataloader__(dataset)
 
         # run --> 
-        for it, data in enumerate(tqdm(dataloader, total=len(dataloader), colour='cyan', desc='extract keypoints'.rjust(20))):
+        for it, data in enumerate(tqdm(dataloader, total=len(dataloader), colour='cyan', desc='extract keypoints'.rjust(15))):
             
             img = data['img']
             
