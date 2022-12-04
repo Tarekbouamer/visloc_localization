@@ -3,7 +3,7 @@
 import sys
 from collections import OrderedDict
 import argparse
-from os import mkdir
+import os
 import numpy as np
 from pathlib import Path
 from tqdm import tqdm
@@ -99,26 +99,48 @@ class SuperPoint(torch.nn.Module):
 
         except OSError as error:   
             raise error 
+
+    def load_locals(self, dataloader, save_path):
         
+        fd    = h5py.File(save_path, 'r')
+        
+        features = {}
+        
+        for it, data in enumerate(tqdm(dataloader, total=len(dataloader), colour='red', desc='load locals'.rjust(15))):
+            name = data['name'][0]
+            
+            features[name] = {}
+            
+            #
+            for k, v in fd[name].items():
+                features[name][k] = torch.from_numpy(v.__array__()).float()       
+        #
+        out = {
+            'features': features,
+            'save_path': save_path,
+        }
+        
+        return out        
     @torch.no_grad()      
     def extract_keypoints(self, dataset, save_path=None, **kwargs):
         
-        #
+        # eval
         self.net.eval()
-
-        #
-        if save_path is not None:
-            if kwargs.pop('override', False):
-                return {'save_path': save_path}
-            else:
-                # writer
-                self.writer = h5py.File(str(save_path), 'a')
         
         # dataloader
         dataloader = self.__dataloader__(dataset)
 
+        #
+        if save_path is not None:
+            if os.path.exists(save_path):
+                return self.load_locals(dataloader, save_path)
+            else:
+                # writer
+                self.writer = h5py.File(str(save_path), 'a')
+        
+
         # run --> 
-        for it, data in enumerate(tqdm(dataloader, total=len(dataloader), colour='cyan', desc='extract keypoints'.rjust(15))):
+        for it, data in enumerate(tqdm(dataloader, total=len(dataloader), colour='green', desc='extract keypoints'.rjust(15))):
             
             img = data['img']
             

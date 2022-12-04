@@ -1,8 +1,12 @@
-[11/29 17:36 loc]: init loc
-[11/29 17:36 loc]: extract global features
-[11/29 17:36 loc]: found 947 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/query
-[11/29 17:36 loc]: found 4479 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/db
-[11/29 17:37 loc]: extract local features
-[11/29 17:37 loc]: found 947 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/query
-[11/29 17:37 loc]: found 4479 images in /media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/db
-[11/29 17:37 loc]: reading Colmap model
+[12/05 01:26 loc]: init loc
+[12/05 01:26 loc]: extract local features
+[12/05 01:26 loc]: found 947 images in /media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/query
+[12/05 01:27 loc]: found 4479 images in /media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/db
+[12/05 01:33 loc]: extract global features using sfm_resnet50_gem_2048
+[12/05 01:33 loc]: found 947 images in /media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/query
+[12/05 01:33 loc]: found 4479 images in /media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/images/database_and_query_images/images_upright/db
+[12/05 01:33 loc]: retrive top 20 images
+[12/05 01:33 loc]: 18940 pairs have been found, saved /media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs/pairs_sfm_resnet50_gem_2048_20.txt
+[12/05 01:33 loc]: matching 18940 pairs
+[12/05 01:33 loc]: Matcher type ( mutual_nearest_neighbor ) is initialized
+[12/05 01:35 loc]: matches saved to /media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs/loc_matches_path.h5

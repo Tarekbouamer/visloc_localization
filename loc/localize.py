@@ -9,63 +9,12 @@ import pycolmap
 from typing import Dict, List, Union, Tuple
 from collections import defaultdict
 
-# from loc.vis import visualize_localization_3d
-from loc.utils.io import parse_retrieval_file
-
-def get_keypoints(path: Path, name: str,
-                  return_uncertainty: bool = False) -> np.ndarray:
-    with h5py.File(str(path), 'r') as hfile:
-        dset = hfile[name]['keypoints']
-        p = dset.__array__()
-        uncertainty = dset.attrs.get('uncertainty')
-    if return_uncertainty:
-        return p, uncertainty
-    return p
-  
-
-def find_pair(hfile: h5py.File, name0: str, name1: str):
-    pair = names_to_pair(name0, name1)    
-    if pair in hfile:
-        return pair, False
-    pair = names_to_pair(name1, name0)
-    if pair in hfile:
-        return pair, True
-    # older, less efficient format
-    pair = names_to_pair_old(name0, name1)
-    if pair in hfile:
-        return pair, False
-    pair = names_to_pair_old(name1, name0)
-    
-    if pair in hfile:
-        return pair, True
-    
-    raise ValueError(
-        f'Could not find pair {(name0, name1)}... '
-        'Maybe you matched with a different list of pairs? ')
-    
-    
-def get_matches(path: Path, name0: str, name1: str) -> Tuple[np.ndarray]:
-    with h5py.File(str(path), 'r') as hfile:
-
-        pair, reverse = find_pair(hfile, name0, name1)
-        matches = hfile[pair]['matches'].__array__()
-        scores  = hfile[pair]['scores'].__array__()
-        
-    # idx = np.where(matches != -1)[0]
-    # matches = np.stack([idx, matches[idx]], -1)
-    # if reverse:
-    #     matches = np.flip(matches, -1)
-    # scores = scores[idx]
-    
-    return matches, scores
-
-  
-def names_to_pair(name0, name1, separator='/'):
-    return separator.join((name0.replace('/', '-'), name1.replace('/', '-')))
+from loc.utils.io import parse_retrieval_file, get_keypoints, get_matches
 
 
-def names_to_pair_old(name0, name1):
-    return names_to_pair(name0, name1, separator='_')
+# logger
+import logging
+logger = logging.getLogger("loc")
 
 
 def do_covisibility_clustering(frame_ids: List[int], sfm_model: pycolmap.Reconstruction):
@@ -140,7 +89,6 @@ def pose_from_cluster(
         db_ids: List[int],
         features_path: Path,
         matches_path: Path,
-        logger=None,
         **kwargs):
     
     # Get Query 2D keypoints
@@ -212,7 +160,6 @@ def main(sfm_model: Union[Path, pycolmap.Reconstruction],
          covisibility_clustering: bool = False,
          prepend_camera_name: bool = False,
          config: Dict = None, 
-         logger=None,
          viewer=None):
 
     assert retrieval_pairs_path.exists(),  retrieval_pairs_path

@@ -21,7 +21,7 @@ from retrieval.models import create_model, get_pretrained_cfg
 
 # logger
 import logging
-logger = logging.getLogger("retrieval")
+logger = logging.getLogger("loc")
 
 __DEBUG__ = False
 
@@ -74,7 +74,9 @@ class FeatureExtractor():
         try:
             if key in hf:
                 del hf[key]
-                    
+            
+            data = self.__to_numpy__(data)
+        
             g = hf.create_group(key)
             g.create_dataset(name, data=data)
 
@@ -118,18 +120,23 @@ class FeatureExtractor():
     def load_global(self, dataloader, save_path):
         
         fd    = h5py.File(save_path, 'r')
-        descs = []
+        
+        features = []
+        names    = []
 
         for it, data in enumerate(tqdm(dataloader, total=len(dataloader), colour='magenta', desc='load global'.rjust(15))):
             name = data['name'][0]
-            descs.append(fd[name]['desc'].__array__())
-         
+            features.append(fd[name]['desc'].__array__())
+            names.append(name)
+
         #   
-        features = torch.from_numpy(np.stack(descs)).float()
+        features = torch.from_numpy(np.stack(features)).float()
+        names   = np.stack(names)
         
         #
         out = {
             'features': features,
+            'names': names,
             'save_path': save_path,
         }
         
@@ -163,8 +170,9 @@ class FeatureExtractor():
                 self.writer = h5py.File(str(save_path), 'a')
 
         # L D size
-        features = []
-
+        features    = []
+        names       = []
+        
         # time
         start_time = time.time()
         
@@ -183,13 +191,13 @@ class FeatureExtractor():
             desc = desc['features'][0]
             
             # numpy
-            desc = self.__to_numpy__(desc)
             features.append(desc)
             
             # write
             if hasattr(self, 'writer'):
                 name = data['name'][0]
                 self.__write__(name, desc)
+                names.append(name)
             
             # clear cache  
             if it % 10 == 0:
@@ -200,7 +208,8 @@ class FeatureExtractor():
             self.writer.close()  
         
         # stack         
-        features    = np.vstack(features)
+        features = torch.stack(features)
+        names    = np.stack(names)
         
         # end time
         end_time = time.time() - start_time  
@@ -210,6 +219,7 @@ class FeatureExtractor():
         # 
         out = {
             'features':     features,
+            'names':        names,
             'save_path':    save_path   }
         
         return out

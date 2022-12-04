@@ -54,10 +54,8 @@ def main(model, output, num_matched):
 
         # Collect pairs 
         for i in top_covis_ids:
-            q = image.name.replace('/', '-')
-            p = images[i].name.replace('/', '-')
-            
-            pair = (q, p)
+
+            pair = (image.name, images[i].name)
             pairs.append(pair)
     
     logger.info(f'found {len(pairs)} image pairs.')

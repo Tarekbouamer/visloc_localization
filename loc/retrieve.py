@@ -7,6 +7,13 @@ import torch
 import collections.abc as collections
 import os 
 
+from loc.dataset        import ImagesFromList, ImagesTransform
+from loc.extractors     import FeatureExtractor
+
+# logger
+import logging
+logger = logging.getLogger("loc")
+
 
 def get_descriptors(desc_path, names, key='global_descriptor'):
     
@@ -23,37 +30,38 @@ def get_descriptors(desc_path, names, key='global_descriptor'):
     return out
 
 
-def do_retrieve(meta, output, topK=5, override=False, logger=None):
+def do_retrieve(dataset, data_config, outputs, topK=5):
 
-    if logger:
-        logger.info("Retrive top %s images", topK)   
-            
-    # 
-    if output.exists():
-        if override:
-            os.remove(output)
-        else:
-            return output
+    # model type
+    retrieval_model_name = 'sfm_resnet50_gem_2048'
+    
+    # extractor
+    logger.info(f"extract global features using {retrieval_model_name}")
+    extractor = FeatureExtractor(model_name=retrieval_model_name)
+                    
+    # query images 
+    image_set = ImagesFromList(root=dataset/data_config['query']["images"], split='query', max_size=400)
+    save_path = Path(str(outputs) + '/' + str('query') + '_global' + '.h5')
+    preds     = extractor.extract_global(image_set, save_path=save_path, normalize=True)
+    q_descs   = preds["features"]
+    q_names   = preds["names"]
 
-    # device 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # db images 
+    image_set = ImagesFromList(root=dataset/data_config['db']["images"], split='db', max_size=400)
+    save_path = Path(str(outputs) + '/' + str('db') + '_global' + '.h5')
+    preds     = extractor.extract_global(image_set, save_path=save_path, normalize=True)   
+    db_descs  = preds["features"]
+    db_names  = preds["names"]
     
-    # Get descs
-    db_descs    = get_descriptors(desc_path=meta["db"]["path"], 
-                                  names=meta["db"]["names"]).to(device=device)
-    
-    q_descs     = get_descriptors(desc_path=meta["query"]["path"], 
-                                  names=meta["query"]["names"]).to(device=device)
-    
-  
-    # Compute dot product scores and ranks
+    # compute dot product scores and ranks
     scores = torch.mm(q_descs, db_descs.t())
-
-    q_names   = meta["query"]["names"]
-    db_names  = meta["db"]["names"]
-        
+    
+    # search for topK images
+    logger.info("retrive top %s images", topK)   
+    
     invalid = np.array(q_names)[:, None] == np.array(db_names)[None]   
-    invalid = torch.from_numpy(invalid).to(scores.device)    
+    invalid = torch.from_numpy(invalid).to(scores.device)   
+
     invalid |= scores < 0
     scores.masked_fill_(invalid, float('-inf'))
 
@@ -62,7 +70,7 @@ def do_retrieve(meta, output, topK=5, override=False, logger=None):
     indices = topk.indices.cpu().numpy()
     valid   = topk.values.isfinite().cpu().numpy() 
     
-    # Find pairs 
+    # collect pairs 
     pairs = []
     for i, j in zip(*np.where(valid)):
         pairs.append((i, indices[i, j]))
@@ -71,9 +79,13 @@ def do_retrieve(meta, output, topK=5, override=False, logger=None):
     
     assert len(name_pairs) > 0, "No matching pairs has been found! "
     
-    if logger:
-        logger.info("%s pairs have been found", len(name_pairs))         
-    
-    # Save
-    with open(output, 'w') as f:
+    # save
+    loc_pairs_path = outputs / Path('pairs' + '_' +  str(retrieval_model_name) + '_' + str(topK)  + '.txt') 
+
+    with open(loc_pairs_path, 'w') as f:
         f.write('\n'.join(' '.join([i, j]) for i, j in name_pairs))
+    
+    #  
+    logger.info(f"{len(name_pairs)} pairs have been found, saved {loc_pairs_path}")         
+  
+    return loc_pairs_path

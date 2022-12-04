@@ -8,45 +8,18 @@ from tqdm import tqdm
 import pycolmap
 
 from loc.colmap.database import COLMAPDatabase
-from loc.utils.io import parse_name
+from loc.utils.io import parse_name, find_pair, get_keypoints, get_matches
+from loc.utils.geometry import compute_epipolar_errors
 
 import h5py
 from collections import defaultdict
 
 
-def to_homogeneous(p):
-    return np.pad(p, ((0, 0),) * (p.ndim - 1) + ((0, 1),), constant_values=1)
+# logger
+import logging
+logger = logging.getLogger("loc")
 
 
-def pose_matrix_from_qvec_tvec(qvec, tvec):
-    pose = np.zeros((4, 4))
-    pose[: 3, : 3] = pycolmap.qvec_to_rotmat(qvec)
-    pose[: 3, -1] = tvec
-    pose[-1, -1] = 1
-    return pose
-
-
-def vector_to_cross_product_matrix(v):
-    return np.array([
-        [0, -v[2], v[1]],
-        [v[2], 0, -v[0]],
-        [-v[1], v[0], 0]
-    ])
-
-
-def compute_epipolar_errors(qvec_r2t, tvec_r2t, p2d_r, p2d_t):
-    T_r2t = pose_matrix_from_qvec_tvec(qvec_r2t, tvec_r2t)
-    # Compute errors in normalized plane to avoid distortion.
-    E = vector_to_cross_product_matrix(T_r2t[: 3, -1]) @ T_r2t[: 3, : 3]
-    l2d_r2t = (E @ to_homogeneous(p2d_r).T).T
-    l2d_t2r = (E.T @ to_homogeneous(p2d_t).T).T
-    errors_r = (
-        np.abs(np.sum(to_homogeneous(p2d_r) * l2d_t2r, axis=1)) /
-        np.linalg.norm(l2d_t2r[:, : 2], axis=1))
-    errors_t = (
-        np.abs(np.sum(to_homogeneous(p2d_t) * l2d_r2t, axis=1)) /
-        np.linalg.norm(l2d_r2t[:, : 2], axis=1))
-    return E, errors_r, errors_t
 
 
 def parse_retrieval(path):
@@ -59,75 +32,6 @@ def parse_retrieval(path):
             retrieval[q].append(r)
     return dict(retrieval)
 
-
-def names_to_pair(name0, name1, separator='/'):
-    return separator.join((name0.replace('/', '-'), name1.replace('/', '-')))
-
-
-def names_to_pair_old(name0, name1):
-    return names_to_pair(name0, name1, separator='_')
-
-
-def find_pair(hfile: h5py.File, name0: str, name1: str):
-    
-    pair = names_to_pair(name0, name1)
-    
-    if pair in hfile:
-        return pair, False
-    pair = names_to_pair(name1, name0)
-    
-    if pair in hfile:
-        return pair, True
-    # older, less efficient format
-    pair = names_to_pair_old(name0, name1)
-    if pair in hfile:
-        return pair, False
-    pair = names_to_pair_old(name1, name0)
-    if pair in hfile:
-        return pair, True
-    raise ValueError(
-        f'Could not find pair {(name0, name1)}... '
-        'Maybe you matched with a different list of pairs? ')
-    
-    
-def get_matches(path, name0, name1):
-    with h5py.File(str(path), 'r') as hfile:
-        pair, reverse = find_pair(hfile, name0, name1)
-
-        matches = hfile[pair]['matches'].__array__()
-        scores = hfile[pair]['scores'].__array__()
-        
-    #     print(matches)
-    #     print(scores)
-    #     print(matches.shape)
-    #     print(scores.shape)   
-    #     input()     
-    # idx = np.where(matches != -1)
-    # print(idx)   
-    # print(idx[0].shape)   
-    # print(idx[1].shape)   
-   
-    # matches = np.stack([idx, matches[idx]], -1)
-    
-    # if reverse:
-    #     matches = np.flip(matches, -1)
-    # scores = scores[idx]
-    return matches, scores
-
-
-def get_keypoints(path, name, return_uncertainty=False):
-    
-    with h5py.File(str(path), 'r') as hfile:
-        dset = hfile[name]['keypoints']
-        
-        kpt         = dset.__array__()
-        uncertainty = dset.attrs.get('uncertainty')
-        
-    
-    if return_uncertainty:
-        return kpt, uncertainty
-    
-    return kpt
 
 
 class OutputCapture:
@@ -147,12 +51,10 @@ class OutputCapture:
         sys.stdout.flush()
 
 
-def create_db_from_model(reconstruction, database_path, logger=None):
+def create_db_from_model(reconstruction, database_path):
+    
     if database_path.exists():
-        
-        if logger:
-            logger.info('The database already exists, deleting it.')
-            
+        logger.info('The database already exists, deleting it.')
         database_path.unlink()
 
     db = COLMAPDatabase.connect(database_path)
@@ -169,15 +71,14 @@ def create_db_from_model(reconstruction, database_path, logger=None):
     return {image.name: i for i, image in reconstruction.images.items()}
 
 
-def import_features(image_ids, database_path, features_path, logger=None):
+def import_features(image_ids, database_path, features_path):
     
-    if logger:
-        logger.info('Importing features into the database...')
+    logger.info('Importing features into the database...')
     
     db = COLMAPDatabase.connect(database_path)
         
     for image_name, image_id in tqdm(image_ids.items()):
-        image_name = parse_name(image_name)
+            
         keypoints = get_keypoints(features_path, image_name)
         keypoints += 0.5  # COLMAP origin
         db.add_keypoints(image_id, keypoints)
@@ -187,10 +88,9 @@ def import_features(image_ids, database_path, features_path, logger=None):
 
 
 def import_matches(image_ids, database_path, pairs_path, matches_path,
-                   min_match_score=None, skip_geometric_verification=False, logger=None):
+                   min_match_score=None, skip_geometric_verification=False):
     
-    if logger:
-        logger.info('Importing matches into the database...')
+    logger.info('Importing matches into the database...')
 
     with open(str(pairs_path), 'r') as f:
         pairs = [p.split() for p in f.readlines()]
@@ -200,8 +100,6 @@ def import_matches(image_ids, database_path, pairs_path, matches_path,
     matched = set()
     
     for name0, name1 in tqdm(pairs):
-        name0 = parse_name(name0)
-        name1 = parse_name(name1)
 
         id0, id1 = image_ids[name0], image_ids[name1]
         
@@ -223,10 +121,9 @@ def import_matches(image_ids, database_path, pairs_path, matches_path,
     db.close()
 
 
-def estimation_and_geometric_verification(database_path, pairs_path,
-                                          verbose=False, logger=None):
-    if logger:
-        logger.info('Performing geometric verification of the matches...')
+def estimation_and_geometric_verification(database_path, pairs_path, verbose=False):
+    
+    logger.info('Performing geometric verification of the matches...')
     
     with OutputCapture(verbose):
         with pycolmap.ostream():
@@ -234,10 +131,9 @@ def estimation_and_geometric_verification(database_path, pairs_path,
 
 
 def geometric_verification(image_ids, reference, database_path, features_path,
-                           pairs_path, matches_path, max_error=4.0, logger=None):
+                           pairs_path, matches_path, max_error=4.0):
 
-    if logger:
-        logger.info('Performing geometric verification of the matches...')
+    logger.info('Performing geometric verification of the matches...')
 
     pairs = parse_retrieval(pairs_path)
     db = COLMAPDatabase.connect(database_path)
@@ -286,8 +182,7 @@ def geometric_verification(image_ids, reference, database_path, features_path,
             db.add_two_view_geometry(id0, id1, matches[valid_matches, :])
             inlier_ratios.append(np.mean(valid_matches))
     
-    if logger:
-        logger.info('mean/med/min/max valid matches %.2f/%.2f/%.2f/%.2f%%.',
+    logger.info('mean/med/min/max valid matches %.2f/%.2f/%.2f/%.2f%%.',
                 np.mean(inlier_ratios) * 100, np.median(inlier_ratios) * 100,
                 np.min(inlier_ratios) * 100, np.max(inlier_ratios) * 100)
 
@@ -295,12 +190,10 @@ def geometric_verification(image_ids, reference, database_path, features_path,
     db.close()
 
 
-def run_triangulation(model_path, database_path, image_dir, reference_model,
-                      verbose=False, logger=None):
+def run_triangulation(model_path, database_path, image_dir, reference_model, verbose=False):
     model_path.mkdir(parents=True, exist_ok=True)
     
-    if logger:
-        logger.info('Running 3D triangulation...')
+    logger.info('Running 3D triangulation...')
     
     with OutputCapture(verbose):
         with pycolmap.ostream():
@@ -311,7 +204,7 @@ def run_triangulation(model_path, database_path, image_dir, reference_model,
 
 def main(sfm_dir, model, image_dir, pairs, features, matches,
          skip_geometric_verification=False, estimate_two_view_geometries=False,
-         min_match_score=None, verbose=False, logger=None):
+         min_match_score=None, verbose=False):
 
     assert model.exists(),      model
     assert features.exists(),   features
@@ -324,24 +217,25 @@ def main(sfm_dir, model, image_dir, pairs, features, matches,
     reference   = pycolmap.Reconstruction(model)
 
     # create database
-    image_ids = create_db_from_model(reference, database, logger=logger)
+    image_ids = create_db_from_model(reference, database)
     
     # 
-    import_features(image_ids, database, features, logger=logger)
+    import_features(image_ids, database, features)
     
-    import_matches(image_ids, database, pairs, matches, min_match_score, skip_geometric_verification, logger=logger)
+    # 
+    import_matches(image_ids, database, pairs, matches, min_match_score, skip_geometric_verification)
     
     if not skip_geometric_verification:
         if estimate_two_view_geometries:
-            estimation_and_geometric_verification(database, pairs, verbose, logger=logger)
+            estimation_and_geometric_verification(database, pairs, verbose)
         else:
-            geometric_verification(image_ids, reference, database, features, pairs, matches, logger=logger)
+            geometric_verification(image_ids, reference, database, features, pairs, matches)
     
+    # run triangulation
     reconstruction = run_triangulation(sfm_dir, database, image_dir, reference,
-                                       verbose, logger=logger)
+                                       verbose)
 
-    if logger:
-        logger.info('Finished the triangulation with statistics:\n%s',
+    logger.info('finished the triangulation with statistics:\n%s',
                 reconstruction.summary())
     
     return reconstruction

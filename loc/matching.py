@@ -21,17 +21,9 @@ from loc.utils.io import names_to_pair, get_pairs_from_txt, read_key_from_h5py
 # logger
 import logging
 logger = logging.getLogger("loc")
-
-      
- 
-
-  
     
         
 def do_matching(src_path, dst_path, pairs_path, output):
-
-    # device 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
     # assert
     assert pairs_path.exists(), pairs_path
@@ -88,6 +80,5 @@ def do_matching(src_path, dst_path, pairs_path, output):
             group.create_dataset('scores',  data=matches_dists  )
 
     #      
-    if logger:
-        logger.info("Matches saved to %s", str(output) )
+    logger.info("matches saved to %s", str(output) )
     

@@ -101,11 +101,11 @@ def main(args):
     logger.info("init loc")
     
     #
-    # dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    # outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
+    dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
 
-    dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
+    # dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    # outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
     
     image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
     
@@ -120,25 +120,10 @@ def main(args):
     # data config
     data_config = make_data_config(name='Aachen')
     
-    # globals
-    logger.info("extract global features")
 
-    extractor = FeatureExtractor(model_name='sfm_resnet50_gem_2048')
     detector  = SuperPoint()
     meta      = OrderedDict() 
     
-    for split in ["query", "db"]:
-        
-        # load images 
-        image_set = ImagesFromList(root=dataset_path/data_config[split]["images"], split=split, max_size=400)
-        
-        # extract features
-        save_path = Path(str(outputs) + '/' + str(split) + '_global' + '.h5')
-        preds = extractor.extract_global(image_set, save_path=save_path, normalize=True, override=True)
-        
-        #
-        meta[split] = dict()
-        meta[split]["global_path"] = Path(preds['save_path'])
 
     # locals
     logger.info("extract local features")
@@ -150,7 +135,7 @@ def main(args):
         
         # extract features
         save_path = Path(str(outputs) + '/' + str(split) + '_local' + '.h5')
-        preds = detector.extract_keypoints(image_set, save_path=save_path, normalize=False, override=True)
+        preds = detector.extract_keypoints(image_set, save_path=save_path, normalize=False)
         
         #
         meta[split] = dict()
@@ -166,7 +151,7 @@ def main(args):
     #                 override=False) 
     
     # covisibility
-    covisibility(model_path, sfm_pairs, num_matched=20)
+    # covisibility(model_path, sfm_pairs, num_matched=20)
         
     # sfm pairs
     sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
@@ -176,37 +161,36 @@ def main(args):
     #             output=sfm_matches_path)
     
     # triangulate
-    reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, meta["db"]["local_path"], sfm_matches_path,
-                                   skip_geometric_verification=False, 
-                                   estimate_two_view_geometries=False,
-                                   verbose=True, logger=logger)
+    # reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, meta["db"]["local_path"], sfm_matches_path,
+    #                                skip_geometric_verification=True, 
+    #                                estimate_two_view_geometries=False,
+    #                                verbose=True)
         
     # retrieve
-    num_top_matches = 20
-    loc_pairs_path = outputs / Path('pairs' + '_' +  opts["retrieval_name"] + '_' +str(num_top_matches)  + '.txt') 
-    do_retrieve(meta=meta, topK=num_top_matches, output=loc_pairs_path, override=False, logger=logger)
-    meta["loc_pairs_path"] = str(loc_pairs_path)
+    loc_pairs_path = do_retrieve(dataset=dataset_path ,
+                                 data_config=data_config,
+                                 outputs=outputs,
+                                 topK=20)
+    
     
     # match
     loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
 
-    do_matching(src_path=Path(meta["query"]["path"] ), dst_path=Path(meta["db"]["path"] ), 
-                pairs_path=loc_pairs_path, 
-                output=loc_matches_path, 
-                logger=logger,
-                override=False)
+    # do_matching(src_path=meta["query"]["local_path"], 
+    #             dst_path=meta["db"]["local_path"], 
+    #             pairs_path=loc_pairs_path, 
+    #             output=loc_matches_path)
     
     # localize
-    # localize(sfm_model=model_path,
-    #          queries=meta["query"]["cameras"],
-    #          retrieval_pairs_path=loc_pairs_path,
-    #          features=Path(meta["query"]["path"] ),
-    #          matches=loc_matches_path,
-    #          results=results,
-    #          covisibility_clustering=True,
-    #          logger=logger,
-    #          viewer=None
-    #         )
+    localize(sfm_model=model_path,
+             queries=meta["query"]["cameras"],
+             retrieval_pairs_path=loc_pairs_path,
+             features=meta["query"]["local_path"],
+             matches=loc_matches_path,
+             results=results,
+             covisibility_clustering=True,
+             viewer=None
+            )
     
     # Visualization
     # visualize_sfm_2d(model_path,  image_path,  n=4,    color_by='track_length'    )
