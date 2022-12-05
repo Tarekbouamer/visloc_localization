@@ -173,7 +173,7 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
     return cameras, images, points3D
 
 
-def main(nvm, intrinsics, database, output, skip_points=False, override=False):
+def main(nvm, intrinsics, database, output, skip_points=False):
     
     assert nvm.exists(),         nvm
     assert intrinsics.exists(), intrinsics

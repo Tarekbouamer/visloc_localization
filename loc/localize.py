@@ -150,16 +150,16 @@ def pose_from_cluster(
     return ret, log
 
 
-def main(sfm_model: Union[Path, pycolmap.Reconstruction],
-         queries: dict,
-         retrieval_pairs_path: Path,
-         features: Path,
-         matches: Path,
-         results: Path,
-         ransac_thresh: int = 12,
-         covisibility_clustering: bool = False,
-         prepend_camera_name: bool = False,
-         config: Dict = None, 
+def main(sfm_model,
+         queries,
+         retrieval_pairs_path,
+         features,
+         matches,
+         results,
+         ransac_thresh=12,
+         covisibility_clustering=False,
+         prepend_camera_name=False,
+         config=None, 
          viewer=None):
 
     assert retrieval_pairs_path.exists(),  retrieval_pairs_path
@@ -167,19 +167,18 @@ def main(sfm_model: Union[Path, pycolmap.Reconstruction],
     assert features.exists(),   features
     assert matches.exists(),    matches
     
-    # Load retrieval pairs
+    # load retrieval pairs
     retrievals = parse_retrieval_file(retrieval_pairs_path)
 
-    logger.info('Reading the 3D model...') 
+    logger.info('reading the 3D model...') 
     if not isinstance(sfm_model, pycolmap.Reconstruction):
         sfm_model = pycolmap.Reconstruction(sfm_model)
         
     db_name_to_id = {img.name: i for i, img in sfm_model.images.items()}
 
-    config = {"estimation": {"ransac": {"max_error": ransac_thresh}},
-              **(config or {})}
+    config = {"estimation": {"ransac": {"max_error": ransac_thresh}}, **(config or {})}
     
-    # Localizer
+    # localizer
     localizer = Localizer(sfm_model, config)
 
     poses = {}
@@ -191,13 +190,13 @@ def main(sfm_model: Union[Path, pycolmap.Reconstruction],
     }
     
     
-    logger.info('Starting localization...')
+    logger.info('starting localization...')
     
     for qname, qcam in tqdm(queries.items(), total=len(queries)):
         
         #  
         if qname not in retrievals:
-            logger.debug(f'No images retrieved for query image {qname}. Skipping...')
+            logger.debug(f'no images retrieved for query image {qname}. Skipping...')
             continue
         
         # Geo-Verification
@@ -205,17 +204,17 @@ def main(sfm_model: Union[Path, pycolmap.Reconstruction],
         db_ids = []
         for n in db_names:
             if n not in db_name_to_id:
-                logger.debug(f'Image {n} was retrieved but not in database')
+                logger.debug(f'image {n} was retrieved but not in database')
                 continue
                 
             db_ids.append(db_name_to_id[n])
         
         #      
         if len(db_ids)<1:
-            logger.error(" Empty retrieval")
+            logger.error("empty retrieval")
             exit(0)
         
-        # Covisibility Clustering --> Hloc
+        # covisibility clustering --> Hloc
         if covisibility_clustering:
             clusters = do_covisibility_clustering(db_ids, sfm_model)
             
@@ -253,19 +252,17 @@ def main(sfm_model: Union[Path, pycolmap.Reconstruction],
             if ret['success']:
                 poses[qname] = (ret['qvec'], ret['tvec'])
             else:
-                logger.warn("NOT Succesful")
+                logger.warn("not Succesful")
                 closest = sfm_model.images[db_ids[0]]
                 poses[qname] = (closest.qvec, closest.tvec)
                 
             log['covisibility_clustering'] = covisibility_clustering
             logs['loc'][qname] = log
         
-        # query pose 3D visualization 
-        if viewer:
-            visualize_localization_3d(sfm_model, log, viewer=viewer)
+
     
-    logger.info(f'Localized {len(poses)} / {len(queries)} images.')
-    logger.info(f'Writing poses to {results}...')
+    logger.info(f'localized {len(poses)} / {len(queries)} images.')
+    logger.info(f'writing poses to {results}...')
     
     # Save results and logs to pkl file    
     with open(results, 'w') as f:
@@ -280,12 +277,12 @@ def main(sfm_model: Union[Path, pycolmap.Reconstruction],
 
     logs_path = f'{results}_logs.pkl'
     
-    logger.info(f'Writing logs to {logs_path}...')
+    logger.info(f'writing logs to {logs_path}...')
     
     with open(logs_path, 'wb') as f:
         pickle.dump(logs, f)
     
-    logger.info('Done!')
+    logger.info('done!')
 
 
 if __name__ == '__main__':

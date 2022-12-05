@@ -30,7 +30,7 @@ def get_descriptors(desc_path, names, key='global_descriptor'):
     return out
 
 
-def do_retrieve(dataset, data_config, outputs, topK=5):
+def do_retrieve(dataset_path, data_cfg, outputs, topK=5):
 
     # model type
     retrieval_model_name = 'sfm_resnet50_gem_2048'
@@ -40,18 +40,18 @@ def do_retrieve(dataset, data_config, outputs, topK=5):
     extractor = FeatureExtractor(model_name=retrieval_model_name)
                     
     # query images 
-    image_set = ImagesFromList(root=dataset/data_config['query']["images"], split='query', max_size=400)
-    save_path = Path(str(outputs) + '/' + str('query') + '_global' + '.h5')
-    preds     = extractor.extract_global(image_set, save_path=save_path, normalize=True)
-    q_descs   = preds["features"]
-    q_names   = preds["names"]
+    query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query', max_size=400)
+    query_path  = Path(str(outputs) + '/' + str('query') + '_global' + '.h5')
+    query_preds = extractor.extract_global(query_set, save_path=query_path, normalize=True)
+    q_descs     = query_preds["features"]
+    q_names     = query_preds["names"]
 
     # db images 
-    image_set = ImagesFromList(root=dataset/data_config['db']["images"], split='db', max_size=400)
-    save_path = Path(str(outputs) + '/' + str('db') + '_global' + '.h5')
-    preds     = extractor.extract_global(image_set, save_path=save_path, normalize=True)   
-    db_descs  = preds["features"]
-    db_names  = preds["names"]
+    db_set    = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db', max_size=400)
+    db_path   = Path(str(outputs) + '/' + str('db') + '_global' + '.h5')
+    db_preds  = extractor.extract_global(db_set, save_path=db_path, normalize=True)   
+    db_descs  = db_preds["features"]
+    db_names  = db_preds["names"]
     
     # compute dot product scores and ranks
     scores = torch.mm(q_descs, db_descs.t())

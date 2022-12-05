@@ -120,7 +120,7 @@ class FeatureExtractor():
     def load_global(self, dataloader, save_path):
         
         fd    = h5py.File(save_path, 'r')
-        
+                
         features = []
         names    = []
 

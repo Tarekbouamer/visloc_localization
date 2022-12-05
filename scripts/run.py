@@ -101,16 +101,15 @@ def main(args):
     logger.info("init loc")
     
     #
-    dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
+    # dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    # outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
 
-    # dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    # outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
+    dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
     
     image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
     
-    sfm_pairs       = outputs / 'pairs-db-covis20.txt'    
-    reference_sfm   = outputs / 'sfm_superpoint+superglue'  
+    reference_sfm   = outputs / 'sfm_superpoint_mnn'  
     results         = outputs / 'Aachen_hloc_superpoint+superglue_netvlad20.txt'  
     
     # outfolder
@@ -118,79 +117,71 @@ def main(args):
         mkdir(outputs)
     
     # data config
-    data_config = make_data_config(name='Aachen')
+    data_cfg = make_data_config(name='Aachen')
     
-
-    detector  = SuperPoint()
-    meta      = OrderedDict() 
-    
-
-    # locals
-    logger.info("extract local features")
-   
-    for split in ["query", "db"]:
-        
-        # load images 
-        image_set = ImagesFromList(root=dataset_path/data_config[split]["images"], split=split, max_size=400, gray=True, transform=None)
-        
-        # extract features
-        save_path = Path(str(outputs) + '/' + str(split) + '_local' + '.h5')
-        preds = detector.extract_keypoints(image_set, save_path=save_path, normalize=False)
-        
-        #
-        meta[split] = dict()
-        meta[split]["local_path"] = Path(preds['save_path'])
-        
-                 
     # Nvm to Colmap
     model_path = dataset_path / 'sfm_sift'
     # colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
     #                 dataset_path / '3D-models/database_intrinsics.txt',
     #                 dataset_path / 'aachen.db',
-    #                 model_path, 
-    #                 override=False) 
+    #                 model_path) 
     
     # covisibility
-    # covisibility(model_path, sfm_pairs, num_matched=20)
+    num_matched = 20
+    sfm_pairs = outputs / str('sfm_pairs_' + str(num_matched) + '.txt') 
+    print(sfm_pairs)
+    covisibility(model_path, sfm_pairs, num_matched=20)
+    
+    # locals
+    logger.info("extract local features")
+    sp_cfg = {'nms_radius': 3,'max_keypoints': 4096}
+    detector  = SuperPoint(config=sp_cfg)
+
+    # extract query images 
+    query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query', max_size=1024, gray=True)
+    query_path  = Path(str(outputs) + '/' + str('query') + '_local' + '.h5')
+    query_meta  = detector.extract_keypoints(query_set, save_path=query_path, normalize=False)
+
+    # extract db images 
+    db_set      = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db', max_size=1024, gray=True)
+    db_path     = Path(str(outputs) + '/' + str('db') + '_local' + '.h5')
+    db_meta     = detector.extract_keypoints(db_set, save_path=db_path, normalize=False)        
         
+            
     # sfm pairs
     sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
-    # do_matching(src_path=meta["db"]["local_path"], 
-    #             dst_path=meta["db"]["local_path"], 
+    # do_matching(src_path=db_path, 
+    #             dst_path=db_path, 
     #             pairs_path=sfm_pairs, 
     #             output=sfm_matches_path)
     
     # triangulate
-    # reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, meta["db"]["local_path"], sfm_matches_path,
-    #                                skip_geometric_verification=True, 
-    #                                estimate_two_view_geometries=False,
-    #                                verbose=True)
+    # reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, db_path, sfm_matches_path)
         
     # retrieve
-    loc_pairs_path = do_retrieve(dataset=dataset_path ,
-                                 data_config=data_config,
-                                 outputs=outputs,
-                                 topK=20)
+    # loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
+    #                              data_cfg=data_cfg,
+    #                              outputs=outputs,
+    #                              topK=50)
     
     
     # match
-    loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
-
+    # loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
     # do_matching(src_path=meta["query"]["local_path"], 
     #             dst_path=meta["db"]["local_path"], 
     #             pairs_path=loc_pairs_path, 
     #             output=loc_matches_path)
     
     # localize
-    localize(sfm_model=model_path,
-             queries=meta["query"]["cameras"],
-             retrieval_pairs_path=loc_pairs_path,
-             features=meta["query"]["local_path"],
-             matches=loc_matches_path,
-             results=results,
-             covisibility_clustering=True,
-             viewer=None
-            )
+    # localize(sfm_model=model_path,
+    #          queries=query_set.get_cameras(),
+    #          retrieval_pairs_path=loc_pairs_path,
+    #          features=query_path,
+    #          matches=loc_matches_path,
+    #          results=results,
+    #          covisibility_clustering=True,
+    #          viewer=None
+    #         )
     
     # Visualization
     # visualize_sfm_2d(model_path,  image_path,  n=4,    color_by='track_length'    )

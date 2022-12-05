@@ -133,41 +133,56 @@ class ImagesTransform:
 
 class ImagesFromList(data.Dataset):
     
-    def __init__(self, root, cameras_path=None, split=None, transform=None, max_size=None, **kwargs): 
+    def __init__(self, root, data_cfg, split=None, transform=None, max_size=None, **kwargs): 
         
+        # cfg
+        cfg =  data_cfg[split]
+        
+        # options
         self.max_size       = max_size
-        self.root           = root
-        self.cameras_path   = cameras_path
+        self.root           = Path(root)
         
-        if split is not None:
-            self.images_path  = Path(self.root) / str(split)
-        else:
-            self.images_path  = Path(self.root)
+        # camera path
+        self.cameras_path = None
+        if cfg['cameras'] is not None:
+            self.cameras_path   = Path(root) / str(cfg['cameras'])
+        
+        # images path
+        if cfg['images'] is not None:
+            self.images_path  = Path(root) / str(cfg['images']) 
+
+        # split path
+        self.split_images_path  = self.images_path / str(split)
 
         # load images
         paths = []
         for ext in _EXT:
-            paths += list(Path(self.images_path).glob('**/'+ ext)) 
+            paths += list(Path(self.split_images_path).glob('**/'+ ext)) 
                                         
         if len(paths) == 0:
-            raise ValueError(f'could not find any image in path: {self.images_path}.')
-            
+            raise ValueError(f'could not find any image in path: {self.split_images_path}.')
+        
+        # sort   
         self.images_fn = sorted(list(set(paths)))
-        self.names = [i.relative_to(root).as_posix() for i in self.images_fn]         
         
-        logger.info('found %s images in %s', len(self.images_fn), self.images_path ) 
+        # all names 
+        self.names = [i.relative_to(self.images_path).as_posix() for i in self.images_fn]         
         
-        # Load intrinsics
-        if self.cameras_path:
+        # load intrinsics
+        if self.cameras_path is not None:
             self.cameras = load_aachen_intrinsics(self.cameras_path)
-            logger.info('Imported %s from %s ', len(self.cameras), self.cameras_path)
-        
+        else:
+            self.cameras = None
+                    
         # gray scale
         self.gray = kwargs.pop('gray', False)
             
         # transform numpy ->  tensor
         self.transform = ImagesTransform(max_size=max_size) if transform is None else transform
-   
+        
+        
+        logger.info(f'found {len(self.images_fn)} images with {self.num_cameras()} intrinsics') 
+
     def __len__(self):
         return len(self.images_fn)
          
@@ -185,14 +200,17 @@ class ImagesFromList(data.Dataset):
                 
         return img
     
-    def get_cameras(self,):
-        if hasattr(self, "cameras"):
-            return self.cameras     
-        else:
-            None          
+    def num_cameras(self):
+        return len(self.cameras) if self.cameras is not None else None
     
+    def get_cameras(self):
+        return self.cameras     
+
+    def get_names(self):
+        return self.names 
+             
     def get_name(self, _path):
-        name = _path.relative_to(self.root).as_posix()
+        name = _path.relative_to(self.images_path).as_posix()
         return name
      
     def __getitem__(self, item):

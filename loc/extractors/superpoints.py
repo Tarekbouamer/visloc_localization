@@ -121,6 +121,7 @@ class SuperPoint(torch.nn.Module):
         }
         
         return out        
+    
     @torch.no_grad()      
     def extract_keypoints(self, dataset, save_path=None, **kwargs):
         
@@ -158,7 +159,10 @@ class SuperPoint(torch.nn.Module):
             # scale keypoints to original scale
             current_size    = np.array(img.shape[-2:][::-1])
             scales          = (original_size / current_size).astype(np.float32)
-            preds['keypoints'] = (preds['keypoints'] + .5) * scales[None] - .5
+            
+            #
+            preds['keypoints']   = (preds['keypoints'] + .5)    * scales[None] - .5
+            preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()
             
             # write
             if hasattr(self, 'writer'):

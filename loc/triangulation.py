@@ -73,7 +73,7 @@ def create_db_from_model(reconstruction, database_path):
 
 def import_features(image_ids, database_path, features_path):
     
-    logger.info('Importing features into the database...')
+    logger.info('importing features into the database...')
     
     db = COLMAPDatabase.connect(database_path)
         
@@ -90,7 +90,7 @@ def import_features(image_ids, database_path, features_path):
 def import_matches(image_ids, database_path, pairs_path, matches_path,
                    min_match_score=None, skip_geometric_verification=False):
     
-    logger.info('Importing matches into the database...')
+    logger.info('importing matches into the database...')
 
     with open(str(pairs_path), 'r') as f:
         pairs = [p.split() for p in f.readlines()]
@@ -203,8 +203,10 @@ def run_triangulation(model_path, database_path, image_dir, reference_model, ver
 
 
 def main(sfm_dir, model, image_dir, pairs, features, matches,
-         skip_geometric_verification=False, estimate_two_view_geometries=False,
-         min_match_score=None, verbose=False):
+         skip_geometric_verification=False, 
+         estimate_two_view_geometries=False,
+         min_match_score=None,
+         verbose=False):
 
     assert model.exists(),      model
     assert features.exists(),   features
