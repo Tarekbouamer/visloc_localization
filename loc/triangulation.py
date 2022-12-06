@@ -206,7 +206,7 @@ def main(sfm_dir, model, image_dir, pairs, features, matches,
          skip_geometric_verification=False, 
          estimate_two_view_geometries=False,
          min_match_score=None,
-         verbose=False):
+         verbose=True):
 
     assert model.exists(),      model
     assert features.exists(),   features

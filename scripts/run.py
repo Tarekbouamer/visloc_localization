@@ -101,16 +101,16 @@ def main(args):
     logger.info("init loc")
     
     #
-    # dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    # outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
+    dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
 
-    dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
+    # dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
+    # outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
     
     image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
     
     reference_sfm   = outputs / 'sfm_superpoint_mnn'  
-    results         = outputs / 'Aachen_hloc_superpoint+superglue_netvlad20.txt'  
+    results         = outputs / 'Aachen_visloc_gem50.txt'  
     
     # outfolder
     if not outputs.exists():
@@ -129,8 +129,7 @@ def main(args):
     # covisibility
     num_matched = 20
     sfm_pairs = outputs / str('sfm_pairs_' + str(num_matched) + '.txt') 
-    print(sfm_pairs)
-    covisibility(model_path, sfm_pairs, num_matched=20)
+    # covisibility(model_path, sfm_pairs, num_matched=20)
     
     # locals
     logger.info("extract local features")
@@ -140,12 +139,12 @@ def main(args):
     # extract query images 
     query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query', max_size=1024, gray=True)
     query_path  = Path(str(outputs) + '/' + str('query') + '_local' + '.h5')
-    query_meta  = detector.extract_keypoints(query_set, save_path=query_path, normalize=False)
+    # query_meta  = detector.extract_keypoints(query_set, save_path=query_path, normalize=False)
 
     # extract db images 
     db_set      = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db', max_size=1024, gray=True)
     db_path     = Path(str(outputs) + '/' + str('db') + '_local' + '.h5')
-    db_meta     = detector.extract_keypoints(db_set, save_path=db_path, normalize=False)        
+    # db_meta     = detector.extract_keypoints(db_set, save_path=db_path, normalize=False)        
         
             
     # sfm pairs
@@ -156,32 +155,33 @@ def main(args):
     #             output=sfm_matches_path)
     
     # triangulate
-    # reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, db_path, sfm_matches_path)
+    # reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, db_path, sfm_matches_path,
+    #                                skip_geometric_verification=True)
         
     # retrieve
-    # loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
-    #                              data_cfg=data_cfg,
-    #                              outputs=outputs,
-    #                              topK=50)
+    loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
+                                 data_cfg=data_cfg,
+                                 outputs=outputs,
+                                 topK=50)
     
     
     # match
-    # loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
-    # do_matching(src_path=meta["query"]["local_path"], 
-    #             dst_path=meta["db"]["local_path"], 
+    loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
+    # do_matching(src_path=query_path, 
+    #             dst_path=db_path, 
     #             pairs_path=loc_pairs_path, 
     #             output=loc_matches_path)
     
     # localize
-    # localize(sfm_model=model_path,
-    #          queries=query_set.get_cameras(),
-    #          retrieval_pairs_path=loc_pairs_path,
-    #          features=query_path,
-    #          matches=loc_matches_path,
-    #          results=results,
-    #          covisibility_clustering=True,
-    #          viewer=None
-    #         )
+    localize(sfm_model=model_path,
+             queries=query_set.get_cameras(),
+             retrieval_pairs_path=loc_pairs_path,
+             features=query_path,
+             matches=loc_matches_path,
+             results=results,
+             covisibility_clustering=True,
+             viewer=None
+            )
     
     # Visualization
     # visualize_sfm_2d(model_path,  image_path,  n=4,    color_by='track_length'    )

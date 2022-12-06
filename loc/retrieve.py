@@ -40,14 +40,14 @@ def do_retrieve(dataset_path, data_cfg, outputs, topK=5):
     extractor = FeatureExtractor(model_name=retrieval_model_name)
                     
     # query images 
-    query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query', max_size=400)
+    query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query', max_size=1024)
     query_path  = Path(str(outputs) + '/' + str('query') + '_global' + '.h5')
     query_preds = extractor.extract_global(query_set, save_path=query_path, normalize=True)
     q_descs     = query_preds["features"]
     q_names     = query_preds["names"]
 
     # db images 
-    db_set    = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db', max_size=400)
+    db_set    = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db', max_size=1024)
     db_path   = Path(str(outputs) + '/' + str('db') + '_global' + '.h5')
     db_preds  = extractor.extract_global(db_set, save_path=db_path, normalize=True)   
     db_descs  = db_preds["features"]

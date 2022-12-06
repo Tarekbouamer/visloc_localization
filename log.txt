@@ -1,7 +1,15 @@
-[12/05 17:15 loc]: init loc
-[12/05 17:15 loc]: reading Colmap model
-[12/05 17:15 loc]: extracting image pairs from covisibility
-[12/05 17:16 loc]: found 85515 image pairs.
-[12/05 17:16 loc]: extract local features
-[12/05 17:16 loc]: found 947 images with 922 intrinsics
-[12/05 17:18 loc]: found 4479 images with None intrinsics
+[12/05 23:07 loc]: init loc
+[12/05 23:07 loc]: extract local features
+[12/05 23:07 loc]: found 947 images with 922 intrinsics
+[12/05 23:07 loc]: found 4479 images with None intrinsics
+[12/05 23:07 loc]: extract global features using sfm_resnet50_gem_2048
+[12/05 23:07 loc]: found 947 images with 922 intrinsics
+[12/05 23:07 loc]: found 4479 images with None intrinsics
+[12/05 23:08 loc]: retrive top 50 images
+[12/05 23:08 loc]: 47350 pairs have been found, saved /media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs/pairs_sfm_resnet50_gem_2048_50.txt
+[12/05 23:08 loc]: reading the 3D model...
+[12/05 23:08 loc]: starting localization...
+[12/06 02:14 loc]: localized 922 / 922 images.
+[12/06 02:14 loc]: writing poses to /media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs/Aachen_visloc_gem50.txt...
+[12/06 02:14 loc]: writing logs to /media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs/Aachen_visloc_gem50.txt_logs.pkl...
+[12/06 02:15 loc]: done!
