@@ -199,6 +199,7 @@ def run_triangulation(model_path, database_path, image_dir, reference_model, ver
         with pycolmap.ostream():
             reconstruction = pycolmap.triangulate_points(
                 reference_model, database_path, image_dir, model_path)
+    
     return reconstruction
 
 

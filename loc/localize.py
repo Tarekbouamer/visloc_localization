@@ -162,10 +162,10 @@ def main(sfm_model,
          config=None, 
          viewer=None):
 
-    assert retrieval_pairs_path.exists(),  retrieval_pairs_path
-    
-    assert features.exists(),   features
-    assert matches.exists(),    matches
+    # 
+    assert retrieval_pairs_path.exists(),   retrieval_pairs_path
+    assert features.exists(),               features
+    assert matches.exists(),                matches
     
     # load retrieval pairs
     retrievals = parse_retrieval_file(retrieval_pairs_path)
@@ -196,21 +196,21 @@ def main(sfm_model,
         
         #  
         if qname not in retrievals:
-            logger.debug(f'no images retrieved for query image {qname}. Skipping...')
+            logger.debug(f'no images retrieved for query image {qname}. skipping...')
             continue
         
-        # Geo-Verification
+        # geo-verification
         db_names = retrievals[qname]
         db_ids = []
         for n in db_names:
             if n not in db_name_to_id:
                 logger.debug(f'image {n} was retrieved but not in database')
                 continue
-                
+            #    
             db_ids.append(db_name_to_id[n])
         
         #      
-        if len(db_ids)<1:
+        if len(db_ids) < 1:
             logger.error("empty retrieval")
             exit(0)
         
@@ -222,7 +222,7 @@ def main(sfm_model,
             best_cluster_id = None
             logs_clusters   = []
             
-            # For each cluser compute the query pose
+            # for each cluser compute the query pose
             for id, cluster_ids in enumerate(clusters):
                 
                 ret, log = pose_from_cluster(localizer, qname, qcam, cluster_ids, features, matches)

@@ -34,7 +34,7 @@ def do_matching(src_path, dst_path, pairs_path, output):
     pairs = get_pairs_from_txt(pairs_path)
 
     if len(pairs) == 0:
-        logger.error('No Matches pairs found.')
+        logger.error('no matches pairs found')
         return
 
     logger.info("matching %s pairs", len(pairs))    
@@ -55,9 +55,8 @@ def do_matching(src_path, dst_path, pairs_path, output):
         src_desc = data['src']['descriptors']
         dst_desc = data['dst']['descriptors']
         
-        if src_desc.shape[-1] != dst_desc.shape[-1]:
-            src_desc = src_desc.T
-            dst_desc = dst_desc.T
+        src_desc = src_desc.T
+        dst_desc = dst_desc.T
             
         # match
         matches_dists, matches_idxs = matcher(src_desc, dst_desc)
