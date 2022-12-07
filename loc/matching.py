@@ -57,7 +57,7 @@ def do_matching(src_path, dst_path, pairs_path, output):
         
         src_desc = src_desc.T
         dst_desc = dst_desc.T
-            
+
         # match
         matches_dists, matches_idxs = matcher(src_desc, dst_desc)
         

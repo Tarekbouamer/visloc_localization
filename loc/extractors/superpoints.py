@@ -58,7 +58,7 @@ class SuperPoint(torch.nn.Module):
         if isinstance(x, DataLoader):
             return x
         else:
-            return DataLoader(x, num_workers=1, shuffle=False, drop_last=False, pin_memory=True)   
+            return DataLoader(x, num_workers=4, shuffle=False, drop_last=False, pin_memory=True)   
 
     def __prepare_input__(self, x, **kwargs):
         
@@ -148,11 +148,14 @@ class SuperPoint(torch.nn.Module):
             # prepare inputs
             img  = self.__prepare_input__(img, **kwargs) 
             img  = self.__cuda__(img) 
+
+            print(img.shape)
             
             # extract locals (W, H) order
             preds = self.net({'image': img})
             preds = self.__to_numpy__(preds)
             
+            print(preds.keys())
             #
             preds['size'] = original_size = data['size'][0].numpy()
             
@@ -163,6 +166,17 @@ class SuperPoint(torch.nn.Module):
             #
             preds['keypoints']   = (preds['keypoints'] + .5)    * scales[None] - .5
             preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()
+            
+            # 
+            print(preds['keypoints'])
+            print(preds['keypoints'].shape)
+
+            print(preds['scores'])
+            print(preds['scores'].shape)
+            
+            print(preds['descriptors'].shape)
+
+            input()
             
             # write
             if hasattr(self, 'writer'):

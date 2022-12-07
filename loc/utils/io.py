@@ -121,21 +121,24 @@ def get_keypoints(path, name, return_uncertainty=False):
     return p
 
 
-def get_matches(path: Path, name0: str, name1: str) -> Tuple[np.ndarray]:
+def get_matches(path, name0, name1):
     
+    #
     with h5py.File(str(path), 'r', libver='latest') as hfile:
+        
         pair, reverse = find_pair(hfile, name0, name1)
         
-        matches       = hfile[pair]['matches'].__array__()
-        scores        = hfile[pair]['scores'].__array__()
-    
+        matches = hfile[pair]['matches'].__array__()
+        scores  = hfile[pair]['scores'].__array__()
+    #
     idx     = np.where(matches != -1)[0]
-    
     matches = np.stack([idx, matches[idx]], -1)
     
+    #
     if reverse:
         matches = np.flip(matches, -1)
     
+    #
     scores = scores[idx]
     
     return matches, scores

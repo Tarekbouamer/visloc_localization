@@ -102,7 +102,10 @@ class ImagesTransform:
                 transforms.ToTensor(),
                 # transforms.Normalize(mean=mean, std=std)
                 ])
-    
+        # cv
+        self.resize_force = False
+        self.interpolation = 'cv2_area'
+        
     def __resize__(self, img):
         
         # scale
@@ -118,13 +121,24 @@ class ImagesTransform:
         # resize
         return img.resize(out_size, resample=Image.BILINEAR)
     
+    def resize(self, image, size, interp=cv2.INTER_AREA):
+        if self.max_size and (self.resize_force or max(size) > self.max_size):
+            scale       = self.resize_max / max(size)
+            size_new    = tuple(int(round(x*scale)) for x in size)
+            
+            h, w = image.shape[:2]
+            if interp == cv2.INTER_AREA and (w < size_new[0] or h < size_new[1]):
+                interp = cv2.INTER_LINEAR
+            image = cv2.resize(image, size_new, interpolation=interp)
+   
     def __call__(self, img):
         
         # resize
-        img = self.__resize__(img)
+        # img = self.__resize__(img)
+        img = self.resize(img)
 
         #
-        img = self.postprocessing(img)           
+        # img = self.postprocessing(img)           
 
         return dict(img=img)
 
@@ -185,7 +199,27 @@ class ImagesFromList(data.Dataset):
 
     def __len__(self):
         return len(self.images_fn)
-         
+    
+    def read_image(path, grayscale=False):
+        
+        if grayscale:
+            mode = cv2.IMREAD_GRAYSCALE
+        else:
+            mode = cv2.IMREAD_COLOR
+        
+        image = cv2.imread(str(path), mode)
+        
+        if image is None:
+            raise ValueError(f'Cannot read image {path}.')
+        
+        if not grayscale and len(image.shape) == 3:
+            image = image[:, :, ::-1]  # BGR to RGB
+        # 
+        image = image.astype(np.float32)
+        size = image.shape[:2][::-1]
+        
+        return image , size  
+    
     def load_img(self, img_path):
           
         # truncated images
@@ -224,6 +258,9 @@ class ImagesFromList(data.Dataset):
         # pil
         img  = self.load_img(img_path)
         size = img.size
+        
+        # cv
+        img, size = self.read_image(img_path, grayscale=self.gray)
         
         # transform
         if self.transform is not None:

@@ -173,10 +173,14 @@ def geometric_verification(image_ids, reference, database_path, features_path,
             _, errors0, errors1 = compute_epipolar_errors(qvec_01, tvec_01, kps0[matches[:, 0]], kps1[matches[:, 1]])
             
 
+            # valid_matches = np.logical_and(
+            #     errors0 <= max_error * noise0 / cam0.mean_focal_length(),
+            #     errors1 <= max_error * noise1 / cam1.mean_focal_length())
+
             valid_matches = np.logical_and(
-                errors0 <= max_error * noise0 / cam0.mean_focal_length(),
-                errors1 <= max_error * noise1 / cam1.mean_focal_length())
-            
+                errors0 <= max_error * 1.0 / cam0.mean_focal_length(),
+                errors1 <= max_error * 1.0 / cam1.mean_focal_length())   
+                     
             # TODO: We could also add E to the database, but we need
             # to reverse the transformations if id0 > id1 in utils/database.py.
             db.add_two_view_geometry(id0, id1, matches[valid_matches, :])

@@ -8,7 +8,6 @@ import pickle
 
 import pycolmap
 import cv2
-from loc import viewer
 
 
 

@@ -34,17 +34,28 @@ class FeatureManagerConfigs(object):
 class DataConfigs(object):
     meta = {}
     
+    # Aachen = {
+    #     'query': {
+    #         'images':   "images/database_and_query_images/images_upright/",
+    #         'cameras':  'queries/*_time_queries_with_intrinsics.txt'
+    #         },
+    #     'db': { 
+    #         'images':   "images/database_and_query_images/images_upright/",
+    #         'cameras':  None
+    #         }
+    #     }
+
     Aachen = {
         'query': {
-            'images':   "images/database_and_query_images/images_upright/",
+            'images':   "images/images_upright/",
             'cameras':  'queries/*_time_queries_with_intrinsics.txt'
             },
         'db': { 
-            'images':   "images/database_and_query_images/images_upright/",
+            'images':   "images/images_upright/",
             'cameras':  None
             }
         }
-    
+        
 def make_data_config(name="default"): 
     
     if name=="Default":

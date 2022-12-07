@@ -93,6 +93,10 @@ def pose_from_cluster(
     
     # Get Query 2D keypoints
     kpq = get_keypoints(features_path, qname)
+    kpq = kpq
+    print(kpq.shape)    
+    print(kpq)
+    input()
     kpq += 0.5  # COLMAP coordinates
 
     # Get Visible 3D points
@@ -111,9 +115,11 @@ def pose_from_cluster(
         
         points3D_ids = np.array([p.point3D_id if p.has_point3D() else -1 for p in image.points2D])
         
-        matches, _ = get_matches(matches_path, qname, image.name)
-        matches = matches[points3D_ids[matches[:, 1]] != -1]
+        matches, _  = get_matches(matches_path, qname, image.name)
+        matches     = matches[points3D_ids[matches[:, 1]] != -1]
+        
         num_matches += len(matches)
+
         for idx, m in matches:
             id_3D = points3D_ids[m]
             kp_idx_to_3D_to_db[idx][id_3D].append(i)

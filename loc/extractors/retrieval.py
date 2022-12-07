@@ -115,7 +115,7 @@ class FeatureExtractor():
         if isinstance(x, DataLoader):
             return x
         else:
-            return DataLoader(x, num_workers=10, shuffle=False, drop_last=False, pin_memory=True)
+            return DataLoader(x, num_workers=4, shuffle=False, drop_last=False, pin_memory=True)
     
     def load_global(self, dataloader, save_path):
         
