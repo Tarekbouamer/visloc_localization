@@ -102,9 +102,7 @@ class ImagesTransform:
                 transforms.ToTensor(),
                 # transforms.Normalize(mean=mean, std=std)
                 ])
-        # cv
-        self.resize_force = False
-        self.interpolation = 'cv2_area'
+
         
     def __resize__(self, img):
         
@@ -121,15 +119,7 @@ class ImagesTransform:
         # resize
         return img.resize(out_size, resample=Image.BILINEAR)
     
-    def resize(self, image, size, interp=cv2.INTER_AREA):
-        if self.max_size and (self.resize_force or max(size) > self.max_size):
-            scale       = self.resize_max / max(size)
-            size_new    = tuple(int(round(x*scale)) for x in size)
-            
-            h, w = image.shape[:2]
-            if interp == cv2.INTER_AREA and (w < size_new[0] or h < size_new[1]):
-                interp = cv2.INTER_LINEAR
-            image = cv2.resize(image, size_new, interpolation=interp)
+
    
     def __call__(self, img):
         
@@ -194,29 +184,49 @@ class ImagesFromList(data.Dataset):
         # transform numpy ->  tensor
         self.transform = ImagesTransform(max_size=max_size) if transform is None else transform
         
+        # cv
+        self.resize_force   = False
+        self.interpolation  = 'cv2_area'
         
+        #
         logger.info(f'found {len(self.images_fn)} images with {self.num_cameras()} intrinsics') 
 
     def __len__(self):
         return len(self.images_fn)
-    
-    def read_image(path, grayscale=False):
+
+    def resize(self, image, size, interp=cv2.INTER_AREA):
         
-        if grayscale:
-            mode = cv2.IMREAD_GRAYSCALE
-        else:
-            mode = cv2.IMREAD_COLOR
+        if self.max_size and (self.resize_force or max(size) > self.max_size):
+            
+            scale       = self.max_size / max(size)
+            size_new    = tuple(int(round(x*scale)) for x in size)
+            
+            h, w = image.shape[:2]
+            
+            if interp == cv2.INTER_AREA and (w < size_new[0] or h < size_new[1]):
+                interp = cv2.INTER_LINEAR
+            
+            image = cv2.resize(image, size_new, interpolation=interp)
         
+        return image
+            
+    def read_image(self, path, grayscale=False):
+        
+        # mode
+        mode = cv2.IMREAD_GRAYSCALE if grayscale else cv2.IMREAD_COLOR
+      
+        # read 
         image = cv2.imread(str(path), mode)
         
         if image is None:
             raise ValueError(f'Cannot read image {path}.')
         
+        # BGR to RGB
         if not grayscale and len(image.shape) == 3:
-            image = image[:, :, ::-1]  # BGR to RGB
+            image = image[:, :, ::-1]  
         # 
-        image = image.astype(np.float32)
-        size = image.shape[:2][::-1]
+        image   = image.astype(np.float32)
+        size    = image.shape[:2][::-1]
         
         return image , size  
     
@@ -254,21 +264,24 @@ class ImagesFromList(data.Dataset):
         #
         img_path    = self.images_fn[item]
         img_name    = self.get_name(img_path)
-                        
-        # pil
-        img  = self.load_img(img_path)
-        size = img.size
-        
+                    
         # cv
         img, size = self.read_image(img_path, grayscale=self.gray)
+
+        # resize
+        img = self.resize(img, size=size)
         
-        # transform
-        if self.transform is not None:
-            out = self.transform(img)
+        #
+        if self.gray:
+            img = img[None]
         else:
-            out['img'] = img
-                        
+            img = img.transpose((2, 0, 1))
+        
+        # 
+        img = img / 255.
+        
         # dict
+        out["img"]   = img
         out["name"]  = img_name
         out["size"]  = np.array(size, dtype=float)
         

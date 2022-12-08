@@ -140,20 +140,20 @@ def main(args):
     #
     sp_cfg = {
         'keypoint_threshold': 0.005,    'remove_borders': 4,
-        'nms_radius': 3,                'max_keypoints': 4096
+        'nms_radius': 3,                'max_keypoints': 1024
         }
 
     # extract db images 
     detector    = SuperPoint(config=sp_cfg)
-    db_set      = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db',      max_size=1024,   gray=True)
+    db_set      = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db',      max_size=600,   gray=True)
     db_path     = Path(str(outputs) + '/' + str('db') + '_local' + '.h5')
-    db_meta     = detector.extract_keypoints(db_set, save_path=db_path, normalize=False)        
+    # db_meta     = detector.extract_keypoints(db_set, save_path=db_path, normalize=False)        
   
     # extract query images 
     detector    = SuperPoint(config=sp_cfg)
-    query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query',   max_size=1024,  gray=True)
+    query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query',   max_size=600,  gray=True)
     query_path  = Path(str(outputs) + '/' + str('query') + '_local' + '.h5')
-    query_meta  = detector.extract_keypoints(query_set, save_path=query_path, normalize=False)
+    # query_meta  = detector.extract_keypoints(query_set, save_path=query_path, normalize=False)
        
     # sfm pairs
     sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
@@ -163,14 +163,19 @@ def main(args):
     #             output=sfm_matches_path)
     
     # triangulate
-    # reconstruction = triangulation(reference_sfm, model_path, image_path, sfm_pairs, db_path, sfm_matches_path,
-    #                                skip_geometric_verification=False, verbose=True)
+    reconstruction = triangulation(reference_sfm, 
+                                   model_path, 
+                                   image_path, 
+                                   sfm_pairs, 
+                                   db_path, 
+                                   sfm_matches_path,
+                                   skip_geometric_verification=False, verbose=True)
     
     # retrieve
-    loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
-                                 data_cfg=data_cfg,
-                                 outputs=outputs,
-                                 topK=25) 
+    # loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
+    #                              data_cfg=data_cfg,
+    #                              outputs=outputs,
+    #                              topK=25) 
     
     # match
     loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 

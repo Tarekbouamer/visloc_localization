@@ -1,3 +1,7 @@
-[12/07 16:57 loc]: init loc
-[12/07 16:57 loc]: extract local features
-[12/07 16:57 loc]: found 4479 images with None intrinsics
+[12/08 16:26 loc]: init loc
+[12/08 16:26 loc]: extract local features
+[12/08 16:26 loc]: found 4479 images with None intrinsics
+[12/08 16:26 loc]: found 947 images with 922 intrinsics
+[12/08 16:26 loc]: The database already exists, deleting it.
+[12/08 16:26 loc]: importing features into the database...
+[12/08 16:26 loc]: importing matches into the database...

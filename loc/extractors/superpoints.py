@@ -84,7 +84,9 @@ class SuperPoint(torch.nn.Module):
         
         return out            
 
-    def __write__(self, name, data):   
+    def __write__(self, name, data): 
+        
+          
         hf  = self.writer
         
         try:
@@ -148,14 +150,11 @@ class SuperPoint(torch.nn.Module):
             # prepare inputs
             img  = self.__prepare_input__(img, **kwargs) 
             img  = self.__cuda__(img) 
-
-            print(img.shape)
             
             # extract locals (W, H) order
             preds = self.net({'image': img})
             preds = self.__to_numpy__(preds)
             
-            print(preds.keys())
             #
             preds['size'] = original_size = data['size'][0].numpy()
             
@@ -164,23 +163,19 @@ class SuperPoint(torch.nn.Module):
             scales          = (original_size / current_size).astype(np.float32)
             
             #
-            preds['keypoints']   = (preds['keypoints'] + .5)    * scales[None] - .5
+            preds['keypoints']   = (preds['keypoints'] + .5) * scales[None] - .5
             preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()
-            
-            # 
-            print(preds['keypoints'])
-            print(preds['keypoints'].shape)
-
-            print(preds['scores'])
-            print(preds['scores'].shape)
-            
-            print(preds['descriptors'].shape)
-
-            input()
-            
+                        
             # write
             if hasattr(self, 'writer'):
                 name = data['name'][0]
+                
+                for k in preds:
+                    dt = preds[k].dtype
+                    if (dt == np.float32) and (dt != np.float16):
+                        preds[k] = preds[k].astype(np.float16)
+                
+                #
                 self.__write__(name, preds)
                 
         # 

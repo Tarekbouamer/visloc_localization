@@ -77,8 +77,7 @@ def import_features(image_ids, database_path, features_path):
     
     db = COLMAPDatabase.connect(database_path)
         
-    for image_name, image_id in tqdm(image_ids.items()):
-            
+    for image_name, image_id in tqdm(image_ids.items()):        
         keypoints = get_keypoints(features_path, image_name)
         keypoints += 0.5  # COLMAP origin
         db.add_keypoints(image_id, keypoints)
@@ -148,7 +147,13 @@ def geometric_verification(image_ids, reference, database_path, features_path,
         cam0    = reference.cameras[image0.camera_id]
         
         kps0, noise0    = get_keypoints(features_path, name0, return_uncertainty=True)
-        kps0            = np.array([cam0.image_to_world(kp) for kp in kps0])
+        
+        if len(kps0) > 0:
+            kps0 = np.stack(cam0.image_to_world(kps0))
+        else:
+            kps0 = np.zeros((0, 2))        
+        
+        noise0 = 1.0 if noise0 is None else noise0
 
         for name1 in pairs[name0]:
             id1 = image_ids[name1]
@@ -156,8 +161,13 @@ def geometric_verification(image_ids, reference, database_path, features_path,
             cam1 = reference.cameras[image1.camera_id]
             
             kps1, noise1 = get_keypoints(features_path, name1, return_uncertainty=True)
-            kps1 = np.array([cam1.image_to_world(kp) for kp in kps1])
+            noise1 = 1.0 if noise1 is None else noise1
 
+            if len(kps1) > 0:
+                kps1 = np.stack(cam1.image_to_world(kps1))
+            else:
+                kps1 = np.zeros((0, 2))
+                
             matches = get_matches(matches_path, name0, name1)[0]
 
             if len({(id0, id1), (id1, id0)} & matched) > 0:
@@ -169,17 +179,19 @@ def geometric_verification(image_ids, reference, database_path, features_path,
                 db.add_two_view_geometry(id0, id1, matches)
                 continue
             
-            qvec_01, tvec_01    = pycolmap.relative_pose(image0.qvec, image0.tvec, image1.qvec, image1.tvec)
-            _, errors0, errors1 = compute_epipolar_errors(qvec_01, tvec_01, kps0[matches[:, 0]], kps1[matches[:, 1]])
+            qvec_01, tvec_01    = pycolmap.relative_pose(
+                image0.qvec, image0.tvec, image1.qvec, image1.tvec)
+            _, errors0, errors1 = compute_epipolar_errors(
+                qvec_01, tvec_01, kps0[matches[:, 0]], kps1[matches[:, 1]])
             
 
-            # valid_matches = np.logical_and(
-            #     errors0 <= max_error * noise0 / cam0.mean_focal_length(),
-            #     errors1 <= max_error * noise1 / cam1.mean_focal_length())
-
             valid_matches = np.logical_and(
-                errors0 <= max_error * 1.0 / cam0.mean_focal_length(),
-                errors1 <= max_error * 1.0 / cam1.mean_focal_length())   
+                errors0 <= max_error * noise0 / cam0.mean_focal_length(),
+                errors1 <= max_error * noise1 / cam1.mean_focal_length())
+
+            # valid_matches = np.logical_and(
+            #     errors0 <= max_error * 1.0 / cam0.mean_focal_length(),
+            #     errors1 <= max_error * 1.0 / cam1.mean_focal_length())   
                      
             # TODO: We could also add E to the database, but we need
             # to reverse the transformations if id0 > id1 in utils/database.py.
@@ -194,7 +206,7 @@ def geometric_verification(image_ids, reference, database_path, features_path,
     db.close()
 
 
-def run_triangulation(model_path, database_path, image_dir, reference_model, verbose=False):
+def run_triangulation(model_path, database_path, image_dir, reference_model, options={}, verbose=False,):
     model_path.mkdir(parents=True, exist_ok=True)
     
     logger.info('Running 3D triangulation...')
@@ -202,7 +214,7 @@ def run_triangulation(model_path, database_path, image_dir, reference_model, ver
     with OutputCapture(verbose):
         with pycolmap.ostream():
             reconstruction = pycolmap.triangulate_points(
-                reference_model, database_path, image_dir, model_path)
+                reference_model, database_path, image_dir, model_path, options=options)
     
     return reconstruction
 

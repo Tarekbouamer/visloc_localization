@@ -107,7 +107,7 @@ def read_key_from_h5py(name, _path):
             
         for k, v in g.items():
             data[k] = torch.from_numpy(v.__array__()).float()
-    
+
     return data
 
 def get_keypoints(path, name, return_uncertainty=False):
@@ -125,7 +125,7 @@ def get_matches(path, name0, name1):
     
     #
     with h5py.File(str(path), 'r', libver='latest') as hfile:
-        
+
         pair, reverse = find_pair(hfile, name0, name1)
         
         matches = hfile[pair]['matches'].__array__()
