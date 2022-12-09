@@ -122,11 +122,14 @@ def import_matches(image_ids, database_path, pairs_path, matches_path,
 
 def estimation_and_geometric_verification(database_path, pairs_path, verbose=False):
     
-    logger.info('Performing geometric verification of the matches...')
+    logger.info('Performing estimation and geometric verification of the matches...')
     
     with OutputCapture(verbose):
         with pycolmap.ostream():
-            pycolmap.verify_matches(database_path, pairs_path,max_num_trials=20000, min_inlier_ratio=0.1)
+            pycolmap.verify_matches(database_path, 
+                                    pairs_path,
+                                    max_num_trials=20000, 
+                                    min_inlier_ratio=0.1)
 
 
 def geometric_verification(image_ids, reference, database_path, features_path,
@@ -206,16 +209,19 @@ def geometric_verification(image_ids, reference, database_path, features_path,
     db.close()
 
 
-def run_triangulation(model_path, database_path, image_dir, reference_model, options={}, verbose=False,):
+def run_triangulation(model_path, database_path, image_dir, reference_model, options=None, verbose=False):
     model_path.mkdir(parents=True, exist_ok=True)
     
     logger.info('Running 3D triangulation...')
+    if options is None:
+        options = {}    
     
     with OutputCapture(verbose):
         with pycolmap.ostream():
             reconstruction = pycolmap.triangulate_points(
-                reference_model, database_path, image_dir, model_path, options=options)
-    
+                reference_model, database_path, image_dir, model_path, 
+                options=options)
+  
     return reconstruction
 
 
@@ -250,9 +256,10 @@ def main(sfm_dir, model, image_dir, pairs, features, matches,
         else:
             geometric_verification(image_ids, reference, database, features, pairs, matches)
     
+    input()
     # run triangulation
     reconstruction = run_triangulation(sfm_dir, database, image_dir, reference,
-                                       verbose)
+                                       verbose=verbose)
 
     logger.info('finished the triangulation with statistics:\n%s',
                 reconstruction.summary())

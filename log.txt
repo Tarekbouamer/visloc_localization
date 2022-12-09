@@ -1,7 +1,12 @@
-[12/08 16:26 loc]: init loc
-[12/08 16:26 loc]: extract local features
-[12/08 16:26 loc]: found 4479 images with None intrinsics
-[12/08 16:26 loc]: found 947 images with 922 intrinsics
-[12/08 16:26 loc]: The database already exists, deleting it.
-[12/08 16:26 loc]: importing features into the database...
-[12/08 16:26 loc]: importing matches into the database...
+[12/09 15:13 loc]: init loc
+[12/09 15:13 loc]: extract local features
+[12/09 15:13 loc]: found 4479 images with None intrinsics
+[12/09 15:13 loc]: found 947 images with 922 intrinsics
+[12/09 15:13 loc]: extract global features using sfm_resnet50_gem_2048
+[12/09 15:13 loc]: found 947 images with 922 intrinsics
+[12/09 15:13 loc]: found 4479 images with None intrinsics
+[12/09 15:14 loc]: retrive top 25 images
+[12/09 15:14 loc]: 23675 pairs have not been found, saved /media/loc/HDD/VisualLocalization2020/aachen/visloc/pairs_sfm_resnet50_gem_2048_25.txt
+[12/09 15:14 loc]: 23675 pairs have been found, saved /media/loc/HDD/VisualLocalization2020/aachen/visloc/pairs_sfm_resnet50_gem_2048_25.txt
+[12/09 15:14 loc]: reading the 3D model...
+[12/09 15:14 loc]: starting localization...

@@ -163,19 +163,19 @@ def main(args):
     #             output=sfm_matches_path)
     
     # triangulate
-    reconstruction = triangulation(reference_sfm, 
-                                   model_path, 
-                                   image_path, 
-                                   sfm_pairs, 
-                                   db_path, 
-                                   sfm_matches_path,
-                                   skip_geometric_verification=False, verbose=True)
+    # reconstruction = triangulation(reference_sfm, 
+    #                                model_path, 
+    #                                image_path, 
+    #                                sfm_pairs, 
+    #                                db_path, 
+    #                                sfm_matches_path,
+    #                                skip_geometric_verification=False, verbose=False)
     
     # retrieve
-    # loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
-    #                              data_cfg=data_cfg,
-    #                              outputs=outputs,
-    #                              topK=25) 
+    loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
+                                 data_cfg=data_cfg,
+                                 outputs=outputs,
+                                 topK=25) 
     
     # match
     loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
@@ -185,15 +185,15 @@ def main(args):
     #             output=loc_matches_path)
     
     # localize
-    # localize(sfm_model=model_path,
-    #          queries=query_set.get_cameras(),
-    #          retrieval_pairs_path=loc_pairs_path,
-    #          features=query_path,
-    #          matches=loc_matches_path,
-    #          results=results,
-    #          covisibility_clustering=True,
-    #          viewer=None
-    #         )
+    localize(sfm_model=model_path,
+             queries=query_set.get_cameras(),
+             retrieval_pairs_path=loc_pairs_path,
+             features=query_path,
+             matches=loc_matches_path,
+             results=results,
+             covisibility_clustering=False,
+             viewer=None
+            )
     
     # Visualization
     # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='track_length'    )

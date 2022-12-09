@@ -93,10 +93,6 @@ def pose_from_cluster(
     
     # Get Query 2D keypoints
     kpq = get_keypoints(features_path, qname)
-    kpq = kpq
-    print(kpq.shape)    
-    print(kpq)
-    input()
     kpq += 0.5  # COLMAP coordinates
 
     # Get Visible 3D points
@@ -254,14 +250,19 @@ def main(sfm_model,
             }
         else:
             ret, log = pose_from_cluster(localizer, qname, qcam, db_ids, features, matches)
-            
             if ret['success']:
                 poses[qname] = (ret['qvec'], ret['tvec'])
             else:
                 logger.warn("not Succesful")
                 closest = sfm_model.images[db_ids[0]]
                 poses[qname] = (closest.qvec, closest.tvec)
-                
+            
+            print(qname)    
+            print(poses[qname])
+            print(ret)
+            print(log)
+            input()
+                            
             log['covisibility_clustering'] = covisibility_clustering
             logs['loc'][qname] = log
         
