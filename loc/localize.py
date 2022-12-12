@@ -110,7 +110,8 @@ def pose_from_cluster(
             continue
         
         points3D_ids = np.array([p.point3D_id if p.has_point3D() else -1 for p in image.points2D])
-        
+
+                
         matches, _  = get_matches(matches_path, qname, image.name)
         matches     = matches[points3D_ids[matches[:, 1]] != -1]
         
@@ -175,7 +176,6 @@ def main(sfm_model,
     logger.info('reading the 3D model...') 
     if not isinstance(sfm_model, pycolmap.Reconstruction):
         sfm_model = pycolmap.Reconstruction(sfm_model)
-        
     db_name_to_id = {img.name: i for i, img in sfm_model.images.items()}
 
     config = {"estimation": {"ransac": {"max_error": ransac_thresh}}, **(config or {})}
@@ -195,7 +195,7 @@ def main(sfm_model,
     logger.info('starting localization...')
     
     for qname, qcam in tqdm(queries.items(), total=len(queries)):
-        
+
         #  
         if qname not in retrievals:
             logger.debug(f'no images retrieved for query image {qname}. skipping...')
@@ -210,7 +210,7 @@ def main(sfm_model,
                 continue
             #    
             db_ids.append(db_name_to_id[n])
-        
+    
         #      
         if len(db_ids) < 1:
             logger.error("empty retrieval")
@@ -256,12 +256,6 @@ def main(sfm_model,
                 logger.warn("not Succesful")
                 closest = sfm_model.images[db_ids[0]]
                 poses[qname] = (closest.qvec, closest.tvec)
-            
-            print(qname)    
-            print(poses[qname])
-            print(ret)
-            print(log)
-            input()
                             
             log['covisibility_clustering'] = covisibility_clustering
             logs['loc'][qname] = log

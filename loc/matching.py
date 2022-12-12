@@ -66,35 +66,25 @@ def do_matching(src_path, dst_path, pairs_path, output):
     # run
     for it, (src_name, dst_name) in enumerate(tqdm(pairs, total=len(pairs))):
         
-        #
+        #   
+        # src_name = "query/day/nexus5x/IMG_20161227_160532.jpg" 
+        # dst_name = "db/1102.jpg"
+        
         data = {'src': {}, 'dst': {}}
        
         data['src'] = read_key_from_h5py(src_name, src_path)
         data['dst'] = read_key_from_h5py(dst_name, dst_path)
-
+        
         src_desc = data['src']['descriptors']
         dst_desc = data['dst']['descriptors']
         
-        # print(src_desc.shape)
-        # print(dst_desc.shape)
-                
         src_desc = src_desc.T
         dst_desc = dst_desc.T
 
         # match
         matches_dists, matches_idxs = matcher(src_desc, dst_desc)
-        # matches_dists, matches_idxs = matcher(dst_desc, src_desc)
 
-        # print(src_desc.shape)
-        # print(src_desc)
 
-        # print(dst_desc.shape)
-        # print(dst_desc)
-
-        # print(matches_idxs.shape)
-        # print(torch.sum(matches_idxs))
-        # print(matches_idxs)
-        # input()
         # Get key
         pair_key = names_to_pair(src_name, dst_name)
         

@@ -100,17 +100,15 @@ def main(args):
     
     logger = setup_logger(output=".", name="loc")
     logger.info("init loc")
-    
-    # dataset_path    = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    # outputs         = Path('/media/dl/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')
 
-    dataset_path    = Path('/media/loc/HDD/VisualLocalization2020/aachen/')
-    outputs         = Path('/media/loc/HDD/VisualLocalization2020/aachen/visloc')    
+    # dataset_path    = Path('/media/loc/HDD/VisualLocalization2020/aachen/')
+    # outputs         = Path('/media/loc/HDD/VisualLocalization2020/aachen/visloc')    
+    # image_path      = dataset_path/'images/images_upright/' 
+
+    dataset_path    = Path('/media/dl/Data/datasets/aachen')
+    outputs         = Path('/media/dl/Data/datasets/aachen/visloc')    
     image_path      = dataset_path/'images/images_upright/' 
-
-    # dataset_path    = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night')
-    # outputs         = Path('/media/loc/data_5tb/datasets/Vis2020/Aachen-Day-Night/outputs')    
-    # image_path      = dataset_path/'images/database_and_query_images/images_upright/' 
+    
     
     reference_sfm   = outputs / 'sfm_superpoint_mnn'  
     results         = outputs / 'Aachen_visloc_gem50.txt'  
@@ -140,52 +138,54 @@ def main(args):
     #
     sp_cfg = {
         'keypoint_threshold': 0.005,    'remove_borders': 4,
-        'nms_radius': 3,                'max_keypoints': 1024
+        'nms_radius': 3,                'max_keypoints': 4096
         }
 
     # extract db images 
     detector    = SuperPoint(config=sp_cfg)
-    db_set      = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db',      max_size=600,   gray=True)
+    db_set      = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db',      max_size=1024,   gray=True)
     db_path     = Path(str(outputs) + '/' + str('db') + '_local' + '.h5')
     # db_meta     = detector.extract_keypoints(db_set, save_path=db_path, normalize=False)        
   
-    # extract query images 
+    # # extract query images 
     detector    = SuperPoint(config=sp_cfg)
-    query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query',   max_size=600,  gray=True)
+    query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query',   max_size=1024
+                                 ,  gray=True)
     query_path  = Path(str(outputs) + '/' + str('query') + '_local' + '.h5')
     # query_meta  = detector.extract_keypoints(query_set, save_path=query_path, normalize=False)
        
-    # sfm pairs
+    # # sfm pairs
     sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
     # do_matching(src_path=db_path, 
     #             dst_path=db_path, 
     #             pairs_path=sfm_pairs, 
     #             output=sfm_matches_path)
     
-    # triangulate
+    # # triangulate
     # reconstruction = triangulation(reference_sfm, 
     #                                model_path, 
     #                                image_path, 
     #                                sfm_pairs, 
     #                                db_path, 
     #                                sfm_matches_path,
-    #                                skip_geometric_verification=False, verbose=False)
+    #                                skip_geometric_verification=False, verbose=True)
     
     # retrieve
     loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
                                  data_cfg=data_cfg,
                                  outputs=outputs,
-                                 topK=25) 
+                                 topK=50) 
     
     # match
     loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
-    # do_matching(src_path=query_path, 
-    #             dst_path=db_path, 
-    #             pairs_path=loc_pairs_path, 
-    #             output=loc_matches_path)
+
+    do_matching(src_path=query_path, 
+                dst_path=db_path, 
+                pairs_path=loc_pairs_path, 
+                output=loc_matches_path)
     
     # localize
-    localize(sfm_model=model_path,
+    localize(sfm_model=reference_sfm,
              queries=query_set.get_cameras(),
              retrieval_pairs_path=loc_pairs_path,
              features=query_path,

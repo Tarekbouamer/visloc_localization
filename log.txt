@@ -1,12 +1,19 @@
-[12/09 15:13 loc]: init loc
-[12/09 15:13 loc]: extract local features
-[12/09 15:13 loc]: found 4479 images with None intrinsics
-[12/09 15:13 loc]: found 947 images with 922 intrinsics
-[12/09 15:13 loc]: extract global features using sfm_resnet50_gem_2048
-[12/09 15:13 loc]: found 947 images with 922 intrinsics
-[12/09 15:13 loc]: found 4479 images with None intrinsics
-[12/09 15:14 loc]: retrive top 25 images
-[12/09 15:14 loc]: 23675 pairs have not been found, saved /media/loc/HDD/VisualLocalization2020/aachen/visloc/pairs_sfm_resnet50_gem_2048_25.txt
-[12/09 15:14 loc]: 23675 pairs have been found, saved /media/loc/HDD/VisualLocalization2020/aachen/visloc/pairs_sfm_resnet50_gem_2048_25.txt
-[12/09 15:14 loc]: reading the 3D model...
-[12/09 15:14 loc]: starting localization...
+[12/10 19:46 loc]: init loc
+[12/10 19:46 loc]: extract local features
+[12/10 19:46 loc]: found 4479 images with None intrinsics
+[12/10 19:46 loc]: found 947 images with 922 intrinsics
+[12/10 19:46 loc]: extract global features using sfm_resnet50_gem_2048
+[12/10 19:47 loc]: found 947 images with 922 intrinsics
+[12/10 19:47 loc]: found 4479 images with None intrinsics
+[12/10 19:48 loc]: retrive top 50 images
+[12/10 19:48 loc]: 47350 pairs have not been found, saved /media/dl/Data/datasets/aachen/visloc/pairs_sfm_resnet50_gem_2048_50.txt
+[12/10 19:48 loc]: 47350 pairs have been found, saved /media/dl/Data/datasets/aachen/visloc/pairs_sfm_resnet50_gem_2048_50.txt
+[12/10 19:48 loc]: matching 47350 pairs
+[12/10 19:48 loc]: Matcher type ( nearest_neighbor ) is initialized
+[12/10 20:09 loc]: matches saved to /media/dl/Data/datasets/aachen/visloc/loc_matches_path.h5
+[12/10 20:09 loc]: reading the 3D model...
+[12/10 20:09 loc]: starting localization...
+[12/10 20:14 loc]: localized 922 / 922 images.
+[12/10 20:14 loc]: writing poses to /media/dl/Data/datasets/aachen/visloc/Aachen_visloc_gem50.txt...
+[12/10 20:14 loc]: writing logs to /media/dl/Data/datasets/aachen/visloc/Aachen_visloc_gem50.txt_logs.pkl...
+[12/10 20:14 loc]: done!

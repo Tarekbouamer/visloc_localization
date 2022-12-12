@@ -22,7 +22,6 @@ def get_descriptors(desc_path, names, key='global_descriptor'):
     for n in names:
         with h5py.File(str(desc_path), 'r') as fd:
             x = fd[n][key].__array__()
-            print(x.shape)
             descs.append(fd[n][key].__array__())
             
     out = torch.from_numpy(np.stack(descs, 0)).float()
@@ -82,12 +81,10 @@ def do_retrieve(dataset_path, data_cfg, outputs, topK=5):
     # save
     loc_pairs_path = outputs / Path('pairs' + '_' +  str(retrieval_model_name) + '_' + str(topK)  + '.txt') 
 
-    # with open(loc_pairs_path, 'w') as f:
-    #     f.write('\n'.join(' '.join([i, j]) for i, j in name_pairs))
+    with open(loc_pairs_path, 'w') as f:
+        f.write('\n'.join(' '.join([i, j]) for i, j in name_pairs))
     
-    #  
-    logger.warning(f"{len(name_pairs)} pairs have not been found, saved {loc_pairs_path}")         
-
+    # 
     logger.info(f"{len(name_pairs)} pairs have been found, saved {loc_pairs_path}")         
   
     return loc_pairs_path

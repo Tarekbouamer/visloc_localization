@@ -127,7 +127,7 @@ class SuperPoint(torch.nn.Module):
     @torch.no_grad()      
     def extract_keypoints(self, dataset, save_path=None, **kwargs):
         
-        # eval
+        # # eval
         self.net.eval()
         
         # dataloader
@@ -154,7 +154,7 @@ class SuperPoint(torch.nn.Module):
             # extract locals (W, H) order
             preds = self.net({'image': img})
             preds = self.__to_numpy__(preds)
-            
+        
             #
             preds['size'] = original_size = data['size'][0].numpy()
             
@@ -165,7 +165,8 @@ class SuperPoint(torch.nn.Module):
             #
             preds['keypoints']   = (preds['keypoints'] + .5) * scales[None] - .5
             preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()
-                        
+                     
+            
             # write
             if hasattr(self, 'writer'):
                 name = data['name'][0]
