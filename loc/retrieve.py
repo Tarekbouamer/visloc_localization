@@ -29,11 +29,18 @@ def get_descriptors(desc_path, names, key='global_descriptor'):
     return out
 
 
-def do_retrieve(dataset_path, data_cfg, outputs, topK=5):
+def do_retrieve(dataset_path, data_cfg, outputs, topK=5, overwrite=True):
 
     # model type
     retrieval_model_name = 'sfm_resnet50_gem_2048'
+
+    # save
+    loc_pairs_path = outputs / Path('pairs' + '_' +  str(retrieval_model_name) + '_' + str(topK)  + '.txt') 
     
+    # no extractions
+    if loc_pairs_path.exists() and not overwrite:
+        return loc_pairs_path
+        
     # extractor
     logger.info(f"extract global features using {retrieval_model_name}")
     extractor = FeatureExtractor(model_name=retrieval_model_name)
@@ -78,9 +85,7 @@ def do_retrieve(dataset_path, data_cfg, outputs, topK=5):
     
     assert len(name_pairs) > 0, "No matching pairs has been found! "
     
-    # save
-    loc_pairs_path = outputs / Path('pairs' + '_' +  str(retrieval_model_name) + '_' + str(topK)  + '.txt') 
-
+    
     with open(loc_pairs_path, 'w') as f:
         f.write('\n'.join(' '.join([i, j]) for i, j in name_pairs))
     

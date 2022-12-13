@@ -1,17 +1,6 @@
-[12/13 11:11 loc]: init loc
-[12/13 11:11 loc]: 3D model has 13026 images and 13026 cameras in database.
-[12/13 11:11 loc]: reading the NVM model...
-[12/13 11:11 loc]: reading 4328 cameras
-[12/13 11:11 loc]: reading 4328 images...
-[12/13 11:11 loc]: reading 1652687 points...
-[12/13 11:12 loc]: parsing image data
-[12/13 11:12 loc]: writing Colmap model...
-[12/13 11:15 loc]: NVM to Colmap conversion done !
-[12/13 11:15 loc]: reading Colmap model
-[12/13 11:16 loc]: extracting image pairs from covisibility
-[12/13 11:17 loc]: found 85515 image pairs.
-[12/13 11:17 loc]: extract local features
-[12/13 11:17 loc]: found 4479 images with None intrinsics
-[12/13 11:25 loc]: found 947 images with 922 intrinsics
-[12/13 11:26 loc]: matching 56717 pairs
-[12/13 11:26 loc]: Matcher type ( nearest_neighbor ) is initialized
+[12/13 17:21 loc]: init loc
+[12/13 17:21 loc]: found 947 images with 922 intrinsics
+[12/13 17:21 loc]: reading the 3D model...
+[12/13 17:21 loc]: starting localization...
+[12/13 17:31 loc]: No 3D points found for db/557.jpg.
+[12/13 17:31 loc]: No 3D points found for db/3312.jpg.

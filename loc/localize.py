@@ -10,7 +10,7 @@ from typing import Dict, List, Union, Tuple
 from collections import defaultdict
 
 from loc.utils.io import parse_retrieval_file, get_keypoints, get_matches
-
+import poselib
 
 # logger
 import logging
@@ -72,6 +72,12 @@ class Localizer:
         points2D = points2D_all[points2D_idxs]
         points3D = [self.sfm_model.points3D[j].xyz for j in points3D_id]
         
+        camera = {'model': 'SIMPLE_RADIAL', 'width': 1600, 'height': 1200, 'params': [1.46920e+03, 8.00000e+02, 6.00000e+02, -3.53019e-02]}
+
+        ret, info = poselib.estimate_absolute_pose(points2D, points3D, camera, 
+                                             {'max_reproj_error': 16.0}, {})
+        print(ret)
+
         # EPnP pose estimation
         ret = pycolmap.absolute_pose_estimation(points2D, 
                                                 points3D,
@@ -79,6 +85,10 @@ class Localizer:
                                                 estimation_options=self.config.get('estimation', {}),
                                                 refinement_options=self.config.get('refinement', {}),
         )
+        print(ret['qvec'], ret['tvec'])
+        
+        input()
+
         return ret
 
 
@@ -106,7 +116,7 @@ def pose_from_cluster(
         image = localizer.sfm_model.images[db_id]
         
         if image.num_points3D() == 0:
-            logger.debug(f'No 3D points found for {image.name}.')
+            logger.warning(f'No 3D points found for {image.name}.')
             continue
         
         points3D_ids = np.array([p.point3D_id if p.has_point3D() else -1 for p in image.points2D])

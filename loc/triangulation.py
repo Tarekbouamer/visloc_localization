@@ -256,7 +256,6 @@ def main(sfm_dir, model, image_dir, pairs, features, matches,
         else:
             geometric_verification(image_ids, reference, database, features, pairs, matches)
     
-    input()
     # run triangulation
     reconstruction = run_triangulation(sfm_dir, database, image_dir, reference,
                                        verbose=verbose)
