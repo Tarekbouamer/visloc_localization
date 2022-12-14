@@ -63,6 +63,60 @@ def do_covisibility_clustering(frame_ids: List[int], sfm_model: pycolmap.Reconst
     return clusters
 
 
+class AbsolutePoseEstimationPyColmap:
+    def __init__(self, sfm_model, config=None):
+        self.sfm_model = sfm_model
+        self.config = config or {}
+        
+    def estimate(self, points2D_all, points2D_idxs, points3D_id, query_camera):
+        #
+        points2D = points2D_all[points2D_idxs]
+        points3D = [self.sfm_model.points3D[j].xyz for j in points3D_id]
+  
+        # estimation
+        ret = pycolmap.absolute_pose_estimation(points2D, 
+                                                points3D,
+                                                query_camera,
+                                                estimation_options=self.config.get('estimation', {}),
+                                                refinement_options=self.config.get('refinement', {}),
+        )
+        
+        return ret
+
+
+class AbsolutePoseEstimationPoseLib:
+    def __init__(self, sfm_model, config=None):
+        self.sfm_model = sfm_model
+        self.config = config or {}
+        
+    def estimate(self, points2D_all, points2D_idxs, points3D_id, query_camera):
+        #
+        points2D = points2D_all[points2D_idxs]
+        points3D = [self.sfm_model.points3D[j].xyz for j in points3D_id]
+  
+        #
+        camera = {'model': str(query_camera.model_name), 
+                  'width': query_camera.width, 
+                  'height': query_camera.height, 
+                  'params': query_camera.params}
+        
+        
+        # estimation
+        cam, info = poselib.estimate_absolute_pose(points2D, 
+                                                   points3D, 
+                                                   camera,
+                                                   {'max_reproj_error': 16.0}, 
+                                                   {})
+        
+        ret = {**info}
+        ret['success']      = True
+        ret['qvec']         = cam.q
+        ret['tvec']         = cam.t
+
+        return ret
+  
+
+
 class Localizer:
     def __init__(self, sfm_model, config=None):
         self.sfm_model = sfm_model
@@ -76,7 +130,11 @@ class Localizer:
 
         ret, info = poselib.estimate_absolute_pose(points2D, points3D, camera, 
                                              {'max_reproj_error': 16.0}, {})
-        print(ret)
+
+        
+
+
+
 
         # EPnP pose estimation
         ret = pycolmap.absolute_pose_estimation(points2D, 
@@ -85,9 +143,7 @@ class Localizer:
                                                 estimation_options=self.config.get('estimation', {}),
                                                 refinement_options=self.config.get('refinement', {}),
         )
-        print(ret['qvec'], ret['tvec'])
-        
-        input()
+
 
         return ret
 
@@ -139,7 +195,7 @@ def pose_from_cluster(
     mp3d_ids = [j for i in idxs for j in kp_idx_to_3D[i]]
     
     # Localize 
-    ret = localizer.localize(kpq, mkp_idxs, mp3d_ids, query_camera, **kwargs)
+    ret = localizer.estimate(kpq, mkp_idxs, mp3d_ids, query_camera, **kwargs)
         
     ret['camera'] = {
         'model': query_camera.model_name,
@@ -191,8 +247,9 @@ def main(sfm_model,
     config = {"estimation": {"ransac": {"max_error": ransac_thresh}}, **(config or {})}
     
     # localizer
-    localizer = Localizer(sfm_model, config)
-
+    # localizer = Localizer(sfm_model, config)
+    localizer = AbsolutePoseEstimationPoseLib(sfm_model, config)
+    
     poses = {}
     logs = {
         'features': features,

@@ -101,13 +101,13 @@ def main(args):
     logger = setup_logger(output=".", name="loc")
     logger.info("init loc")
 
-    dataset_path    = Path('/media/loc/HDD/VisualLocalization2020/aachen/')
-    outputs         = Path('/media/loc/HDD/VisualLocalization2020/aachen/visloc')    
-    image_path      = dataset_path/'images/images_upright/' 
-
-    # dataset_path    = Path('/media/dl/Data/datasets/aachen')
-    # outputs         = Path('/media/dl/Data/datasets/aachen/visloc')    
+    # dataset_path    = Path('/media/loc/HDD/VisualLocalization2020/aachen/')
+    # outputs         = Path('/media/loc/HDD/VisualLocalization2020/aachen/visloc')    
     # image_path      = dataset_path/'images/images_upright/' 
+
+    dataset_path    = Path('/media/dl/Data/datasets/aachen')
+    outputs         = Path('/media/dl/Data/datasets/aachen/visloc')    
+    image_path      = dataset_path/'images/images_upright/' 
     
     
     reference_sfm   = outputs / 'sfm_superpoint_mnn'  

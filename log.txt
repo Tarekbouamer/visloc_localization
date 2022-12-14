@@ -1,6 +1,52 @@
-[12/13 17:21 loc]: init loc
-[12/13 17:21 loc]: found 947 images with 922 intrinsics
-[12/13 17:21 loc]: reading the 3D model...
-[12/13 17:21 loc]: starting localization...
-[12/13 17:31 loc]: No 3D points found for db/557.jpg.
-[12/13 17:31 loc]: No 3D points found for db/3312.jpg.
+[12/13 23:10 loc]: init loc
+[12/13 23:10 loc]: found 947 images with 922 intrinsics
+[12/13 23:10 loc]: reading the 3D model...
+[12/13 23:10 loc]: starting localization...
+[12/13 23:10 loc]: No 3D points found for db/557.jpg.
+[12/13 23:10 loc]: No 3D points found for db/3312.jpg.
+[12/13 23:10 loc]: No 3D points found for db/2976.jpg.
+[12/13 23:10 loc]: No 3D points found for db/557.jpg.
+[12/13 23:10 loc]: No 3D points found for db/557.jpg.
+[12/13 23:10 loc]: No 3D points found for db/557.jpg.
+[12/13 23:10 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:10 loc]: No 3D points found for db/2976.jpg.
+[12/13 23:10 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:10 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:10 loc]: No 3D points found for db/2976.jpg.
+[12/13 23:10 loc]: No 3D points found for db/2976.jpg.
+[12/13 23:10 loc]: No 3D points found for db/2048.jpg.
+[12/13 23:10 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:10 loc]: No 3D points found for db/3966.jpg.
+[12/13 23:11 loc]: No 3D points found for db/2976.jpg.
+[12/13 23:11 loc]: No 3D points found for db/3312.jpg.
+[12/13 23:11 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:11 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:11 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:12 loc]: No 3D points found for db/557.jpg.
+[12/13 23:12 loc]: No 3D points found for db/557.jpg.
+[12/13 23:12 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:12 loc]: No 3D points found for db/2435.jpg.
+[12/13 23:12 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:12 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:12 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:12 loc]: No 3D points found for db/557.jpg.
+[12/13 23:12 loc]: No 3D points found for db/3312.jpg.
+[12/13 23:12 loc]: No 3D points found for db/3938.jpg.
+[12/13 23:12 loc]: No 3D points found for db/257.jpg.
+[12/13 23:12 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:13 loc]: No 3D points found for db/257.jpg.
+[12/13 23:13 loc]: No 3D points found for db/3312.jpg.
+[12/13 23:13 loc]: No 3D points found for db/3312.jpg.
+[12/13 23:13 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:13 loc]: No 3D points found for db/2349.jpg.
+[12/13 23:13 loc]: No 3D points found for db/2976.jpg.
+[12/13 23:13 loc]: No 3D points found for db/3312.jpg.
+[12/13 23:13 loc]: No 3D points found for db/2435.jpg.
+[12/13 23:13 loc]: No 3D points found for db/3938.jpg.
+[12/13 23:13 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:13 loc]: No 3D points found for db/2435.jpg.
+[12/13 23:13 loc]: No 3D points found for db/3970.jpg.
+[12/13 23:13 loc]: localized 922 / 922 images.
+[12/13 23:13 loc]: writing poses to /media/dl/Data/datasets/aachen/visloc/Aachen_visloc_gem50.txt...
+[12/13 23:13 loc]: writing logs to /media/dl/Data/datasets/aachen/visloc/Aachen_visloc_gem50.txt_logs.pkl...
+[12/13 23:14 loc]: done!
