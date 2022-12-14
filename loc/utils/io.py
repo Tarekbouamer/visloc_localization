@@ -5,6 +5,7 @@ from typing import Dict, List, Union, Tuple
 
 import torch
 import h5py
+import pickle
 
 import pycolmap
 from loc import logger
@@ -151,7 +152,6 @@ def names_to_pair(name0, name1, separator='/'):
 def names_to_pair_old(name0, name1):
     return names_to_pair(name0, name1, separator='_')
 
-
 def find_pair(hfile: h5py.File, name0: str, name1: str):
     pair = names_to_pair(name0, name1)    
     if pair in hfile:
@@ -172,3 +172,28 @@ def find_pair(hfile: h5py.File, name0: str, name1: str):
         f'Could not find pair {(name0, name1)}... '
         'Maybe you matched with a different list of pairs? ')
   
+
+
+def dump_logs(logs, save_path):
+    
+    save_path = f'{save_path}_logs.pkl'
+
+    logger.info(f'writing logs to {save_path} ')
+    
+    with open(save_path, 'wb') as f:
+        pickle.dump(logs, f)
+      
+      
+def write_poses_txt(poses, save_path):
+
+    logger.info(f'writing poses to {save_path}...')
+
+    with open(save_path, 'w') as f:
+        for q in poses:
+            
+            name        = q.split('/')[-1]
+            qvec, tvec  = poses[q]
+            qvec        = ' '.join(map(str, qvec))
+            tvec        = ' '.join(map(str, tvec))
+
+            f.write(f'{name} {qvec} {tvec}\n')
