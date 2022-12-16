@@ -30,6 +30,9 @@ from loc.vis            import visualize_sfm_2d
 from loc.colmap.colmap_nvm  import main as colmap_from_nvm
 from loc.colmap.database    import COLMAPDatabase
 
+# mapper
+from loc.mappers.colmap_mapper  import ColmapMapper
+
 # retrieval
 # import retrieval as ret
 
@@ -121,15 +124,17 @@ def main(args):
     data_cfg = make_data_config(name='Aachen')
     
     # # Nvm to Colmap
-    # model_path = outputs / 'sfm_sift'
+    model_path = outputs / 'sfm_sift'
     # colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
     #                 dataset_path / '3D-models/database_intrinsics.txt',
     #                 dataset_path / 'aachen.db',
     #                 model_path) 
     
     # covisibility
-    # num_matched = 20
-    # sfm_pairs = outputs / str('sfm_pairs_' + str(num_matched) + '.txt') 
+    num_matches = 20
+    sfm_pairs = outputs / str('sfm_pairs_' + str(num_matches) + '.txt') 
+    mapper = ColmapMapper(model_path)
+    # mapper.covisible_pairs(num_matches=num_matches)
     # covisibility(model_path, sfm_pairs, num_matched=20)
     
     # locals
@@ -155,21 +160,21 @@ def main(args):
     # query_meta  = detector.extract_keypoints(query_set, save_path=query_path, normalize=False)
        
     # sfm pairs
-    # sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
+    sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
     # do_matching(src_path=db_path, 
     #             dst_path=db_path, 
     #             pairs_path=sfm_pairs, 
     #             output=sfm_matches_path)
     
     # triangulate
-    # reconstruction = triangulation(reference_sfm, 
-    #                                model_path, 
-    #                                image_path, 
-    #                                sfm_pairs, 
-    #                                db_path, 
-    #                                sfm_matches_path,
-    #                                skip_geometric_verification=False, 
-    #                                verbose=True)
+    reconstruction = triangulation(reference_sfm, 
+                                   mapper, 
+                                   image_path, 
+                                   sfm_pairs, 
+                                   db_path, 
+                                   sfm_matches_path,
+                                   skip_geometric_verification=False, 
+                                   verbose=True)
     
     # retrieve
     loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
@@ -192,10 +197,7 @@ def main(args):
              retrieval_pairs_path=loc_pairs_path,
              features=query_path,
              matches=loc_matches_path,
-             results=results,
-             covisibility_clustering=False,
-             viewer=None
-            )
+             results=results)
     
     # Visualization
     # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='track_length'    )
