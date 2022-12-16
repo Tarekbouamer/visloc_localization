@@ -8,7 +8,7 @@ import pycolmap
 from typing import Dict, List, Union, Tuple
 from collections import defaultdict
 
-from loc.utils.io import parse_retrieval_file, get_keypoints, get_matches
+from loc.utils.io import parse_retrieval_file, get_keypoints, get_matches, write_poses_txt, dump_logs
 
 from loc.solvers.pnp import AbsolutePoseEstimationPoseLib, AbsolutePoseEstimationPyColmap
 
@@ -130,7 +130,8 @@ def pose_from_cluster(localizer, qname, query_camera, db_ids, features_path, mat
 
 class Localizer:
     default_cfg = {}
-    def __init__(self, sfm_model, features, matches, cfg=None):
+    
+    def __init__(self, sfm_model, features, matches, cfg={}):
         
         #
         self.cfg = {**self.default_cfg, **cfg}
@@ -140,7 +141,7 @@ class Localizer:
         if not isinstance(sfm_model, pycolmap.Reconstruction):
             sfm_model = pycolmap.Reconstruction(sfm_model)
         
-        #
+        # TODO from config or args we select the pose estimator
         pose_estimator = AbsolutePoseEstimationPoseLib(sfm_model, cfg)
 
         self.sfm_model  = sfm_model
@@ -153,7 +154,6 @@ class Localizer:
         self.matches    = matches
         
         self.covisibility_clustering = False
-
 
     def db_name_to_id(self):
         return {img.name: i for i, img in self.sfm_model.images.items()}  
@@ -293,7 +293,7 @@ class Localizer:
                     'covisibility_clustering': self.covisibility_clustering
                 }
             else:
-                ret, log = self.pose_from_cluster(qname, qcam, cluster_ids)
+                ret, log = self.pose_from_cluster(qname, qcam, db_ids)
                 
                 if ret['success']:
                     poses[qname] = (ret['qvec'], ret['tvec'])
@@ -305,117 +305,29 @@ class Localizer:
                 log['covisibility_clustering'] = self.covisibility_clustering
                 logs['loc'][qname] = log
         
-        pass
+        if save_path is not None:
+            write_poses_txt(poses, save_path)
+            dump_logs(logs, save_path)
+    
+        logger.info(f'localized {len(poses)} / {len(queries)} images.')
+        logger.info('done!')
+        
         
 
-def main(sfm_model, queries, retrieval_pairs_path, features,
-         matches, results,
-         ransac_thresh=12,
-         covisibility_clustering=False,
-         prepend_camera_name=False,
-         config=None, 
-         viewer=None):
+def main(queries, retrieval_pairs_path, 
+         sfm_model, features, matches, 
+         results=None,
+         config={}):
+    
+    # init localizer
+    loc = Localizer(sfm_model=sfm_model,
+                    features=features,
+                    matches=matches, 
+                    cfg=config)
+    
+    # localize queries 
+    loc(queries, retrieval_pairs_path, save_path=results)
 
-    # 
-    # assert retrieval_pairs_path.exists(),   retrieval_pairs_path
-    # assert features.exists(),               features
-    # assert matches.exists(),                matches
-    
-    # # load retrieval pairs
-    # logger.info('load retrievals pairs') 
-    # retrievals = parse_retrieval_file(retrieval_pairs_path)
-
-    # logger.info('reading the 3D model...') 
-    # if not isinstance(sfm_model, pycolmap.Reconstruction):
-    #     sfm_model = pycolmap.Reconstruction(sfm_model)
-    # db_name_to_id = {img.name: i for i, img in sfm_model.images.items()}
-    
-    # localizer
-    localizer = AbsolutePoseEstimationPoseLib(sfm_model, config)
-    
-    # poses = {}
-    # logs = {
-    #     'features': features,
-    #     'matches': matches,
-    #     'retrieval': retrievals,
-    #     'loc': {},
-    # }
-    
-    
-    logger.info('starting localization...')
-    
-    for qname, qcam in tqdm(queries.items(), total=len(queries)):
-
-        #  
-        if qname not in retrievals:
-            logger.debug(f'no images retrieved for query image {qname}. skipping...')
-            continue
-        
-        # geo-verification
-        db_names = retrievals[qname]
-        db_ids = []
-        for n in db_names:
-            if n not in db_name_to_id:
-                logger.debug(f'image {n} was retrieved but not in database')
-                continue
-            #    
-            db_ids.append(db_name_to_id[n])
-    
-        #      
-        if len(db_ids) < 1:
-            logger.error("empty retrieval")
-            exit(0)
-        
-        # covisibility clustering --> Hloc
-        if covisibility_clustering:
-            clusters = do_covisibility_clustering(db_ids, sfm_model)
-            
-            best_inliers    = 0
-            best_cluster_id = None
-            logs_clusters   = []
-            
-            # for each cluser compute the query pose
-            for id, cluster_ids in enumerate(clusters):
-                
-                ret, log = pose_from_cluster(localizer, qname, qcam, cluster_ids, features, matches)
-
-                #
-                if ret['success'] and ret['num_inliers'] > best_inliers:
-                    best_cluster_id = id
-                    best_inliers    = ret['num_inliers']
-                #
-                logs_clusters.append(log)
-            
-            # --> Best Cluster  TODO: What if it is not succesful 
-            if best_cluster_id is not None:
-                ret           = logs_clusters[best_cluster_id]['PnP_ret']
-                poses[qname]  = (ret['qvec'], ret['tvec'])
-            
-            #
-            logs['loc'][qname] = {
-                'db': db_ids,
-                'best_cluster': best_cluster_id,
-                'log_clusters': logs_clusters,
-                'covisibility_clustering': covisibility_clustering,
-            }
-        else:
-            ret, log = pose_from_cluster(localizer, qname, qcam, db_ids, features, matches)
-            if ret['success']:
-                poses[qname] = (ret['qvec'], ret['tvec'])
-            else:
-                logger.warn("not Succesful")
-                closest = sfm_model.images[db_ids[0]]
-                poses[qname] = (closest.qvec, closest.tvec)
-                            
-            log['covisibility_clustering'] = covisibility_clustering
-            logs['loc'][qname] = log
-    
-    # 
-    write_poses_txt(poses, results)
-    dump_logs(logs, results)
-    
-    logger.info(f'localized {len(poses)} / {len(queries)} images.')
-    logger.info('done!')
 
 
     

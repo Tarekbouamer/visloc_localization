@@ -225,25 +225,26 @@ def run_triangulation(model_path, database_path, image_dir, reference_model, opt
     return reconstruction
 
 
-def main(sfm_dir, model, image_dir, pairs, features, matches,
+def main(sfm_dir, mapper, image_dir, pairs, features, matches,
          skip_geometric_verification=False, 
          estimate_two_view_geometries=False,
          min_match_score=None,
          verbose=True):
 
-    assert model.exists(),      model
     assert features.exists(),   features
     assert pairs.exists(),      pairs
     assert matches.exists(),    matches
 
     sfm_dir.mkdir(parents=True, exist_ok=True)
     
-    database    = sfm_dir / 'database.db'
-    reference   = pycolmap.Reconstruction(model)
+    database    = Path(sfm_dir) / 'database.db'
+    # reference   = pycolmap.Reconstruction(model)
 
     # create database
-    image_ids = create_db_from_model(reference, database)
+    image_ids = mapper.create_database(database)
     
+    # image_ids = create_db_from_model(reference, database)
+    input()
     # 
     import_features(image_ids, database, features)
     
