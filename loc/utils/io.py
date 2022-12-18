@@ -3,6 +3,12 @@ from pathlib import Path
 import numpy as np
 from typing import Dict, List, Union, Tuple
 
+
+import contextlib
+import io
+import sys
+
+
 import torch
 import h5py
 import pickle
@@ -172,8 +178,17 @@ def find_pair(hfile: h5py.File, name0: str, name1: str):
         f'Could not find pair {(name0, name1)}... '
         'Maybe you matched with a different list of pairs? ')
   
+def parse_retrieval(path):
+    retrieval = defaultdict(list)
+    with open(path, 'r') as f:
+        for p in f.read().rstrip('\n').split('\n'):
+            if len(p) == 0:
+                continue
+            q, r = p.split()
+            retrieval[q].append(r)
+    return dict(retrieval)
 
-
+# pose
 def dump_logs(logs, save_path):
     
     save_path = f'{save_path}_logs.pkl'
@@ -182,8 +197,7 @@ def dump_logs(logs, save_path):
     
     with open(save_path, 'wb') as f:
         pickle.dump(logs, f)
-      
-      
+          
 def write_poses_txt(poses, save_path):
 
     logger.info(f'writing poses to {save_path}...')
@@ -197,3 +211,21 @@ def write_poses_txt(poses, save_path):
             tvec        = ' '.join(map(str, tvec))
 
             f.write(f'{name} {qvec} {tvec}\n')
+            
+# capture
+
+class OutputCapture:
+    def __init__(self, verbose):
+        self.verbose = verbose
+
+    def __enter__(self):
+        if not self.verbose:
+            self.capture = contextlib.redirect_stdout(io.StringIO())
+            self.out = self.capture.__enter__()
+
+    def __exit__(self, exc_type, *args):
+        if not self.verbose:
+            self.capture.__exit__(exc_type, *args)
+            if exc_type is not None:
+                print('Failed with output:\n%s', self.out.getvalue())
+        sys.stdout.flush()

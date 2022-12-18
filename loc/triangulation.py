@@ -8,7 +8,7 @@ from tqdm import tqdm
 import pycolmap
 
 from loc.colmap.database import COLMAPDatabase
-from loc.utils.io import parse_name, find_pair, get_keypoints, get_matches
+from loc.utils.io import parse_name, find_pair, get_keypoints, get_matches, parse_retrieval
 from loc.utils.geometry import compute_epipolar_errors
 
 import h5py
@@ -227,7 +227,6 @@ def run_triangulation(model_path, database_path, image_dir, reference_model, opt
 
 def main(sfm_dir, mapper, image_dir, pairs, features, matches,
          skip_geometric_verification=False, 
-         estimate_two_view_geometries=False,
          min_match_score=None,
          verbose=True):
 
@@ -238,32 +237,29 @@ def main(sfm_dir, mapper, image_dir, pairs, features, matches,
     sfm_dir.mkdir(parents=True, exist_ok=True)
     
     database    = Path(sfm_dir) / 'database.db'
+
+    mapper.create_database(database)
+    mapper.import_features(features)
+    mapper.import_matches(pairs, matches, min_match_score, skip_geometric_verification)
+    mapper.geometric_verification(features, pairs, matches)
+    reconstruction = mapper.run_triangulation(image_dir, sfm_dir, verbose=verbose)
+    
     # reference   = pycolmap.Reconstruction(model)
-
     # create database
-    image_ids = mapper.create_database(database)
-    
     # image_ids = create_db_from_model(reference, database)
-    input()
     # 
-    import_features(image_ids, database, features)
-    
-    # 
-    import_matches(image_ids, database, pairs, matches, min_match_score, skip_geometric_verification)
-    
-    if not skip_geometric_verification:
-        if estimate_two_view_geometries:
-            estimation_and_geometric_verification(database, pairs, verbose)
-        else:
-            geometric_verification(image_ids, reference, database, features, pairs, matches)
-    
+    # import_features(image_ids, database, features) 
+    # import_matches(image_ids, database, pairs, matches, min_match_score, skip_geometric_verification)
+    # if not skip_geometric_verification:
+    #     if estimate_two_view_geometries:
+    #         estimation_and_geometric_verification(database, pairs, verbose)
+    #     else:
+    #         geometric_verification(image_ids, reference, database, features, pairs, matches)
     # run triangulation
-    reconstruction = run_triangulation(sfm_dir, database, image_dir, reference,
-                                       verbose=verbose)
+    # reconstruction = run_triangulation(sfm_dir, database, image_dir, reference,
+    #                                    verbose=verbose)
 
-    logger.info('finished the triangulation with statistics:\n%s',
-                reconstruction.summary())
-    
+
     return reconstruction
 
 

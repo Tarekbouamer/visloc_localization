@@ -125,16 +125,16 @@ def main(args):
     
     # # Nvm to Colmap
     model_path = outputs / 'sfm_sift'
-    # colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
-    #                 dataset_path / '3D-models/database_intrinsics.txt',
-    #                 dataset_path / 'aachen.db',
-    #                 model_path) 
+    colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
+                    dataset_path / '3D-models/database_intrinsics.txt',
+                    dataset_path / 'aachen.db',
+                    model_path) 
     
     # covisibility
     num_matches = 20
     sfm_pairs = outputs / str('sfm_pairs_' + str(num_matches) + '.txt') 
     mapper = ColmapMapper(model_path)
-    # mapper.covisible_pairs(num_matches=num_matches)
+    mapper.covisible_pairs(num_matches=num_matches)
     # covisibility(model_path, sfm_pairs, num_matched=20)
     
     # locals
