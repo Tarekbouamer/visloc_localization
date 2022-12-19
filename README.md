@@ -22,10 +22,6 @@ Visloc-Localization library is a collection of various localization algorithmsn 
 
 ## Roadmap
 
-- [x]  remove Models folder and replace with retrieval packages and other features in thirdparty.
-- [x]  add superpoints and superglue.
-- [ ]  add cameras to dataset
-- [ ]  separate the modules Mappers, Retrieval, Matcher, and Localizer
 - [ ]  make a nice visualization.
 
 ## Results:
