@@ -1,53 +1,7 @@
-[12/20 16:35 loc]: init loc
-[12/20 16:35 loc]: found 947 images with 922 intrinsics
-[12/20 16:35 loc]: reading the sfm model
-[12/20 16:35 loc]: load retrievals pairs
-[12/20 16:35 loc]: starting localization
-[12/20 16:35 loc]: zero 3D points for db/557.jpg.
-[12/20 16:35 loc]: zero 3D points for db/3312.jpg.
-[12/20 16:36 loc]: zero 3D points for db/2976.jpg.
-[12/20 16:36 loc]: zero 3D points for db/557.jpg.
-[12/20 16:36 loc]: zero 3D points for db/557.jpg.
-[12/20 16:36 loc]: zero 3D points for db/557.jpg.
-[12/20 16:36 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:36 loc]: zero 3D points for db/2976.jpg.
-[12/20 16:36 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:36 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:36 loc]: zero 3D points for db/2976.jpg.
-[12/20 16:36 loc]: zero 3D points for db/2976.jpg.
-[12/20 16:36 loc]: zero 3D points for db/2048.jpg.
-[12/20 16:37 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:37 loc]: zero 3D points for db/3966.jpg.
-[12/20 16:37 loc]: zero 3D points for db/2976.jpg.
-[12/20 16:38 loc]: zero 3D points for db/3312.jpg.
-[12/20 16:38 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:38 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:38 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:39 loc]: zero 3D points for db/557.jpg.
-[12/20 16:39 loc]: zero 3D points for db/557.jpg.
-[12/20 16:39 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:40 loc]: zero 3D points for db/2435.jpg.
-[12/20 16:40 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:40 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:40 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:40 loc]: zero 3D points for db/557.jpg.
-[12/20 16:41 loc]: zero 3D points for db/3312.jpg.
-[12/20 16:41 loc]: zero 3D points for db/3938.jpg.
-[12/20 16:41 loc]: zero 3D points for db/257.jpg.
-[12/20 16:41 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:42 loc]: zero 3D points for db/257.jpg.
-[12/20 16:42 loc]: zero 3D points for db/3312.jpg.
-[12/20 16:43 loc]: zero 3D points for db/3312.jpg.
-[12/20 16:43 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:43 loc]: zero 3D points for db/2349.jpg.
-[12/20 16:43 loc]: zero 3D points for db/2976.jpg.
-[12/20 16:43 loc]: zero 3D points for db/3312.jpg.
-[12/20 16:43 loc]: zero 3D points for db/2435.jpg.
-[12/20 16:43 loc]: zero 3D points for db/3938.jpg.
-[12/20 16:44 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:44 loc]: zero 3D points for db/2435.jpg.
-[12/20 16:44 loc]: zero 3D points for db/3970.jpg.
-[12/20 16:44 loc]: writing poses to /media/loc/HDD/VisualLocalization2020/aachen/visloc/Aachen_visloc_gem50.txt...
-[12/20 16:44 loc]: writing logs to /media/loc/HDD/VisualLocalization2020/aachen/visloc/Aachen_visloc_gem50.txt_logs.pkl 
-[12/20 16:44 loc]: localized 922 / 922 images.
-[12/20 16:44 loc]: done!
+[12/20 17:11 loc]: init loc
+[12/20 17:11 loc]: init ColmapMapper
+[12/20 17:11 loc]: reading Colmap model
+[12/20 17:12 loc]: model successfully loaded
+[12/20 17:12 loc]: found 947 images with 922 intrinsics
+[12/20 17:12 loc]: importing features into the database...
+[12/20 17:14 loc]: importing matches into the database...

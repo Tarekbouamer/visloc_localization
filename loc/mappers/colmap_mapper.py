@@ -1,4 +1,3 @@
-import os
 import logging
 from pathlib import Path
 import numpy as np
@@ -10,7 +9,6 @@ from loc.colmap.database import COLMAPDatabase
 from loc.utils.read_write_model import read_model
 from loc.utils.io import parse_name, find_pair, get_keypoints, get_matches, parse_retrieval, OutputCapture
 from loc.utils.geometry import compute_epipolar_errors
-
 
 import pycolmap
 
@@ -25,23 +23,27 @@ class ColmapMapper(object):
         
     }
 
-    def __init__(self, model_path):
+    def __init__(self, colmap_model_path, visloc_model_path):
         
         #
         logger.info("init ColmapMapper")
         
         # model exsists
-        if isinstance(model_path, str):
-            model_path = Path(model_path)
+        if isinstance(colmap_model_path, str):
+            colmap_model_path = Path(colmap_model_path)
         
         #
-        self.model_path = model_path
+        self.colmap_model_path     = colmap_model_path
+        self.visloc_model_path     = visloc_model_path
+
+        #
+        self.database_path   = Path(visloc_model_path) / 'database.db'
         
         # read model
-        self.read_model(model_path)
+        self.read_model(colmap_model_path)
         
     def load_model(self):
-        return pycolmap.Reconstruction(self.model_path)
+        return pycolmap.Reconstruction(self.colmap_model_path)
     
     def read_model(self, model_path):
         
@@ -66,10 +68,7 @@ class ColmapMapper(object):
     
     def get_points3D(self):
         return self.points3D
-    
-    def set_database_path(self, database_path):
-        self.database_path = database_path
-    
+     
     def names_to_ids(self):  
         model = self.load_model()
         return {image.name: i for i, image in model.images.items()}  
@@ -128,20 +127,19 @@ class ColmapMapper(object):
         
         return sfm_pairs
     
-    def create_database(self, database_path):
+    def create_database(self):
         
         # 
-        self.set_database_path(database_path)
         
-        if database_path.exists():
+        if self.database_path.exists():
             logger.info('The database already exists, deleting it.')
-            database_path.unlink()
+            self.database_path.unlink()
         
         # load model
         model = self.load_model()
 
         # create database
-        db = COLMAPDatabase.connect(database_path)
+        db = COLMAPDatabase.connect(self.database_path)
         db.create_tables()
         
         # add cameras
@@ -352,3 +350,8 @@ class ColmapMapper(object):
         
         return reconstruction                 
     
+    def run(self):
+        """
+            run mapper, take images and create an sfm model
+        """
+        raise NotImplementedError

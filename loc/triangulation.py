@@ -236,9 +236,7 @@ def main(sfm_dir, mapper, image_dir, pairs, features, matches,
 
     sfm_dir.mkdir(parents=True, exist_ok=True)
     
-    database    = Path(sfm_dir) / 'database.db'
-
-    mapper.create_database(database)
+    mapper.create_database()
     mapper.import_features(features)
     mapper.import_matches(pairs, matches, min_match_score, skip_geometric_verification)
     mapper.geometric_verification(features, pairs, matches)

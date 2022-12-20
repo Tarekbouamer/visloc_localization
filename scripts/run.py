@@ -112,7 +112,8 @@ def main(args):
     # outputs         = Path('/media/dl/Data/datasets/aachen/visloc')    
     # image_path      = dataset_path/'images/images_upright/' 
     
-    reference_sfm   = outputs / 'sfm_superpoint_mnn'  
+    colmap_model_path   = outputs / 'sfm_sift'
+    visloc_model_path   = outputs / 'sfm_superpoint_mnn'  
     results         = outputs / 'Aachen_visloc_gem50.txt'  
     
     # outfolder
@@ -123,7 +124,6 @@ def main(args):
     data_cfg = make_data_config(name='Aachen')
     
     # # Nvm to Colmap
-    model_path = outputs / 'sfm_sift'
     # colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
     #                 dataset_path / '3D-models/database_intrinsics.txt',
     #                 dataset_path / 'aachen.db',
@@ -132,7 +132,8 @@ def main(args):
     # covisibility
     num_matches = 20
     sfm_pairs = outputs / str('sfm_pairs_' + str(num_matches) + '.txt') 
-    # mapper = ColmapMapper(model_path)
+    mapper = ColmapMapper(colmap_model_path=colmap_model_path,
+                          visloc_model_path=visloc_model_path)
     # mapper.covisible_pairs(num_matches=num_matches)
     # covisibility(model_path, sfm_pairs, num_matched=20)
     
@@ -166,14 +167,14 @@ def main(args):
     #             output=sfm_matches_path)
     
     # triangulate
-    # reconstruction = triangulation(reference_sfm, 
-    #                                mapper, 
-    #                                image_path, 
-    #                                sfm_pairs, 
-    #                                db_path, 
-    #                                sfm_matches_path,
-    #                                skip_geometric_verification=False, 
-    #                                verbose=True)
+    reconstruction = triangulation(visloc_model_path, 
+                                   mapper, 
+                                   image_path, 
+                                   sfm_pairs, 
+                                   db_path, 
+                                   sfm_matches_path,
+                                   skip_geometric_verification=False, 
+                                   verbose=True)
     
     # retrieve
     loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
@@ -185,13 +186,13 @@ def main(args):
     # match
     loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
 
-    do_matching(src_path=query_path, 
-                dst_path=db_path, 
-                pairs_path=loc_pairs_path, 
-                output=loc_matches_path)
+    # do_matching(src_path=query_path, 
+    #             dst_path=db_path, 
+    #             pairs_path=loc_pairs_path, 
+    #             output=loc_matches_path)
     
     # localize
-    localize(sfm_model=reference_sfm,
+    localize(sfm_model=visloc_model_path,
              queries=query_set.get_cameras(),
              retrieval_pairs_path=loc_pairs_path,
              features=query_path,
