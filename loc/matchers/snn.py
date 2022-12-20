@@ -7,8 +7,8 @@ def find_nn(sim, ratio_thresh=None, distance_thresh=None):
     
 
     sim_nn, ind_nn = sim.topk(2 if ratio_thresh else 1, dim=-1, largest=True)
-
     dist_nn = 2 * (1 - sim_nn)
+
     mask = torch.ones(ind_nn.shape[:-1], dtype=torch.bool, device=sim.device)
 
     # if ratio_thresh:

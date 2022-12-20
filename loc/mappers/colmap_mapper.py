@@ -20,8 +20,15 @@ logger = logging.getLogger("loc")
 
 
 class ColmapMapper(object):
+    
+    default_cfg = {
+        
+    }
 
     def __init__(self, model_path):
+        
+        #
+        logger.info("init ColmapMapper")
         
         # model exsists
         if isinstance(model_path, str):
@@ -33,7 +40,6 @@ class ColmapMapper(object):
         # read model
         self.read_model(model_path)
         
-
     def load_model(self):
         return pycolmap.Reconstruction(self.model_path)
     
@@ -346,60 +352,3 @@ class ColmapMapper(object):
         
         return reconstruction                 
     
-    def visible_points(self, image_ids):
-        """Get visible 3D point ids for given image id list.
-        Args:
-            image_ids (list[int]): The image id list
-        Returns:
-            np.array(int64): The 3D point ids that are visible for
-                input images
-        """
-        set_point3d_ids = set()
-        for id in image_ids:
-            point3d_ids = self.images[id].point3D_ids
-            valid_point3d_ids = point3d_ids[point3d_ids != -1]
-            set_point3d_ids.update(valid_point3d_ids)
-        mp_point3d_ids = np.array(list(set_point3d_ids))
-        return mp_point3d_ids
-
-    def point3d_at(self, point3d_id):
-        """Get 3D point coordinate.
-        Args:
-            point3d_id (int): The 3D point id
-        Returns:
-            np.array(float): 3D point coordinate
-        """
-        return self.point3ds[point3d_id]
-
-    def image_at(self, image_id):
-        """Get image.
-        Args:
-            image_id (int): The image id
-        Returns:
-            Image: The image with id == image_id
-        """
-        return self.images[image_id]
-
-    def point3d_coordinates(self, point3d_ids):
-        """Get the coordinates of multi 3D points.
-        Args:
-            point3d_ids (array[int]): The point 3D ids
-        Returns:
-            np.array(float, 3*N): The coordinates
-        """
-        coordinates = np.array([
-            self.point3ds[point3d_id].xyz for point3d_id in point3d_ids
-        ]).transpose()
-        return coordinates
-
-    def point3d_features(self, point3d_ids):
-        """Get the descriptors of multi 3D points.
-        Args:
-            point3d_ids (array[int]): The point 3D ids
-        Returns:
-            np.array(float, dim*N): The descriptors
-        """
-        features = np.array([
-            self.features[point3d_id] for point3d_id in point3d_ids
-        ]).transpose()
-        return features

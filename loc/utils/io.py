@@ -101,6 +101,26 @@ def parse_retrieval_file(path):
     return ret
 
 
+def find_unique_new_pairs(pairs_all: List[Tuple[str]], match_path: Path = None):
+    '''Avoid to recompute duplicates to save time.'''
+    pairs = set()
+    for i, j in pairs_all:
+        if (j, i) not in pairs:
+            pairs.add((i, j))
+    pairs = list(pairs)
+    if match_path is not None and match_path.exists():
+        with h5py.File(str(match_path), 'r', libver='latest') as fd:
+            pairs_filtered = []
+            for i, j in pairs:
+                if (names_to_pair(i, j) in fd or
+                        names_to_pair(j, i) in fd or
+                        names_to_pair_old(i, j) in fd or
+                        names_to_pair_old(j, i) in fd):
+                    continue
+                pairs_filtered.append((i, j))
+        return pairs_filtered
+    return pairs
+
 # h5py
 
 def read_key_from_h5py(name, _path):
@@ -132,7 +152,7 @@ def get_matches(path, name0, name1):
     
     #
     with h5py.File(str(path), 'r', libver='latest') as hfile:
-
+        
         pair, reverse = find_pair(hfile, name0, name1)
         
         matches = hfile[pair]['matches'].__array__()
@@ -159,7 +179,9 @@ def names_to_pair_old(name0, name1):
     return names_to_pair(name0, name1, separator='_')
 
 def find_pair(hfile: h5py.File, name0: str, name1: str):
+    
     pair = names_to_pair(name0, name1)    
+
     if pair in hfile:
         return pair, False
     pair = names_to_pair(name1, name0)

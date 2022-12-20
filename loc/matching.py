@@ -13,35 +13,93 @@ from tqdm import tqdm
 import h5py
 import torch
 
+from queue import Queue
+from threading import Thread
+from functools import partial
 
 import loc.matchers as matchers
+from torch.utils.data import Dataset, DataLoader
 
-from loc.utils.io import names_to_pair, names_to_pair_old, get_pairs_from_txt, read_key_from_h5py
+from loc.utils.io import names_to_pair, names_to_pair_old, get_pairs_from_txt, read_key_from_h5py, find_unique_new_pairs
 
 # logger
 import logging
 logger = logging.getLogger("loc")
     
-def find_unique_new_pairs(pairs_all: List[Tuple[str]], match_path: Path = None):
-    '''Avoid to recompute duplicates to save time.'''
-    pairs = set()
-    for i, j in pairs_all:
-        if (j, i) not in pairs:
-            pairs.add((i, j))
-    pairs = list(pairs)
-    if match_path is not None and match_path.exists():
-        with h5py.File(str(match_path), 'r', libver='latest') as fd:
-            pairs_filtered = []
-            for i, j in pairs:
-                if (names_to_pair(i, j) in fd or
-                        names_to_pair(j, i) in fd or
-                        names_to_pair_old(i, j) in fd or
-                        names_to_pair_old(j, i) in fd):
-                    continue
-                pairs_filtered.append((i, j))
-        return pairs_filtered
-    return pairs
+    
+class WorkQueue():
+    def __init__(self, work_fn, num_threads=1):
+        self.queue = Queue(num_threads)
+        self.threads = [
+            Thread(target=self.thread_fn, args=(work_fn,))
+            for _ in range(num_threads)
+        ]
+        for thread in self.threads:
+            thread.start()
 
+    def join(self):
+        for thread in self.threads:
+            self.queue.put(None)
+        for thread in self.threads:
+            thread.join()
+
+    def thread_fn(self, work_fn):
+        item = self.queue.get()
+        while item is not None:
+            work_fn(item)
+            item = self.queue.get()
+
+    def put(self, data):
+        self.queue.put(data)
+
+
+class PairsDataset(Dataset):
+    """"""
+    def __init__(self, pairs, src_path, dst_path):
+        
+        self.pairs = pairs
+        
+        self.src_path = src_path
+        self.dst_path = dst_path
+
+    def __getitem__(self, idx):
+        
+        data = {'src': {}, 'dst': {}}
+
+        src_name, dst_name = self.pairs[idx]
+
+        data['src_name'] = src_name
+        data['dst_name'] = dst_name
+
+        data['src'] = read_key_from_h5py(src_name, self.src_path)
+        data['dst'] = read_key_from_h5py(dst_name, self.dst_path)
+        
+        return data
+
+    def __len__(self):
+        return len(self.pairs)
+
+
+def writer_fn(data, match_path):
+    
+    #
+    pair_key, matches_dists, matches_idxs = data
+
+    #
+    with h5py.File(str(match_path), 'a') as fd:
+        #
+        if pair_key in fd:
+            del fd[pair_key]
+                
+        group = fd.create_group(pair_key)
+        
+        #
+        matches_idxs    = matches_idxs.cpu().short().numpy()
+        matches_dists   = matches_dists.cpu().half().numpy()
+                                
+        group.create_dataset('matches', data=matches_idxs   )
+        group.create_dataset('scores',  data=matches_dists  )               
+        
         
 def do_matching(src_path, dst_path, pairs_path, output):
     
@@ -58,49 +116,37 @@ def do_matching(src_path, dst_path, pairs_path, output):
         logger.error('no matches pairs found')
         return
 
-    logger.info("matching %s pairs", len(pairs))    
-              
+    # pair dataset loader
+    pair_dataset = PairsDataset(pairs=pairs, src_path=src_path, dst_path=dst_path)
+    pair_loader  = DataLoader(pair_dataset, num_workers=16, batch_size=1, shuffle=False, pin_memory=True)
+    
+    logger.info("matching %s pairs", len(pair_dataset))    
+    
+    # workers
+    writer_queue  = WorkQueue(partial(writer_fn, match_path=output), 16)
+            
     # matcher
-    matcher = matchers.SNearestNeighbor()
+    matcher = matchers.MutualNearestNeighbor()
     
     # run
-    for it, (src_name, dst_name) in enumerate(tqdm(pairs, total=len(pairs))):
+    for _, data in enumerate(tqdm(pair_loader, total=len(pair_loader))):
         
-        #   
-        # src_name = "query/day/nexus5x/IMG_20161227_160532.jpg" 
-        # dst_name = "db/1102.jpg"
+        src_name = data['src_name'][0]
+        dst_name = data['dst_name'][0]
         
-        data = {'src': {}, 'dst': {}}
-       
-        data['src'] = read_key_from_h5py(src_name, src_path)
-        data['dst'] = read_key_from_h5py(dst_name, dst_path)
-        
-        src_desc = data['src']['descriptors']
-        dst_desc = data['dst']['descriptors']
-        
-        src_desc = src_desc.T
-        dst_desc = dst_desc.T
+        src_desc = data['src']['descriptors'].cuda()
+        dst_desc = data['dst']['descriptors'].cuda()
 
         # match
         matches_dists, matches_idxs = matcher(src_desc, dst_desc)
-
-
-        # Get key
-        pair_key = names_to_pair(src_name, dst_name)
         
-        # Save
-        with h5py.File(str(output), 'a') as fd:
-            
-            if pair_key in fd:
-                del fd[pair_key]
-                
-            group = fd.create_group(pair_key)
-            matches_idxs    = matches_idxs.cpu().short().numpy()
-            matches_dists   = matches_dists.cpu().half().numpy()
-                                
-            group.create_dataset('matches', data=matches_idxs   )
-            group.create_dataset('scores',  data=matches_dists  )
-
+        # get key
+        pair_key = names_to_pair(src_name, dst_name)
+        writer_queue.put((pair_key, matches_dists, matches_idxs))
+    
+    # collect workers    
+    writer_queue.join()
+    
     #      
     logger.info("matches saved to %s", str(output) )
     
