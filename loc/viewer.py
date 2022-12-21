@@ -11,8 +11,6 @@ import pypangolin as pango
 import OpenGL.GL as gl
 
 
-
-
 # [4x4] homogeneous inverse T^-1 from [4x4] T     
 def inv_T(T):
     
@@ -27,7 +25,7 @@ def inv_T(T):
 
 
 kUiWidth                = 180
-kDefaultPointSize       = 2
+kDefaultPointSize       = 5
 kViewportWidth          = 1024
 kViewportHeight         = 768
 kViewportHeight         = 550
@@ -36,7 +34,7 @@ kDrawReferenceCamera    = True
   
 kMinWeightForDrawingCovisibilityEdge    =100
 
-MIN_TRACK_LENGTH = 3
+MIN_TRACK_LENGTH = 1
 
 class Viewer3DMapElement(object): 
     def __init__(self):
@@ -73,8 +71,7 @@ class Viewer3D(object):
     def quit(self):
         self._is_running.value = 0
         self.vp.join()
-        #pangolin.Quit()
-        print('Viewer stopped')   
+        print('3D viewer stopped')   
         
     def is_paused(self):
         return (self._is_paused.value == 1)       
@@ -167,12 +164,10 @@ class Viewer3D(object):
         
         self.dcam.Activate(self.scam)
         
-        #Grid is ON/OFF    
+        # grid is ON/OFF    
         if self.ui.Grid:
             Viewer3D.drawPlane()   
             
-            
-           
      
         if self.map_state is not None:
             # Draw query pose
@@ -335,6 +330,7 @@ class Viewer3D(object):
 
     def draw_sfm(self, sfm_model=None, seed=2):
         
+        print(sfm_model)
         if sfm_model is None:
             return 
         
@@ -354,7 +350,8 @@ class Viewer3D(object):
             pose[:3, :3]   = rotmatINV
             pose[:3, 3]    = trans_vec
                     
-            map_state.db_poses.append(pose)  
+            map_state.db_poses.append(pose) 
+            print(pose) 
             
         
         for j in sfm_model.points3D:
@@ -374,7 +371,8 @@ class Viewer3D(object):
         map_state.colors3D    = np.array(map_state.colors3D) 
      
          
-        self.map.put(map_state)    
+        self.map.put(map_state)         
+           
 
     def updateTwc(self, pose):
         self.Twc = pango.OpenGlMatrix(pose)

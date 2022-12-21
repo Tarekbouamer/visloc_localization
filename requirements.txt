@@ -15,7 +15,6 @@ pycolmap==0.3.0
 tabulate==0.8.10
 PyOpenGL
 asmk
-git+https://github.com/stevenlovegrove/Pangolin#egg=pangolin
 
 # pangolin==0.8
 # visloc_retrieval

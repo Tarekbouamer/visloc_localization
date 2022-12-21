@@ -27,6 +27,7 @@ from loc.localize       import main as localize
 from loc.covisibility   import main as covisibility
 from loc.triangulation  import main as triangulation
 from loc.vis            import visualize_sfm_2d 
+from loc.viewer         import Viewer3D 
 
 # colmap
 from loc.colmap.colmap_nvm  import main as colmap_from_nvm
@@ -137,51 +138,51 @@ def main(args):
     sfm_pairs = save_path / str('sfm_pairs_' + str(num_matches) + '.txt') 
     
     mapper = ColmapMapper(colmap_model_path=colmap_model_path, visloc_model_path=visloc_model_path)
-    mapper.covisible_pairs(sfm_pairs, num_matches=num_matches)
+    # mapper.covisible_pairs(sfm_pairs, num_matches=num_matches)
 
     # 
-    db_path, q_path = do_extraction(dataset_path=dataset_path,
-                                    data_cfg=data_cfg,
-                                    save_path=save_path)
+    # db_path, q_path = do_extraction(dataset_path=dataset_path,
+    #                                 data_cfg=data_cfg,
+    #                                 save_path=save_path)
 
     # sfm pairs
-    sfm_matches_path = save_path / Path('sfm_matches' +'.h5') 
+    # sfm_matches_path = save_path / Path('sfm_matches' +'.h5') 
     
-    do_matching(src_path=db_path, 
-                dst_path=db_path, 
-                pairs_path=sfm_pairs, 
-                output=sfm_matches_path)
+    # do_matching(src_path=db_path, 
+    #             dst_path=db_path, 
+    #             pairs_path=sfm_pairs, 
+    #             output=sfm_matches_path)
     
     # triangulate
-    reconstruction = triangulation(visloc_model_path, 
-                                   mapper, 
-                                   image_path, 
-                                   sfm_pairs, 
-                                   db_path, 
-                                   sfm_matches_path)
+    # reconstruction = triangulation(visloc_model_path, 
+    #                                mapper, 
+    #                                image_path, 
+    #                                sfm_pairs, 
+    #                                db_path, 
+    #                                sfm_matches_path)
     
     # retrieve
-    loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
-                                 data_cfg=data_cfg,
-                                 save_path=save_path) 
+    # loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
+    #                              data_cfg=data_cfg,
+    #                              save_path=save_path) 
     
     # match
-    loc_matches_path = save_path / Path('loc_matches_path' +'.h5') 
+    # loc_matches_path = save_path / Path('loc_matches_path' +'.h5') 
 
-    do_matching(src_path=q_path, 
-                dst_path=db_path, 
-                pairs_path=loc_pairs_path, 
-                output=loc_matches_path)
+    # do_matching(src_path=q_path, 
+    #             dst_path=db_path, 
+    #             pairs_path=loc_pairs_path, 
+    #             output=loc_matches_path)
     
     # localize
-    query_set = ImagesFromList(root=dataset_path, split="query", cfg=data_cfg, gray=True)
+    # query_set = ImagesFromList(root=dataset_path, split="query", cfg=data_cfg, gray=True)
 
-    localize(sfm_model=visloc_model_path,
-             queries=query_set.get_cameras(),
-             retrieval_pairs_path=loc_pairs_path,
-             features=q_path,
-             matches=loc_matches_path,
-             results=results)
+    # localize(sfm_model=visloc_model_path,
+    #          queries=query_set.get_cameras(),
+    #          retrieval_pairs_path=loc_pairs_path,
+    #          features=q_path,
+    #          matches=loc_matches_path,
+    #          results=results)
     
     # Visualization
     # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='track_length'    )
@@ -189,9 +190,10 @@ def main(args):
     # )
     # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='depth'           )
     # visualize_loc(results, image_path, model_path, n=5, top_k_db=2, prefix='query/night', seed=2)
+    reconstruction = mapper.load_visloc()
+    viewer = Viewer3D()
     
-    # if viewer3D is not None:
-    #     viewer3D.draw_map()
+    viewer.draw_sfm(reconstruction)
     
     
 if __name__ == '__main__':

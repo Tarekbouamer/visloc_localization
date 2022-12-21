@@ -48,7 +48,10 @@ class ColmapMapper(object):
         
     def load_model(self):
         return pycolmap.Reconstruction(self.colmap_model_path)
-    
+ 
+    def load_visloc(self):
+        return pycolmap.Reconstruction(self.visloc_model_path)  
+     
     def read_model(self, model_path):
         
         logger.info('reading Colmap model')
