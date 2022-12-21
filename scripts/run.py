@@ -19,6 +19,8 @@ from loc.utils.logging          import setup_logger
 
 # loc
 from loc.dataset        import ImagesFromList, ImagesTransform
+
+from loc.extract        import do_extraction
 from loc.retrieve       import do_retrieve
 from loc.matching       import do_matching
 from loc.localize       import main as localize
@@ -104,21 +106,22 @@ def main(args):
     logger = setup_logger(output=".", name="loc")
     logger.info("init loc")
 
-    dataset_path    = Path('/media/loc/HDD/VisualLocalization2020/aachen/')
-    outputs         = Path('/media/loc/HDD/VisualLocalization2020/aachen/visloc')    
-    image_path      = dataset_path/'images/images_upright/' 
-
-    # dataset_path    = Path('/media/dl/Data/datasets/aachen')
-    # outputs         = Path('/media/dl/Data/datasets/aachen/visloc')    
+    # dataset_path    = Path('/media/loc/HDD/VisualLocalization2020/aachen/')
+    # save_path         = Path('/media/loc/HDD/VisualLocalization2020/aachen/visloc')    
     # image_path      = dataset_path/'images/images_upright/' 
+
+
+    dataset_path    = Path('/media/dl/Data/datasets/aachen')
+    save_path         = Path('/media/dl/Data/datasets/aachen/visloc')    
+    image_path      = dataset_path/'images/images_upright/' 
     
-    colmap_model_path   = outputs / 'sfm_sift'
-    visloc_model_path   = outputs / 'sfm_superpoint_mnn'  
-    results         = outputs / 'Aachen_visloc_gem50.txt'  
+    colmap_model_path   = save_path / 'sfm_sift'
+    visloc_model_path   = save_path / 'sfm_superpoint_mnn'  
+    results         = save_path / 'Aachen_visloc_gem50.txt'  
     
     # outfolder
-    if not outputs.exists():
-        mkdir(outputs)
+    if not save_path.exists():
+        mkdir(save_path)
     
     # data config
     data_cfg = make_data_config(name='Aachen')
@@ -131,40 +134,23 @@ def main(args):
     
     # covisibility
     num_matches = 20
-    sfm_pairs = outputs / str('sfm_pairs_' + str(num_matches) + '.txt') 
-    mapper = ColmapMapper(colmap_model_path=colmap_model_path,
-                          visloc_model_path=visloc_model_path)
-    # mapper.covisible_pairs(num_matches=num_matches)
-    # covisibility(model_path, sfm_pairs, num_matched=20)
+    sfm_pairs = save_path / str('sfm_pairs_' + str(num_matches) + '.txt') 
     
-    # locals
-    # logger.info("extract local features")
+    mapper = ColmapMapper(colmap_model_path=colmap_model_path, visloc_model_path=visloc_model_path)
+    mapper.covisible_pairs(sfm_pairs, num_matches=num_matches)
 
-    #
-    # sp_cfg = {
-    #     'keypoint_threshold': 0.005,    'remove_borders': 4,
-    #     'nms_radius': 3,                'max_keypoints': 4096
-    #     }
+    # 
+    db_path, q_path = do_extraction(dataset_path=dataset_path,
+                                    data_cfg=data_cfg,
+                                    save_path=save_path)
 
-    # extract db images 
-    # detector    = SuperPoint(config=sp_cfg)
-    # db_set      = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='db',      max_size=1024,   gray=True)
-    db_path     = Path(str(outputs) + '/' + str('db') + '_local' + '.h5')
-    # db_meta     = detector.extract_keypoints(db_set, save_path=db_path, normalize=False)        
-  
-    # extract query images 
-    # detector    = SuperPoint(config=sp_cfg)
-    query_set   = ImagesFromList(root=dataset_path, data_cfg=data_cfg, split='query',   max_size=1024
-                                 ,  gray=True)
-    query_path  = Path(str(outputs) + '/' + str('query') + '_local' + '.h5')
-    # query_meta  = detector.extract_keypoints(query_set, save_path=query_path, normalize=False)
-       
     # sfm pairs
-    sfm_matches_path = outputs / Path('sfm_matches' +'.h5') 
-    # do_matching(src_path=db_path, 
-    #             dst_path=db_path, 
-    #             pairs_path=sfm_pairs, 
-    #             output=sfm_matches_path)
+    sfm_matches_path = save_path / Path('sfm_matches' +'.h5') 
+    
+    do_matching(src_path=db_path, 
+                dst_path=db_path, 
+                pairs_path=sfm_pairs, 
+                output=sfm_matches_path)
     
     # triangulate
     reconstruction = triangulation(visloc_model_path, 
@@ -172,36 +158,35 @@ def main(args):
                                    image_path, 
                                    sfm_pairs, 
                                    db_path, 
-                                   sfm_matches_path,
-                                   skip_geometric_verification=False, 
-                                   verbose=True)
+                                   sfm_matches_path)
     
     # retrieve
     loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
                                  data_cfg=data_cfg,
-                                 outputs=outputs,
-                                 topK=50, 
-                                 overwrite=False) 
+                                 save_path=save_path) 
     
     # match
-    loc_matches_path = outputs / Path('loc_matches_path' +'.h5') 
+    loc_matches_path = save_path / Path('loc_matches_path' +'.h5') 
 
-    # do_matching(src_path=query_path, 
-    #             dst_path=db_path, 
-    #             pairs_path=loc_pairs_path, 
-    #             output=loc_matches_path)
+    do_matching(src_path=q_path, 
+                dst_path=db_path, 
+                pairs_path=loc_pairs_path, 
+                output=loc_matches_path)
     
     # localize
+    query_set = ImagesFromList(root=dataset_path, split="query", cfg=data_cfg, gray=True)
+
     localize(sfm_model=visloc_model_path,
              queries=query_set.get_cameras(),
              retrieval_pairs_path=loc_pairs_path,
-             features=query_path,
+             features=q_path,
              matches=loc_matches_path,
              results=results)
     
     # Visualization
     # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='track_length'    )
-    # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='visibility'      )
+    # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='visibility'
+    # )
     # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='depth'           )
     # visualize_loc(results, image_path, model_path, n=5, top_k_db=2, prefix='query/night', seed=2)
     

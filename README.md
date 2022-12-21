@@ -17,7 +17,7 @@ Visloc-Localization library is a collection of various localization algorithmsn 
 
 ## Welcome
 
-* Welcome to the `Visloc-Localizatio` :sparkles:
+* Welcome to the `Visloc-Localization` :sparkles:
 
 
 ## Roadmap

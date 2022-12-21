@@ -29,22 +29,23 @@ logger = logging.getLogger("loc")
     
 class WorkQueue():
     def __init__(self, work_fn, num_threads=1):
-        self.queue = Queue(num_threads)
-        self.threads = [
-            Thread(target=self.thread_fn, args=(work_fn,))
-            for _ in range(num_threads)
-        ]
+        self.queue      = Queue(num_threads)
+        self.threads    = [Thread(target=self.thread_fn, args=(work_fn,)) for _ in range(num_threads)]
+        
         for thread in self.threads:
             thread.start()
 
     def join(self):
+        
         for thread in self.threads:
             self.queue.put(None)
+        
         for thread in self.threads:
             thread.join()
 
     def thread_fn(self, work_fn):
         item = self.queue.get()
+        
         while item is not None:
             work_fn(item)
             item = self.queue.get()

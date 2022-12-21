@@ -20,10 +20,14 @@ logger = logging.getLogger("loc")
 class ColmapMapper(object):
     
     default_cfg = {
-        
+        "min_match_score": None, 
+        "skip_geometric_verification": False 
     }
 
-    def __init__(self, colmap_model_path, visloc_model_path):
+    def __init__(self, colmap_model_path, visloc_model_path, cfg={}):
+        
+        #
+        self.cfg = {**self.default_cfg, **cfg}
         
         #
         logger.info("init ColmapMapper")
@@ -73,7 +77,7 @@ class ColmapMapper(object):
         model = self.load_model()
         return {image.name: i for i, image in model.images.items()}  
     
-    def covisible_pairs(self, num_matches=5):
+    def covisible_pairs(self, output, num_matches=5):
 
         logger.info('extracting image pairs from covisibility')
         
@@ -122,6 +126,9 @@ class ColmapMapper(object):
         
         logger.info(f'found {len(sfm_pairs)} image pairs.')
         
+        #
+        with open(output, 'w') as f:
+            f.write('\n'.join(' '.join([i, j]) for i, j in sfm_pairs))
         # 
         self.sfm_pairs = sfm_pairs
         
@@ -169,7 +176,7 @@ class ColmapMapper(object):
         db.commit()
         db.close()  
 
-    def import_matches(self, pairs_path, matches_path, min_match_score=None, skip_geometric_verification=False):
+    def import_matches(self, pairs_path, matches_path):
         
         logger.info('importing matches into the database...')
 
@@ -190,13 +197,13 @@ class ColmapMapper(object):
             
             matches, scores = get_matches(matches_path, name0, name1)
             
-            if min_match_score:
-                matches = matches[scores > min_match_score]
+            if self.cfg.pop("min_match_score", None):
+                matches = matches[scores > self.cfg.pop("min_match_score", 0.)]
             
             db.add_matches(id0, id1, matches)
             matched |= {(id0, id1), (id1, id0)}
             
-            if skip_geometric_verification:
+            if self.cfg.pop("skip_geometric_verification", None):
                 db.add_two_view_geometry(id0, id1, matches)
 
         db.commit()
@@ -328,8 +335,9 @@ class ColmapMapper(object):
         db.commit()
         db.close()       
 
-    def run_triangulation(self, image_path, output_path, options=None, verbose=False):
+    def triangulate_points(self, image_path, output_path, options=None, verbose=False):
         
+        # 
         output_path.mkdir(parents=True, exist_ok=True)
         
         logger.info('running 3D triangulation...')

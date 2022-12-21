@@ -225,10 +225,7 @@ def run_triangulation(model_path, database_path, image_dir, reference_model, opt
     return reconstruction
 
 
-def main(sfm_dir, mapper, image_dir, pairs, features, matches,
-         skip_geometric_verification=False, 
-         min_match_score=None,
-         verbose=True):
+def main(sfm_dir, mapper, image_dir, pairs, features, matches):
 
     assert features.exists(),   features
     assert pairs.exists(),      pairs
@@ -238,9 +235,13 @@ def main(sfm_dir, mapper, image_dir, pairs, features, matches,
     
     mapper.create_database()
     mapper.import_features(features)
-    mapper.import_matches(pairs, matches, min_match_score, skip_geometric_verification)
+    mapper.import_matches(pairs, matches)
+
+
     mapper.geometric_verification(features, pairs, matches)
-    reconstruction = mapper.run_triangulation(image_dir, sfm_dir, verbose=verbose)
+    
+    # mapper.update_database(features, pairs, matches)
+    reconstruction = mapper.triangulate_points(image_dir, sfm_dir)
     
     # reference   = pycolmap.Reconstruction(model)
     # create database

@@ -34,7 +34,8 @@ setup(
 
     dependency_links=[
         # 'git+https://github.com/Tarekbouamer/visloc_retrieval#egg=visloc_retrieval',
-        'git+https://github.com/jenicek/asmk#egg=asmk'
+        'git+https://github.com/jenicek/asmk#egg=asmk',
+        'git+https://github.com/stevenlovegrove/Pangolin#egg=pangolin'
         ]
 
 )

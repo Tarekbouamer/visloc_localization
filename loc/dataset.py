@@ -137,10 +137,10 @@ class ImagesTransform:
 
 class ImagesFromList(data.Dataset):
     
-    def __init__(self, root, data_cfg, split=None, transform=None, max_size=None, **kwargs): 
+    def __init__(self, root, cfg, split=None, transform=None, max_size=None, **kwargs): 
         
         # cfg
-        cfg =  data_cfg[split]
+        cfg =  cfg[split]
         
         # options
         self.max_size       = max_size
