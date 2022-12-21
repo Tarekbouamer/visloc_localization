@@ -1,3 +1,6 @@
 [submodule "thirdparty/SuperGluePretrainedNetwork"]
 	path = thirdparty/SuperGluePretrainedNetwork
 	url = https://github.com/magicleap/SuperGluePretrainedNetwork
+[submodule "thirdparty/--recursive"]
+	path = thirdparty/--recursive
+	url = https://github.com/stevenlovegrove/Pangolin
