@@ -2,3 +2,10 @@
 	path = thirdparty/SuperGluePretrainedNetwork
 	url = https://github.com/magicleap/SuperGluePretrainedNetwork
 
+[submodule "thirdparty/--force"]
+	path = thirdparty/--force
+	url = https://github.com/stevenlovegrove/Pangolin
+
+[submodule "thirdparty/Pangolin"]
+	path = thirdparty/Pangolin
+	url = https://github.com/stevenlovegrove/Pangolin.git
