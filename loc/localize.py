@@ -221,13 +221,13 @@ class Localizer:
         
         return ret, log
         
-    def __call__(self, queries, retrieval_pairs_path, save_path=None):
+    def __call__(self, queries, pairs_path, save_path=None):
         
-        assert retrieval_pairs_path.exists(),   retrieval_pairs_path
+        assert pairs_path.exists(),   pairs_path
         
         # load retrieval pairs
         logger.info('load retrievals pairs') 
-        retrieval_pairs = parse_retrieval_file(retrieval_pairs_path)
+        retrieval_pairs = parse_retrieval_file(pairs_path)
         
         #
         db_name_to_id = self.db_name_to_id()
@@ -314,7 +314,7 @@ class Localizer:
         
         
 
-def main(queries, retrieval_pairs_path, 
+def main(queries, pairs_path, 
          sfm_model, features, matches, 
          results=None,
          config={}):
@@ -326,7 +326,7 @@ def main(queries, retrieval_pairs_path,
                     cfg=config)
     
     # localize queries 
-    loc(queries, retrieval_pairs_path, save_path=results)
+    loc(queries, pairs_path, save_path=results)
 
 
 

@@ -213,7 +213,7 @@ def parse_retrieval(path):
 # pose
 def dump_logs(logs, save_path):
     
-    save_path = f'{save_path}_logs.pkl'
+    save_path = save_path / 'visloc.logs.pkl'
 
     logger.info(f'writing logs to {save_path} ')
     
@@ -221,6 +221,8 @@ def dump_logs(logs, save_path):
         pickle.dump(logs, f)
           
 def write_poses_txt(poses, save_path):
+    
+    save_path = save_path / 'visloc.poses.txt'
 
     logger.info(f'writing poses to {save_path}...')
 

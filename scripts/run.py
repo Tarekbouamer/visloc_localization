@@ -145,21 +145,21 @@ def main(args):
                                  ) 
     
     # match
-    sfm_matches_path = args.save_path / 'loc_matches.h5' 
+    loc_matches_path = args.save_path / 'loc_matches.h5' 
     loc_matches_path= do_matching(src_path=q_features_path, 
                                   dst_path=db_features_path, 
                                   pairs_path=loc_pairs_path, 
                                   save_path=loc_matches_path)
     
     # localize
-    query_set = ImagesFromList(root=dataset_path, split="query", cfg=data_cfg, gray=True)
+    query_set = ImagesFromList(root=args.directory, split="query", cfg=data_cfg, gray=True)
 
-    localize(sfm_model=visloc_model_path,
+    localize(sfm_model=mapper.visloc_model_path,
              queries=query_set.get_cameras(),
-             retrieval_pairs_path=loc_pairs_path,
-             features=q_path,
+             pairs_path=loc_pairs_path,
+             features=q_features_path,
              matches=loc_matches_path,
-             results=results)
+             results=args.save_path)
     
     # Visualization
     # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='track_length'    )
