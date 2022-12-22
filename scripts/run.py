@@ -6,6 +6,9 @@ from os import mkdir
 import numpy as np
 from pathlib import Path
 
+# 
+from omegaconf import OmegaConf
+
 # torch
 import torch
 
@@ -27,7 +30,7 @@ from loc.localize       import main as localize
 from loc.covisibility   import main as covisibility
 from loc.triangulation  import main as triangulation
 from loc.vis            import visualize_sfm_2d 
-from loc.viewer         import Viewer3D 
+# from loc.viewer         import Viewer3D 
 
 # colmap
 from loc.colmap.colmap_nvm  import main as colmap_from_nvm
@@ -56,28 +59,17 @@ def make_parser():
     # Export directory, training and val datasets, test datasets
     parser.add_argument("--local_rank", type=int)
 
-    parser.add_argument('--directory', metavar='EXPORT_DIR',
-                        help='destination where trained network should be saved')
+    parser.add_argument('--directory', metavar='IMPORT_DIR',
+                        help='data folder')
 
-    parser.add_argument('--data', metavar='EXPORT_DIR',
-                        help='destination where trained network should be saved')
+    parser.add_argument('--save_path', metavar='EXPORT_DIR',
+                        help='path to localization folder')
 
     parser.add_argument("--config", metavar="FILE", type=str, help="Path to configuration file",
-                        default='./cirtorch/configuration/defaults/global_config.ini')
-
-    parser.add_argument("--eval", action="store_true", help="Do a single validation run")
-
-    parser.add_argument('--resume', metavar='FILENAME', type=str,
-                        help='name of the latest checkpoint (default: None)')
-
-    parser.add_argument("--pre_train", metavar="FILE", type=str, nargs="*",
-                        help="Start from the given pre-trained snapshots, overwriting each with the next one in the list. "
-                             "Snapshots can be given in the format '{module_name}:{path}', where '{module_name} is one of "
-                             "'body', 'rpn_head', 'roi_head' or 'sem_head'. In that case only that part of the network "
-                             "will be loaded from the snapshot")
-
+                        default='loc/configurations/default.yml')
 
     args = parser.parse_args()
+    
 
     for arg in vars(args):
         print(' {}\t  {}'.format(arg, getattr(args, arg)))
@@ -86,103 +78,88 @@ def make_parser():
 
     return parser
 
-
-def init_device(args):
-    """ Not used for the moment """
-    # Initialize multi-processing
-    device_id, device = args.local_rank, torch.device(args.local_rank)
-    rank, world_size = 0, 1
-
-    # Set device
-    torch.cuda.set_device(device_id)
-
-    # Set seed
-    torch.manual_seed(0)
-    torch.cuda.manual_seed_all(0)
-    np.random.seed(0)
-
-
 def main(args):
     
-    logger = setup_logger(output=".", name="loc")
-    logger.info("init loc")
-
-    # dataset_path    = Path('/media/loc/HDD/VisualLocalization2020/aachen/')
-    # save_path         = Path('/media/loc/HDD/VisualLocalization2020/aachen/visloc')    
     # image_path      = dataset_path/'images/images_upright/' 
 
+    # logger
+    logger = setup_logger(output=".", name="loc")
+    
+    logger.info("init visloc_localization")
+    
+    args.directory = Path(args.directory)
+    logger.info(f"data workspace {args.directory}")
+    
+    if args.save_path is None:
+        args.save_path = args.directory / 'visloc' 
+    
+    logger.info(f"visloc workspace {args.save_path}")
+    args.save_path.mkdir(parents=True, exist_ok=True)
+        
+    # load config 
+    cfg = OmegaConf.load(args.config)
 
-    dataset_path    = Path('/media/dl/Data/datasets/aachen')
-    save_path         = Path('/media/dl/Data/datasets/aachen/visloc')    
-    image_path      = dataset_path/'images/images_upright/' 
-    
-    colmap_model_path   = save_path / 'sfm_sift'
-    visloc_model_path   = save_path / 'sfm_superpoint_mnn'  
-    results         = save_path / 'Aachen_visloc_gem50.txt'  
-    
-    # outfolder
-    if not save_path.exists():
-        mkdir(save_path)
-    
     # data config
-    data_cfg = make_data_config(name='Aachen')
+    data_cfg = make_data_config(name='aachen')
     
-    # # Nvm to Colmap
+    # merge
+    cfg = OmegaConf.merge(cfg, data_cfg)
+    
+    # #TODO: Nvm to Colmap
     # colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
     #                 dataset_path / '3D-models/database_intrinsics.txt',
     #                 dataset_path / 'aachen.db',
     #                 model_path) 
     
-    # covisibility
-    num_matches = 20
-    sfm_pairs = save_path / str('sfm_pairs_' + str(num_matches) + '.txt') 
     
-    mapper = ColmapMapper(colmap_model_path=colmap_model_path, visloc_model_path=visloc_model_path)
-    # mapper.covisible_pairs(sfm_pairs, num_matches=num_matches)
+    # mapper  
+    mapper = ColmapMapper(data_path=args.directory,
+                          workspace=args.save_path, 
+                          cfg=cfg)
+    
+    # covisibility
+    sfm_pairs_path = mapper.covisible_pairs()
 
     # 
-    # db_path, q_path = do_extraction(dataset_path=dataset_path,
-    #                                 data_cfg=data_cfg,
-    #                                 save_path=save_path)
+    db_features_path, q_features_path = do_extraction(workspace=args.directory,
+                                                      save_path=args.save_path,
+                                                      cfg=cfg)
 
     # sfm pairs
-    # sfm_matches_path = save_path / Path('sfm_matches' +'.h5') 
-    
-    # do_matching(src_path=db_path, 
-    #             dst_path=db_path, 
-    #             pairs_path=sfm_pairs, 
-    #             output=sfm_matches_path)
+    sfm_matches_path = args.save_path / 'sfm_matches.h5' 
+    sfm_matches_path = do_matching( src_path=db_features_path, 
+                                    dst_path=db_features_path, 
+                                    pairs_path=sfm_pairs_path, 
+                                    save_path=sfm_matches_path)
     
     # triangulate
-    # reconstruction = triangulation(visloc_model_path, 
-    #                                mapper, 
-    #                                image_path, 
-    #                                sfm_pairs, 
-    #                                db_path, 
-    #                                sfm_matches_path)
+    reconstruction = triangulation(mapper, 
+                                   sfm_pairs_path, 
+                                   db_features_path, 
+                                   sfm_matches_path)
     
-    # retrieve
-    # loc_pairs_path = do_retrieve(dataset_path=dataset_path ,
-    #                              data_cfg=data_cfg,
-    #                              save_path=save_path) 
+    # # retrieve
+    loc_pairs_path = do_retrieve(workspace=args.directory ,
+                                 save_path=args.save_path,
+                                 cfg=cfg
+                                 ) 
     
     # match
-    # loc_matches_path = save_path / Path('loc_matches_path' +'.h5') 
-
-    # do_matching(src_path=q_path, 
-    #             dst_path=db_path, 
-    #             pairs_path=loc_pairs_path, 
-    #             output=loc_matches_path)
+    sfm_matches_path = args.save_path / 'loc_matches.h5' 
+    loc_matches_path= do_matching(src_path=q_features_path, 
+                                  dst_path=db_features_path, 
+                                  pairs_path=loc_pairs_path, 
+                                  save_path=loc_matches_path)
     
     # localize
-    # query_set = ImagesFromList(root=dataset_path, split="query", cfg=data_cfg, gray=True)
+    query_set = ImagesFromList(root=dataset_path, split="query", cfg=data_cfg, gray=True)
 
-    # localize(sfm_model=visloc_model_path,
-    #          queries=query_set.get_cameras(),
-    #          retrieval_pairs_path=loc_pairs_path,
-    #          features=q_path,
-    #          matches=loc_matches_path,
-    #          results=results)
+    localize(sfm_model=visloc_model_path,
+             queries=query_set.get_cameras(),
+             retrieval_pairs_path=loc_pairs_path,
+             features=q_path,
+             matches=loc_matches_path,
+             results=results)
     
     # Visualization
     # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='track_length'    )
@@ -190,10 +167,10 @@ def main(args):
     # )
     # visualize_sfm_2d(model_path,  image_path,  n=3,    color_by='depth'           )
     # visualize_loc(results, image_path, model_path, n=5, top_k_db=2, prefix='query/night', seed=2)
-    reconstruction = mapper.load_visloc()
-    viewer = Viewer3D()
+    # reconstruction = mapper.load_visloc()
+    # viewer = Viewer3D()
     
-    viewer.draw_sfm(reconstruction)
+    # viewer.draw_sfm(reconstruction)
     
     
 if __name__ == '__main__':

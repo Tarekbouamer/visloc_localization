@@ -225,38 +225,21 @@ def run_triangulation(model_path, database_path, image_dir, reference_model, opt
     return reconstruction
 
 
-def main(sfm_dir, mapper, image_dir, pairs, features, matches):
+def main(mapper, sfm_pairs_path, db_features_path, sfm_matches_path):
 
-    assert features.exists(),   features
-    assert pairs.exists(),      pairs
-    assert matches.exists(),    matches
-
-    sfm_dir.mkdir(parents=True, exist_ok=True)
+    assert db_features_path.exists(),   db_features_path
+    assert sfm_pairs_path.exists(),      sfm_pairs_path
+    assert sfm_matches_path.exists(),    sfm_matches_path
     
     mapper.create_database()
-    mapper.import_features(features)
-    mapper.import_matches(pairs, matches)
+    mapper.import_features(db_features_path)
+    mapper.import_matches(sfm_pairs_path, sfm_matches_path)
 
+    #
+    mapper.geometric_verification(db_features_path, sfm_pairs_path, sfm_matches_path)
 
-    mapper.geometric_verification(features, pairs, matches)
-    
-    # mapper.update_database(features, pairs, matches)
-    reconstruction = mapper.triangulate_points(image_dir, sfm_dir)
-    
-    # reference   = pycolmap.Reconstruction(model)
-    # create database
-    # image_ids = create_db_from_model(reference, database)
-    # 
-    # import_features(image_ids, database, features) 
-    # import_matches(image_ids, database, pairs, matches, min_match_score, skip_geometric_verification)
-    # if not skip_geometric_verification:
-    #     if estimate_two_view_geometries:
-    #         estimation_and_geometric_verification(database, pairs, verbose)
-    #     else:
-    #         geometric_verification(image_ids, reference, database, features, pairs, matches)
-    # run triangulation
-    # reconstruction = run_triangulation(sfm_dir, database, image_dir, reference,
-    #                                    verbose=verbose)
+    #
+    reconstruction = mapper.triangulate_points()
 
 
     return reconstruction

@@ -1,4 +1,14 @@
-[12/21 23:40 loc]: init loc
-[12/21 23:40 loc]: init ColmapMapper
-[12/21 23:40 loc]: reading Colmap model
-[12/21 23:40 loc]: model successfully loaded
+[12/22 16:45 loc]: init visloc_localization
+[12/22 16:45 loc]: data workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+[12/22 16:45 loc]: visloc workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
+[12/22 16:45 loc]: init Colmap Mapper
+[12/22 16:45 loc]: reading Colmap model
+[12/22 16:45 loc]: model successfully loaded
+[12/22 16:45 loc]: searching for 10 covisibility pairs 
+[12/22 16:47 loc]: found 43169 covisible pairs saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/sfm_pairs_10.txt
+[12/22 16:47 loc]: init feature extractor superpoint
+[12/22 16:47 loc]: extract local features for databse images 
+[12/22 16:47 loc]: found 4479 images with None intrinsics
+[12/22 16:47 loc]: extract local features for query images 
+[12/22 16:47 loc]: found 947 images with 922 intrinsics
+[12/22 16:47 loc]: matching 29734 pairs

@@ -1,0 +1,34 @@
+dataset: 
+    name: aachen
+
+mapper:
+    name: colmap
+    num_covis: 10
+    min_match_score: None
+    skip_geometric_verification: False
+
+retrieval:
+    model_name: sfm_resnet50_gem_2048
+    max_size: 1024
+    num_topK : 20
+
+extractor:
+    name: superpoint
+    max_keypoints: 1024
+    max_size:  640
+    keypoint_threshold: 0.005  
+    remove_borders: 4
+    nms_radius: 3                
+
+matcher:
+    distance_thresh: 0.7
+
+solver:
+    ransac:
+        max_reproj_error: 12.0
+        max_epipolar_error: 1.0
+    bundle: 
+        max_iterations: 100
+
+localize:
+    covis_clustering : False

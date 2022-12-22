@@ -25,7 +25,6 @@ class SuperPoint(torch.nn.Module):
         self.net = superpoint(config)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.net.to(device=device) 
-        print(device)
     
     def _forward(self, data):
         """ Run SuperPoint (optionally) and SuperGlue

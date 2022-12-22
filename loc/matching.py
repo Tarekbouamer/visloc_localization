@@ -102,7 +102,7 @@ def writer_fn(data, match_path):
         group.create_dataset('scores',  data=matches_dists  )               
         
         
-def do_matching(src_path, dst_path, pairs_path, output):
+def do_matching(pairs_path, src_path, dst_path, save_path=None):
     
     # assert
     assert pairs_path.exists(), pairs_path
@@ -124,7 +124,7 @@ def do_matching(src_path, dst_path, pairs_path, output):
     logger.info("matching %s pairs", len(pair_dataset))    
     
     # workers
-    writer_queue  = WorkQueue(partial(writer_fn, match_path=output), 16)
+    writer_queue  = WorkQueue(partial(writer_fn, match_path=save_path), 16)
             
     # matcher
     matcher = matchers.MutualNearestNeighbor()
@@ -147,7 +147,9 @@ def do_matching(src_path, dst_path, pairs_path, output):
     
     # collect workers    
     writer_queue.join()
-    
+
     #      
-    logger.info("matches saved to %s", str(output) )
+    logger.info("matches saved to %s", str(save_path) )
+    
+    return save_path
     

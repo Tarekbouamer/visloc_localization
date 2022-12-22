@@ -32,28 +32,26 @@ def get_descriptors(desc_path, names, key='global_descriptor'):
 
 
 class Retrieval(object):
-    default_cfg = {
-        "max_size":     1024,
-        "topK":         50
-        }
     
-    def __init__(self, dataset_path, save_path, model_name='sfm_resnet50_gem_2048', cfg={}):
+    def __init__(self, workspace, save_path, cfg):
         
         # cfg
-        self.cfg = {**self.default_cfg, **cfg}
-        
+        self.cfg    = cfg
+        model_name  = self.cfg.retrieval.model_name
+        num_topK    = self.cfg.retrieval.num_topK
+       
         # extractor
         logger.info(f"init retrieval {model_name}")
         self.extractor = FeatureExtractor(model_name=model_name)
         
         #
-        self.dataset_path   = dataset_path
-        self.save_path      = save_path
+        self.workspace  = workspace
+        self.save_path  = save_path
         
         # paris path
         self.pairs_path = save_path /   Path('pairs'            + '_' + \
                                         str(model_name)         + '_' + \
-                                        str(self.cfg["topK"])   + '.txt') 
+                                        str(num_topK)           + '.txt') 
 
     
     def extract_images(self, images_path, split=None):
@@ -69,7 +67,7 @@ class Retrieval(object):
         
         logger.info(f"extract global features for databse images ")
 
-        db_preds = self.extract_images(self.dataset_path, split="db")
+        db_preds = self.extract_images(self.workspace, split="db")
         
         return db_preds
 
@@ -77,7 +75,7 @@ class Retrieval(object):
         
         logger.info(f"extract global features for query images ")
 
-        db_preds = self.extract_images(self.dataset_path, split="query")
+        db_preds = self.extract_images(self.workspace, split="query")
         
         return db_preds    
     
@@ -92,9 +90,10 @@ class Retrieval(object):
         # similarity
         scores = torch.mm(q_descs, db_descs.t())
         
-        # search for topK images
-        topK = self.cfg.pop("topK", 10)
-        logger.info("retrive top %s images", topK)   
+        # search for num_topK images
+        num_topK = self.cfg.retrieval.num_topK
+        
+        logger.info(f"retrive top {num_topK} images")   
         
         invalid = np.array(q_names)[:, None] == np.array(db_names)[None]   
         invalid = torch.from_numpy(invalid).to(scores.device)   
@@ -102,7 +101,7 @@ class Retrieval(object):
         invalid |= scores < 0
         scores.masked_fill_(invalid, float('-inf'))
 
-        topk    = torch.topk(scores, k=topK, dim=1)
+        topk    = torch.topk(scores, k=num_topK, dim=1)
         
         indices = topk.indices.cpu().numpy()
         valid   = topk.values.isfinite().cpu().numpy() 
@@ -145,13 +144,12 @@ class Retrieval(object):
     
     
     
-def do_retrieve(dataset_path, data_cfg, save_path, model_name='sfm_resnet50_gem_2048'):
+def do_retrieve(workspace, save_path, cfg):
     
     # save
-    ret = Retrieval(dataset_path=dataset_path, 
+    ret = Retrieval(workspace=workspace, 
                     save_path=save_path,
-                    model_name=model_name,
-                    cfg=data_cfg)
+                    cfg=cfg)
     
     # retrieve
     image_pairs = ret.retrieve()   

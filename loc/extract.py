@@ -32,27 +32,21 @@ def get_descriptors(desc_path, names, key='global_descriptor'):
 
 
 class Extraction(object):
-    default_cfg = {
-        "max_size":     640,
-        'keypoint_threshold': 0.005,    
-        'remove_borders': 4,
-        'nms_radius': 3,                
-        'max_keypoints': 2048
-        }
+
     
-    def __init__(self, dataset_path, save_path, model_name='superpoint', cfg={}):
+    def __init__(self, workspace, save_path, cfg):
         
         # cfg
-        self.cfg = {**self.default_cfg, **cfg}
+        self.cfg = cfg
         
         # extractor
-        logger.info(f"init extraction {model_name}")
+        logger.info(f"init feature extractor {cfg.extractor.name}")
 
-        self.extractor = SuperPoint(config=self.cfg)
+        self.extractor = SuperPoint(config=self.cfg.extractor)
         
         #
-        self.dataset_path   = dataset_path
-        self.save_path      = save_path
+        self.workspace  = workspace
+        self.save_path  = save_path
     
     def extract_images(self, images_path, split=None):
         
@@ -66,7 +60,7 @@ class Extraction(object):
         
         logger.info(f"extract local features for databse images ")
 
-        db_preds, db_path = self.extract_images(self.dataset_path, split="db")
+        db_preds, db_path = self.extract_images(self.workspace, split="db")
         
         return db_preds, db_path
 
@@ -74,7 +68,7 @@ class Extraction(object):
         
         logger.info(f"extract local features for query images ")
 
-        q_preds, q_path = self.extract_images(self.dataset_path, split="query")
+        q_preds, q_path = self.extract_images(self.workspace, split="query")
         
         return q_preds, q_path    
     
@@ -89,13 +83,12 @@ class Extraction(object):
     
     
     
-def do_extraction(dataset_path, data_cfg, save_path, model_name='sfm_resnet50_gem_2048'):
-    
+def do_extraction(workspace, save_path, cfg):
+
     # save
-    ext = Extraction(dataset_path=dataset_path, 
-                    save_path=save_path,
-                    model_name=model_name,
-                    cfg=data_cfg)
+    ext = Extraction(workspace=workspace, 
+                     save_path=save_path,
+                     cfg=cfg)
     
     # retrieve
     image_pairs = ext.extract()    

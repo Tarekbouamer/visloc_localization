@@ -58,10 +58,10 @@ class DataConfigs(object):
         
 def make_data_config(name="default"): 
     
-    if name=="Default":
+    if name=="default":
         return DataConfigs.Default
     
-    elif name=="Aachen":
+    elif name=="aachen":
         return DataConfigs.Aachen
     
     else:

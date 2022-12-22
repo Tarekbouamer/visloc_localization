@@ -19,32 +19,29 @@ logger = logging.getLogger("loc")
 
 class ColmapMapper(object):
     
-    default_cfg = {
-        "min_match_score": None, 
-        "skip_geometric_verification": False 
-    }
+    def __init__(self, data_path, workspace, cfg={}):
+        
+        # cfg
+        self.cfg = cfg
+        
+        #
+        logger.info("init Colmap Mapper")
+        
+        #
+        self.workspace      = workspace
+        self.images_path    = data_path / self.cfg.db.images
+        
+        self.colmap_model_path     = workspace / 'colmap_model'
+        self.visloc_model_path     = workspace / 'visloc_model'  
 
-    def __init__(self, colmap_model_path, visloc_model_path, cfg={}):
-        
+        self.colmap_model_path.mkdir(parents=True, exist_ok=True)
+        self.visloc_model_path.mkdir(parents=True, exist_ok=True)
         #
-        self.cfg = {**self.default_cfg, **cfg}
-        
-        #
-        logger.info("init ColmapMapper")
-        
-        # model exsists
-        if isinstance(colmap_model_path, str):
-            colmap_model_path = Path(colmap_model_path)
-        
-        #
-        self.colmap_model_path     = colmap_model_path
-        self.visloc_model_path     = visloc_model_path
-
-        #
-        self.database_path   = Path(visloc_model_path) / 'database.db'
-        
+        self.database_path   = self.visloc_model_path / 'database.db'
+        self.sfm_pairs_path = workspace / str('sfm_pairs_' + str(self.cfg.mapper.num_covis) + '.txt') 
+                         
         # read model
-        self.read_model(colmap_model_path)
+        self.read_model(self.colmap_model_path)
         
     def load_model(self):
         return pycolmap.Reconstruction(self.colmap_model_path)
@@ -80,9 +77,12 @@ class ColmapMapper(object):
         model = self.load_model()
         return {image.name: i for i, image in model.images.items()}  
     
-    def covisible_pairs(self, output, num_matches=5):
+    def covisible_pairs(self, num_covis=None):
 
-        logger.info('extracting image pairs from covisibility')
+        if num_covis is None:
+            num_covis = self.cfg.mapper.num_covis
+        
+        logger.info(f'searching for {num_covis} covisibility pairs ')
         
         #
         images      = self.get_images()
@@ -109,12 +109,12 @@ class ColmapMapper(object):
             covis_num = np.array([covis[i] for i in covis_ids])
             
             # Sort and select        
-            if len(covis_ids) <= num_matches:
+            if len(covis_ids) <= num_covis:
                 top_covis_ids = covis_ids[np.argsort(-covis_num)]
             else:
                 # get covisible image ids with top k number of common matches
-                ind_top     = np.argpartition(covis_num, -num_matches)
-                ind_top     = ind_top[-num_matches:]  # unsorted top k
+                ind_top     = np.argpartition(covis_num, -num_covis)
+                ind_top     = ind_top[-num_covis:]  # unsorted top k
                 ind_top     = ind_top[np.argsort(-covis_num[ind_top])]
                 
                 top_covis_ids = [covis_ids[i] for i in ind_top]
@@ -127,15 +127,13 @@ class ColmapMapper(object):
                 pair = (image.name, images[i].name)
                 sfm_pairs.append(pair)
         
-        logger.info(f'found {len(sfm_pairs)} image pairs.')
-        
-        #
-        with open(output, 'w') as f:
+        # save
+        with open(self.sfm_pairs_path, 'w') as f:
             f.write('\n'.join(' '.join([i, j]) for i, j in sfm_pairs))
-        # 
-        self.sfm_pairs = sfm_pairs
-        
-        return sfm_pairs
+
+        logger.info(f'found {len(sfm_pairs)} covisible pairs saved {self.sfm_pairs_path}')
+          
+        return self.sfm_pairs_path
     
     def create_database(self):
         
@@ -338,10 +336,14 @@ class ColmapMapper(object):
         db.commit()
         db.close()       
 
-    def triangulate_points(self, image_path, output_path, options=None, verbose=False):
+    def triangulate_points(self, options=None, verbose=False):
         
         # 
+        output_path = self.visloc_model_path
         output_path.mkdir(parents=True, exist_ok=True)
+        
+        #
+        image_path = self.images_path
         
         logger.info('running 3D triangulation...')
         if options is None:
