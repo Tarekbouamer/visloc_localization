@@ -5,8 +5,8 @@ from collections import defaultdict
 import numpy as np
 from pathlib import Path
 
-from ..utils.read_write_model import Camera, Image, Point3D, CAMERA_MODEL_NAMES
-from ..utils.read_write_model import write_model
+from .read_write_model import Camera, Image, Point3D, CAMERA_MODEL_NAMES
+from .read_write_model import write_model
 
 
 # logger

@@ -6,7 +6,7 @@ from tqdm import tqdm
 from collections import defaultdict
 
 from loc.colmap.database import COLMAPDatabase
-from loc.utils.read_write_model import read_model
+from loc.utils.colmap.read_write_model import read_model
 from loc.utils.io import parse_name, find_pair, get_keypoints, get_matches, parse_retrieval, OutputCapture
 from loc.utils.geometry import compute_epipolar_errors
 
@@ -41,7 +41,7 @@ class ColmapMapper(object):
         self.sfm_pairs_path = workspace / str('sfm_pairs_' + str(self.cfg.mapper.num_covis) + '.txt') 
                          
         # read model
-        self.read_model(self.colmap_model_path)
+        # self.read_model(self.colmap_model_path)
         
     def load_model(self):
         return pycolmap.Reconstruction(self.colmap_model_path)

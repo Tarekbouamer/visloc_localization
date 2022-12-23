@@ -57,7 +57,7 @@ def setup_logger(output=None, *, color=True, name="visloc", abbrev_name=None, su
     """
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
-    logger.propagate = True
+    logger.propagate = False
     
     # Formaters 
      

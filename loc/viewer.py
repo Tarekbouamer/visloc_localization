@@ -10,6 +10,10 @@ import numpy as np
 import pypangolin as pango
 import OpenGL.GL as gl
 
+# logger
+import logging
+logger = logging.getLogger("loc")
+
 
 # [4x4] homogeneous inverse T^-1 from [4x4] T     
 def inv_T(T):
@@ -32,9 +36,9 @@ kViewportHeight         = 550
 kDrawCameraPrediction   = False   
 kDrawReferenceCamera    = True 
   
-kMinWeightForDrawingCovisibilityEdge    =100
+kMinWeightForDrawingCovisibilityEdge = 100
 
-MIN_TRACK_LENGTH = 1
+MIN_TRACK_LENGTH = 4
 
 class Viewer3DMapElement(object): 
     def __init__(self):
@@ -61,10 +65,15 @@ class Viewer3D(object):
         self.cam_state = None 
         self.map_state = None 
               
-        self._is_running    = Value('i',1)
-        self._is_paused     = Value('i',1)
+        self._is_running    = Value('i', 1)
+        self._is_paused     = Value('i', 1)
         
-        self.vp = Process(target=self.viewer_thread, args=(self.map, self.cameras,self._is_running ,self._is_paused,))
+        self.vp = Process(target=self.viewer_thread, 
+                          args=(self.map, 
+                                self.cameras, 
+                                self._is_running, 
+                                self._is_paused,))
+        
         self.vp.daemon = True
         self.vp.start()
 
@@ -77,6 +86,7 @@ class Viewer3D(object):
         return (self._is_paused.value == 1)       
 
     def viewer_thread(self, map, cameras, is_running, is_paused):
+        
         self.viewer_init(kViewportWidth, kViewportHeight)
         
         while not pango.ShouldQuit() and (is_running.value == 1):
@@ -116,7 +126,7 @@ class Viewer3D(object):
         
         self.ui = pango.Var("ui")
         self.ui.Button          = False
-        self.ui.Follow          = True
+        self.ui.Follow          = False
         self.ui.Cams            = True
         self.ui.Covisibility    = True
         self.ui.SpanningTree    = True
@@ -124,8 +134,8 @@ class Viewer3D(object):
         self.ui.Pause           = False
 
         # self.ui.slider      =   (3, pango.VarMeta(0, 5))
-        self.ui.log_slider  =   (3.0, pango.VarMeta(1, 1e4, logscale=True))
-        self.ui.slider      =   (2, pango.VarMeta(1, 10)) 
+        self.ui.log_slider  =   (3.0,   pango.VarMeta(1, 1e4,   logscale=True)  )
+        self.ui.slider      =   (2,     pango.VarMeta(1, 10)                    ) 
         
         # Focus        
         self.Twc    = pango.OpenGlMatrix()
@@ -137,12 +147,14 @@ class Viewer3D(object):
     
     def viewer_refresh(self, map, cameras, is_paused):
         
+        print("viewer_refresh")
+
         while not cameras.empty():
             self.cam_state = cameras.get()
         
         while not map.empty():
-              self.map_state = map.get()
-
+            self.map_state = map.get()
+        
         if self.ui.Pause:
             is_paused.value = 0  
         else:
@@ -171,16 +183,16 @@ class Viewer3D(object):
      
         if self.map_state is not None:
             # Draw query pose
-            if self.map_state.query_pose is not None:
-                # in blue
-                gl.glColor3f(0.0, 0.0, 1.0)
-                gl.glLineWidth(2)                
-                self.drawCamera(self.map_state.query_pose)
-                gl.glLineWidth(1)                
-                self.updateTwc(self.map_state.query_pose)
+            # if self.map_state.query_pose is not None:
+            #     # in blue
+            #     gl.glColor3f(0.0, 0.0, 1.0)
+            #     gl.glLineWidth(2)                
+            #     self.drawCamera(self.map_state.query_pose)
+            #     gl.glLineWidth(1)                
+            #     self.updateTwc(self.map_state.query_pose)
             
-            # key frame pose           
-            if len(self.map_state.db_poses) >1:
+            # key frame pose       
+            if len(self.map_state.db_poses) >= 1:
                 # draw keyframe poses in green
                 if self.ui.Cams:
                     gl.glColor3f(0.0, 1.0, 0.0)
@@ -220,7 +232,6 @@ class Viewer3D(object):
         gl.glEnd();
         
     def drawCameras(self, cameras,  w=1, h_ratio=0.75, z_ratio=0.5):
-        
         for cam in cameras:
             self.drawCamera(cam, w=w, h_ratio=h_ratio, z_ratio=z_ratio) 
               
@@ -330,34 +341,37 @@ class Viewer3D(object):
 
     def draw_sfm(self, sfm_model=None, seed=2):
         
-        print(sfm_model)
-        if sfm_model is None:
-            return 
+        logger.info("draw sfm ")
+        import pycolmap
+        
+        sfm_model = pycolmap.Reconstruction(sfm_model)  
         
         map_state  = Viewer3DMapElement()
         
+        # -->
         for i in sfm_model.images:
-            image       =   sfm_model.images[i]
-            
-            # Pose
-            rot_mat     =   getRotmat(image.qvec)
-            rotmatINV   =   np.transpose(rot_mat)
+        
+            #
+            image = sfm_model.images[i]
+
+            # pose
+            rot_mat   = getRotmat(image.qvec)
+            rotmatINV = np.transpose(rot_mat)
                 
-            trans_vec   =   image.tvec
-            trans_vec   =   -rotmatINV.dot(trans_vec)
+            trans_vec = image.tvec
+            trans_vec = -rotmatINV.dot(trans_vec)
             
-            pose   = np.eye(4)
-            pose[:3, :3]   = rotmatINV
-            pose[:3, 3]    = trans_vec
+            pose        = np.eye(4)
+            pose[:3,:3] = rotmatINV
+            pose[:3,3]  = trans_vec
                     
             map_state.db_poses.append(pose) 
-            print(pose) 
             
-        
+        # -->
         for j in sfm_model.points3D:
             
             pt3D = sfm_model.points3D[j]
-            
+
             if pt3D.track.length() < MIN_TRACK_LENGTH:
                 continue
 
@@ -366,13 +380,14 @@ class Viewer3D(object):
         
         
         # numpy
-        map_state.db_poses     = np.array(map_state.db_poses)
+        map_state.db_poses    = np.array(map_state.db_poses)
         map_state.points3D    = np.array(map_state.points3D)
         map_state.colors3D    = np.array(map_state.colors3D) 
      
-         
-        self.map.put(map_state)         
-           
+        # print(map_state.db_poses)
+        # print(map_state.points3D)
+        # print(map_state.colors3D)
+        self.map.put(map_state)              
 
     def updateTwc(self, pose):
         self.Twc = pango.OpenGlMatrix(pose)

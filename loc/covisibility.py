@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 from collections import defaultdict
 
-from .utils.read_write_model import read_model
+from .utils.colmap.read_write_model import read_model
 
 # logger
 import logging
