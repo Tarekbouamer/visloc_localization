@@ -157,7 +157,7 @@ def main(args):
     model = Model()
     model.read_model(mapper.colmap_model_path)
     model.create_window()
-    # model.add_points(min_track_len=4)
+    model.add_points(min_track_len=4)
     model.add_cameras(scale=0.25)
     model.show()
 
