@@ -1,4 +1,7 @@
-[12/23 15:42 loc]: init visloc_localization
-[12/23 15:42 loc]: data workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
-[12/23 15:42 loc]: visloc workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-[12/23 15:42 loc]: init Colmap Mapper
+[12/24 23:45 loc]: init visloc_localization
+[12/24 23:45 loc]: data workspace /media/dl/Data/datasets/aachen
+[12/24 23:45 loc]: visloc workspace /media/dl/Data/datasets/aachen/visloc
+[12/24 23:45 loc]: init Colmap Mapper
+[12/24 23:45 loc]: reading Colmap model
+[12/24 23:45 loc]: model successfully loaded
+[12/24 23:45 loc]: found 947 images with 922 intrinsics

@@ -31,7 +31,7 @@ from loc.covisibility   import main as covisibility
 from loc.triangulation  import main as triangulation
 from loc.vis            import visualize_sfm_2d 
 
-from loc.utils.viewer3d import Model
+from loc.utils.viewer3d import Visualizer, VisualizerGui
 
 # colmap
 from loc.utils.colmap.colmap_nvm  import main as colmap_from_nvm
@@ -118,7 +118,7 @@ def main(args):
     #                                                   cfg=cfg)
 
     # # sfm pairs
-    # sfm_matches_path = args.save_path / 'sfm_matches.h5' 
+    sfm_matches_path = args.save_path / 'sfm_matches.h5' 
     # sfm_matches_path = do_matching( src_path=db_features_path, 
     #                                 dst_path=db_features_path, 
     #                                 pairs_path=sfm_pairs_path, 
@@ -137,14 +137,14 @@ def main(args):
     #                              ) 
     
     # # match
-    # loc_matches_path = args.save_path / 'loc_matches.h5' 
+    loc_matches_path = args.save_path / 'loc_matches.h5' 
     # loc_matches_path= do_matching(src_path=q_features_path, 
     #                               dst_path=db_features_path, 
     #                               pairs_path=loc_pairs_path, 
     #                               save_path=loc_matches_path)
     
     # # localize
-    # query_set = ImagesFromList(root=args.directory, split="query", cfg=data_cfg, gray=True)
+    query_set = ImagesFromList(root=args.directory, split="query", cfg=data_cfg, gray=True)
 
     # localize(sfm_model=mapper.visloc_model_path,
     #          queries=query_set.get_cameras(),
@@ -152,15 +152,22 @@ def main(args):
     #          features=q_features_path,
     #          matches=loc_matches_path,
     #          results=args.save_path)
-    import pycolmap
-    sfm_model = pycolmap.Reconstruction(mapper.visloc_model_path)  
-    model = Model()
-    model.read_model(mapper.colmap_model_path)
-    model.create_window()
-    model.add_points(min_track_len=4)
-    model.add_cameras(scale=0.25)
-    model.show()
-
+    # import pycolmap
+    # sfm_model = pycolmap.Reconstruction(mapper.visloc_model_path)  
+    # sample_data = open3d.data.DemoCustomVisualization()
+    
+    # model = Model()
+    # model.read_model(mapper.colmap_model_path)
+    # model.create_window()
+    
+    # model = VisualizationProcess()
+    # model.read_model(mapper.colmap_model_path)
+    # model.show()
+    # model.show(render_option_path=sample_data.render_option_path)
+    vis = VisualizerGui()
+    vis.read_model(mapper.visloc_model_path)
+    vis.create_window()
+    vis.show()
     # 
     # viewer = Viewer3D()   
     # viewer.draw_sfm(mapper.visloc_model_path)

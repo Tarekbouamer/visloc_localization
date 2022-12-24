@@ -41,7 +41,7 @@ class ColmapMapper(object):
         self.sfm_pairs_path = workspace / str('sfm_pairs_' + str(self.cfg.mapper.num_covis) + '.txt') 
                          
         # read model
-        # self.read_model(self.colmap_model_path)
+        self.read_model(self.colmap_model_path)
         
     def load_model(self):
         return pycolmap.Reconstruction(self.colmap_model_path)
