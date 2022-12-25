@@ -6,6 +6,9 @@ mapper:
     num_covis: 20
     min_match_score: None
     skip_geometric_verification: False
+    max_num_trials: 20000
+    min_inlier_ratio: 0.1
+    max_epip_error: 4.0
 
 retrieval:
     model_name: sfm_resnet50_gem_2048

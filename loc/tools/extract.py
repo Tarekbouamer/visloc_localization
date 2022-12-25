@@ -7,7 +7,7 @@ import torch
 import collections.abc as collections
 import os 
 
-from loc.dataset        import ImagesFromList, ImagesTransform
+from loc.tools.dataset        import ImagesFromList, ImagesTransform
 from loc.extractors      import SuperPoint
 
 from loc.utils.io import  find_unique_new_pairs
@@ -32,9 +32,15 @@ def get_descriptors(desc_path, names, key='global_descriptor'):
 
 
 class Extraction(object):
+    """local feature extractor
 
-    
-    def __init__(self, workspace, save_path, cfg):
+    Args:
+        workspace (str): path to visloc workspace
+        save_path (str): path to save directory
+        cfg (str): configuration parameters
+    """    
+
+    def __init__(self, workspace, save_path, cfg={}):
         
         # cfg
         self.cfg = cfg
@@ -49,6 +55,16 @@ class Extraction(object):
         self.save_path  = save_path
     
     def extract_images(self, images_path, split=None):
+        """extract local features
+
+        Args:
+            images_path (str): path to images
+            split (str, optional): [query, db]. Defaults to None.
+
+        Returns:
+            dict: local predictions 
+            str: local predictions path
+        """        
         
         images          = ImagesFromList(root=images_path, split=split, cfg=self.cfg, gray=True)
         features_path   = Path(str(self.save_path) + '/' + str(split) + '_local_features' + '.h5')
@@ -56,15 +72,27 @@ class Extraction(object):
                 
         return preds, features_path
     
-    def extract_images_databse(self):
+    def extract_images_database(self):
+        """extract local features for database images
+
+        Returns:
+            dict: local database predictions 
+            str: local database predictions path        
+        """        
         
-        logger.info(f"extract local features for databse images ")
+        logger.info(f"extract local features for database images ")
 
         db_preds, db_path = self.extract_images(self.workspace, split="db")
         
         return db_preds, db_path
 
     def extract_images_queries(self):
+        """extract local features for query images
+
+        Returns:
+            dict: local query predictions 
+            str: local query predictions path  
+        """        
         
         logger.info(f"extract local features for query images ")
 
@@ -73,10 +101,15 @@ class Extraction(object):
         return q_preds, q_path    
     
     def extract(self):
-    
+        """local extraction main
+
+        Returns:
+            str: database local path
+            str: query local path
+        """    
         # extract
-        db_preds, db_path = self.extract_images_databse()
-        q_preds , q_path  = self.extract_images_queries()
+        _, db_path = self.extract_images_database()
+        _, q_path  = self.extract_images_queries()
         
         return db_path, q_path
     
@@ -84,13 +117,20 @@ class Extraction(object):
     
     
 def do_extraction(workspace, save_path, cfg):
+    """general extraction function 
 
-    # save
-    ext = Extraction(workspace=workspace, 
-                     save_path=save_path,
-                     cfg=cfg)
+    Args:
+        workspace (str): workspace path
+        save_path (str): save path
+        cfg (str): configurations 
+
+    Returns:
+        str: path to retrieval pairs
+    """  
+      
+    ext = Extraction(workspace=workspace, save_path=save_path, cfg=cfg)
     
-    # retrieve
+    # run
     image_pairs = ext.extract()    
     
     return image_pairs

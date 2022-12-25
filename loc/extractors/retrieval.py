@@ -1,26 +1,21 @@
-import time
-import h5py
-import numpy as np
-from PIL import Image
-from tqdm import tqdm
-import os 
-
-
-import torch
-import torch.nn.functional as functional
-from torch.utils.data import DataLoader
-
-from torchvision import transforms
-
-from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
-
-from retrieval.utils.logging import setup_logger
-from retrieval.datasets import ImagesListDataset
-from retrieval.models import create_model, get_pretrained_cfg
-
-
 # logger
 import logging
+import os
+import time
+
+import h5py
+import numpy as np
+import torch
+import torch.nn.functional as functional
+from PIL import Image
+from retrieval.datasets import ImagesListDataset
+from retrieval.models import create_model, get_pretrained_cfg
+from retrieval.utils.logging import setup_logger
+from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+from torch.utils.data import DataLoader
+from torchvision import transforms
+from tqdm import tqdm
+
 logger = logging.getLogger("loc")
 
 __DEBUG__ = False

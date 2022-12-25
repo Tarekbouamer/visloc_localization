@@ -1,36 +1,38 @@
-import torch
-import sys
-from abc import ABCMeta, abstractmethod
-from torch import nn
-from copy import copy
-import inspect
-from typing import Optional, Tuple
-from typing import Union, Optional, Dict, List, Tuple
-from pathlib import Path
-import pprint
 import collections.abc as collections
-from tqdm import tqdm
-import h5py
-import torch
-
-from queue import Queue
-from threading import Thread
-from functools import partial
-
-import loc.matchers as matchers
-from torch.utils.data import Dataset, DataLoader
-
-from loc.utils.io import names_to_pair, names_to_pair_old, get_pairs_from_txt, read_key_from_h5py, find_unique_new_pairs
-
+import inspect
 # logger
 import logging
+import pprint
+import sys
+from abc import ABCMeta, abstractmethod
+from copy import copy
+from functools import partial
+from pathlib import Path
+from queue import Queue
+from threading import Thread
+from typing import Dict, List, Optional, Tuple, Union
+
+import h5py
+import torch
+from torch import nn
+from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
+
+import loc.matchers as matchers
+from loc.utils.io import (find_unique_new_pairs, 
+                          get_pairs_from_txt,
+                          names_to_pair, 
+                          names_to_pair_old, 
+                          read_key_from_h5py)
+
 logger = logging.getLogger("loc")
     
     
 class WorkQueue():
     def __init__(self, work_fn, num_threads=1):
         self.queue      = Queue(num_threads)
-        self.threads    = [Thread(target=self.thread_fn, args=(work_fn,)) for _ in range(num_threads)]
+        self.threads    = [Thread(target=self.thread_fn, args=(work_fn,)) 
+                           for _ in range(num_threads)]
         
         for thread in self.threads:
             thread.start()
@@ -55,7 +57,13 @@ class WorkQueue():
 
 
 class PairsDataset(Dataset):
-    """"""
+    """pair dataset
+
+    Args:
+        pairs (list): pairs list
+        src_path (str): path to src image
+        dst_path (str): path to dst image
+    """    
     def __init__(self, pairs, src_path, dst_path):
         
         self.pairs = pairs
@@ -81,13 +89,20 @@ class PairsDataset(Dataset):
         return len(self.pairs)
 
 
-def writer_fn(data, match_path):
+def matcher_writer(data, save_path):
+    """matcher writer
+
+    Args:
+        data (tuple): input data (keys, m_dists, m_idxs)
+        save_path (_type_): save_path to matches 
+    """    
     
     #
-    pair_key, matches_dists, matches_idxs = data
+    pair_key, m_dists, m_idxs = data
 
     #
-    with h5py.File(str(match_path), 'a') as fd:
+    with h5py.File(str(save_path), 'a') as fd:
+        
         #
         if pair_key in fd:
             del fd[pair_key]
@@ -95,14 +110,26 @@ def writer_fn(data, match_path):
         group = fd.create_group(pair_key)
         
         #
-        matches_idxs    = matches_idxs.cpu().short().numpy()
-        matches_dists   = matches_dists.cpu().half().numpy()
+        m_idxs  = m_idxs.cpu().short().numpy()
+        m_dists = m_dists.cpu().half().numpy()
                                 
-        group.create_dataset('matches', data=matches_idxs   )
-        group.create_dataset('scores',  data=matches_dists  )               
+        group.create_dataset('matches', data=m_idxs )
+        group.create_dataset('scores',  data=m_dists)               
         
         
-def do_matching(pairs_path, src_path, dst_path, save_path=None):
+def do_matching(pairs_path, src_path, dst_path, save_path=None, num_threads=4):
+    """general matching 
+
+    Args:
+        pairs_path (str): pairs path
+        src_path (str): src image features path
+        dst_path (str): dst image features path
+        save_path (str, optional): path to save matches. Defaults to None.
+        num_threads (int, optional): number of workers. Defaults to 4.
+
+    Returns:
+        str: path to save matches 
+    """    
     
     # assert
     assert pairs_path.exists(), pairs_path
@@ -124,7 +151,7 @@ def do_matching(pairs_path, src_path, dst_path, save_path=None):
     logger.info("matching %s pairs", len(pair_dataset))    
     
     # workers
-    writer_queue  = WorkQueue(partial(writer_fn, match_path=save_path), 16)
+    writer_queue  = WorkQueue(partial(matcher_writer, match_path=save_path), num_threads)
             
     # matcher
     matcher = matchers.MutualNearestNeighbor()

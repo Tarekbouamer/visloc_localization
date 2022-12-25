@@ -1,0 +1,33 @@
+{
+  "cSpell.words": [
+    "BCHW",
+    "Colmap",
+    "COLMAP",
+    "covis",
+    "covisibility",
+    "Covisible",
+    "cuda",
+    "descs",
+    "hstack",
+    "idxs",
+    "IMAGENET",
+    "IMAGENET_DEFAULT_STD",
+    "imids",
+    "keypoint",
+    "keypoints",
+    "macthing",
+    "preds",
+    "pretrained",
+    "pycolmap",
+    "qcam",
+    "qvec",
+    "succesful",
+    "Succesful",
+    "timm",
+    "torchvision",
+    "tqdm",
+    "tvec",
+    "unsqueeze",
+    "visloc"
+  ]
+}

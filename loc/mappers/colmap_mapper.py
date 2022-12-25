@@ -10,6 +10,8 @@ from loc.utils.colmap.read_write_model import read_model
 from loc.utils.io import parse_name, find_pair, get_keypoints, get_matches, parse_retrieval, OutputCapture
 from loc.utils.geometry import compute_epipolar_errors
 
+from .base import Mapper
+
 import pycolmap
 
 # logger
@@ -17,7 +19,13 @@ import logging
 logger = logging.getLogger("loc")
 
 
-class ColmapMapper(object):
+class ColmapMapper(Mapper):
+    """ Colmap mapping class (SFM) 
+
+    Args:
+        workspace  ([str, Pathlib]) : path to sfm model
+        cfg  (dict) : configuration parameters
+    """ 
     
     def __init__(self, data_path, workspace, cfg={}):
         
@@ -44,12 +52,27 @@ class ColmapMapper(object):
         self.read_model(self.colmap_model_path)
         
     def load_model(self):
+        """load colmap sift model
+
+        Returns:
+            pycolmap.Reconstruction: colmap sift reconstruction 
+        """        
         return pycolmap.Reconstruction(self.colmap_model_path)
  
     def load_visloc(self):
+        """load visloc model
+
+        Returns:
+            pycolmap.Reconstruction: visloc reconstruction 
+        """        
         return pycolmap.Reconstruction(self.visloc_model_path)  
      
     def read_model(self, model_path):
+        """read colmap model
+
+        Args:
+            model_path ([str]): path to colmap reconstruction 
+        """        
         
         logger.info('reading Colmap model')
         
@@ -65,19 +88,47 @@ class ColmapMapper(object):
         self.points3D = points3D
     
     def get_images(self):
+        """get list of images
+
+        Returns:
+            List: list of images
+        """        
         return self.images
     
     def get_cameras(self):
+        """get list of cameras
+
+        Returns:
+            List: list of cameras
+        """        
         return self.cameras
     
     def get_points3D(self):
+        """get map 3D points
+
+        Returns:
+            List: list of map 3D points
+        """        
         return self.points3D
      
     def names_to_ids(self):  
+        """images names to ids mapping
+
+        Returns:
+            dict: names to ids mapping
+        """        
         model = self.load_model()
         return {image.name: i for i, image in model.images.items()}  
     
     def covisible_pairs(self, num_covis=None):
+        """get co-visible image pairs
+
+        Args:
+            num_covis (int, optional): number of covisible pairs . Defaults to None.
+
+        Returns:
+            str: path tp list of pairs (*.txt)
+        """        
 
         if num_covis is None:
             num_covis = self.cfg.mapper.num_covis
@@ -136,6 +187,8 @@ class ColmapMapper(object):
         return self.sfm_pairs_path
     
     def create_database(self):
+        """create reconstruction database
+        """        
         
         # 
         
@@ -162,6 +215,11 @@ class ColmapMapper(object):
         db.close()
             
     def import_features(self, features_path):
+        """import features to database
+
+        Args:
+            features_path (str): path to features data (*.h5) 
+        """        
         
         logger.info('importing features into the database...')
         
@@ -178,6 +236,12 @@ class ColmapMapper(object):
         db.close()  
 
     def import_matches(self, pairs_path, matches_path):
+        """import matches to database
+
+        Args:
+            pairs_path (str): path to images pairs (*.txt)
+            matches_path (str): path to features data (*.h5) 
+        """        
         
         logger.info('importing matches into the database...')
 
@@ -210,55 +274,41 @@ class ColmapMapper(object):
         db.commit()
         db.close()    
              
-    def covisible_images(self, image_id, num_covisble_point=1):
-        """Get co-visible images.
-        Args:
-            image_id (int): Image id
-            num_covisble_point (int): The number of co-visible 3D point
-        Returns:
-            list[int]: Co-visible image ids
-        """
-        covisible_images_to_num_points = {}
-        if image_id not in self.images:
-            logging.error('Image id {} not exist in reconstruction. The reason '
-                          'may be you did not specify images_bin_path when '
-                          'creating database.bin '.format(image_id))
-            return []
-        point3d_ids = self.images[image_id].point3D_ids
-        for point3d_id in point3d_ids:
-            if point3d_id == -1:
-                continue
-            image_ids = self.point3ds[point3d_id].image_ids
-            for id in image_ids:
-                if id in covisible_images_to_num_points:
-                    covisible_images_to_num_points[id] += 1
-                else:
-                    covisible_images_to_num_points[id] = 1
-
-        covisible_pairs = [(id, covisible_images_to_num_points[id])
-                           for id in covisible_images_to_num_points]
-
-        covisible_pairs = sorted(covisible_pairs,
-                                 key=lambda k: k[1],
-                                 reverse=True)
-
-        image_ids = [
-            id for id, num_point in covisible_pairs
-            if num_point >= num_covisble_point and id != image_id
-        ]
-
-        return [image_id] + image_ids
-
     def estimation_and_geometric_verification(self, pairs_path, verbose=False):
+        """ colmap geometric verification for pair matches 
+            pycolmap.verify_matches
+
+        Args:
+            pairs_path (str): path to images pairs (*.txt)
+            verbose (bool, optional): console print. Defaults to False.
+        """        
         
         logger.info('performing estimation and geometric verification of the matches...')
         
+        # TODO: not pretty
+        
+        max_num_trials      =self.cfg.mapper.max_num_trials
+        min_inlier_ratio    = self.cfg.mapper.min_inlier_ratio
+
         with OutputCapture(verbose):
             with pycolmap.ostream():
-                pycolmap.verify_matches(self.database_path, pairs_path, max_num_trials=20000, min_inlier_ratio=0.1)
+                pycolmap.verify_matches(self.database_path, 
+                                        pairs_path, 
+                                        max_num_trials=max_num_trials, 
+                                        min_inlier_ratio=min_inlier_ratio)
 
-    def geometric_verification(self, features_path, pairs_path, matches_path, max_error=4.0):
+    def geometric_verification(self, features_path, pairs_path, matches_path):
+        """geometric verification for pair matches 
 
+        Args:
+            features_path (str): path to features data (*.h5) 
+            pairs_path (str): path to images pairs (*.txt)
+            matches_path (str): path to features data (*.h5) 
+        """
+        
+        # maximum epipolar error
+        max_epip_error = self.cfg.mapper.max_epip_error 
+        
         logger.info('performing geometric verification of the matches...')
         
         # 
@@ -319,8 +369,8 @@ class ColmapMapper(object):
                 
 
                 valid_matches = np.logical_and(
-                    errors0 <= max_error * noise0 / cam0.mean_focal_length(),
-                    errors1 <= max_error * noise1 / cam1.mean_focal_length())
+                    errors0 <= max_epip_error * noise0 / cam0.mean_focal_length(),
+                    errors1 <= max_epip_error * noise1 / cam1.mean_focal_length())
 
                 # TODO: We could also add E to the database, but we need
                 # to reverse the transformations if id0 > id1 in utils/database.py.
@@ -336,7 +386,16 @@ class ColmapMapper(object):
         db.commit()
         db.close()       
 
-    def triangulate_points(self, options=None, verbose=False):
+    def triangulate_points(self, options={}, verbose=False):
+        """triangulation 
+
+        Args:
+            options (dict, optional): triangulation options . Defaults to None.
+            verbose (bool, optional): print console. Defaults to False.
+
+        Returns:
+            pycolmap.Reconstruction: reconstruction 
+        """        
         
         # 
         output_path = self.visloc_model_path
@@ -364,7 +423,4 @@ class ColmapMapper(object):
         return reconstruction                 
     
     def run(self):
-        """
-            run mapper, take images and create an sfm model
-        """
         raise NotImplementedError

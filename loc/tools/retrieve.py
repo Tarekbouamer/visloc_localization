@@ -7,7 +7,7 @@ import torch
 import collections.abc as collections
 import os 
 
-from loc.dataset        import ImagesFromList, ImagesTransform
+from loc.tools.dataset        import ImagesFromList, ImagesTransform
 from loc.extractors     import FeatureExtractor
 
 from loc.utils.io import  find_unique_new_pairs
@@ -17,21 +17,14 @@ import logging
 logger = logging.getLogger("loc")
 
 
-def get_descriptors(desc_path, names, key='global_descriptor'):
-    
-    descs = []
-
-    for n in names:
-        with h5py.File(str(desc_path), 'r') as fd:
-            x = fd[n][key].__array__()
-            descs.append(fd[n][key].__array__())
-            
-    out = torch.from_numpy(np.stack(descs, 0)).float()
-    
-    return out
-
-
 class Retrieval(object):
+    """general retrieval class
+
+    Args:
+        workspace (str): workspace path
+        save_path (str): save path for global features
+        cfg (dict): configurations
+    """    
     
     def __init__(self, workspace, save_path, cfg):
         
@@ -55,6 +48,15 @@ class Retrieval(object):
 
     
     def extract_images(self, images_path, split=None):
+        """extract global features
+
+        Args:
+            images_path (str): images path
+            split (str, optional): [query, db]. Defaults to None.
+
+        Returns:
+            dict: retrieval predictions 
+        """        
         
         images          = ImagesFromList(root=images_path, split=split, cfg=self.cfg)
         features_path   = Path(str(self.save_path) + '/' + str(split) + '_global_features' + '.h5')
@@ -64,6 +66,11 @@ class Retrieval(object):
         return preds
     
     def extract_images_databse(self):
+        """extract databse global features
+
+        Returns:
+            dict: database retrieval predictions         
+        """        
         
         logger.info(f"extract global features for databse images ")
 
@@ -72,6 +79,11 @@ class Retrieval(object):
         return db_preds
 
     def extract_images_queries(self):
+        """extract query global features
+
+        Returns:
+            dict: query retrieval predictions         
+        """  
         
         logger.info(f"extract global features for query images ")
 
@@ -80,6 +92,15 @@ class Retrieval(object):
         return db_preds    
     
     def __match(self, q_preds, db_preds):
+        """descriptor bases matcher
+
+        Args:
+            q_preds (dict): query predictions 
+            db_preds (dict): databse predictions
+
+        Returns:
+            dict: retrieval name pairs
+        """        
         #
         q_descs  = q_preds["features"]
         db_descs = db_preds["features"]
@@ -118,9 +139,25 @@ class Retrieval(object):
         return name_pairs
     
     def __remove_duplicates(self, pairs):
+        """remove duplicate pairs (a,b) (b,a)
+
+        Args:
+            pairs (dict): named pairs
+
+        Returns:
+            dict: filtred named pairs
+        """        
         return find_unique_new_pairs(pairs)
     
     def retrieve(self, remove_duplicates=True):
+        """retrieval main
+
+        Args:
+            remove_duplicates (bool, optional): remove duplicate pairs. Defaults to True.
+
+        Returns:
+            str: path to retrieval pairs (*.txt)
+        """        
     
         # extract
         db_preds    = self.extract_images_databse()
@@ -142,16 +179,21 @@ class Retrieval(object):
         return self.pairs_path
     
     
+def do_retrieve(workspace, save_path, cfg={}):
+    """perform retrieval 
+
+    Args:
+        workspace (str): workspace path
+        save_path (str): save path
+        cfg (dict): configurations 
+
+    Returns:
+        str: path to retrieval pairs (*.txt)
+    """    
     
+    ret = Retrieval(workspace=workspace, save_path=save_path, cfg=cfg)
     
-def do_retrieve(workspace, save_path, cfg):
-    
-    # save
-    ret = Retrieval(workspace=workspace, 
-                    save_path=save_path,
-                    cfg=cfg)
-    
-    # retrieve
+    # run
     image_pairs = ret.retrieve()   
        
     return image_pairs

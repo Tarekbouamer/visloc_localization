@@ -2,7 +2,6 @@
 
 import multiprocessing as mp 
 from multiprocessing import Process, Queue, Value
-import random
 
 from  collections import Set
 import numpy as np

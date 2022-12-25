@@ -21,14 +21,13 @@ from loc.utils.configurations   import make_config
 from loc.utils.logging          import setup_logger
 
 # loc
-from loc.dataset        import ImagesFromList, ImagesTransform
+from loc.datasets.dataset        import ImagesFromList, ImagesTransform
 
-from loc.extract        import do_extraction
-from loc.retrieve       import do_retrieve
-from loc.matching       import do_matching
-from loc.localize       import main as localize
-from loc.covisibility   import main as covisibility
-from loc.triangulation  import main as triangulation
+from loc.tools.extract        import do_extraction
+from loc.tools.retrieve       import do_retrieve
+from loc.tools.matching       import do_matching
+from loc.localize             import  do_localization
+from loc.tools.reconstruction  import main as triangulation
 from loc.vis            import visualize_sfm_2d 
 
 from loc.utils.viewer3d import Visualizer, VisualizerGui
@@ -49,7 +48,7 @@ from loc.extractors      import SuperPoint, FeatureExtractor
 # third 
 
 # configs
-from loc.config import *
+from loc.configurations.dataset_config import *
 
 def make_parser():
     # ArgumentParser
@@ -61,6 +60,9 @@ def make_parser():
                         help='path to localization folder')
     parser.add_argument("--config", metavar="FILE", type=str, help="Path to configuration file",
                         default='loc/configurations/default.yml')
+
+    parser.add_argument('--num_threads', metavar='CST',type=int,
+                        default=4, help='number of workers')
 
     args = parser.parse_args()
     
@@ -122,7 +124,9 @@ def main(args):
     # sfm_matches_path = do_matching( src_path=db_features_path, 
     #                                 dst_path=db_features_path, 
     #                                 pairs_path=sfm_pairs_path, 
-    #                                 save_path=sfm_matches_path)
+    #                                 save_path=sfm_matches_path
+    #                                 num_threads=args.num_threads)
+
     
     # # triangulate
     # reconstruction = triangulation(mapper, 
@@ -138,20 +142,21 @@ def main(args):
     
     # # match
     loc_matches_path = args.save_path / 'loc_matches.h5' 
-    # loc_matches_path= do_matching(src_path=q_features_path, 
-    #                               dst_path=db_features_path, 
-    #                               pairs_path=loc_pairs_path, 
-    #                               save_path=loc_matches_path)
+    loc_matches_path= do_matching(src_path=q_features_path, 
+                                  dst_path=db_features_path, 
+                                  pairs_path=loc_pairs_path, 
+                                  save_path=loc_matches_path,
+                                  num_threads=args.num_threads)
     
     # # localize
     query_set = ImagesFromList(root=args.directory, split="query", cfg=data_cfg, gray=True)
 
-    # localize(sfm_model=mapper.visloc_model_path,
-    #          queries=query_set.get_cameras(),
-    #          pairs_path=loc_pairs_path,
-    #          features=q_features_path,
-    #          matches=loc_matches_path,
-    #          results=args.save_path)
+    do_localization(sfm_model=mapper.visloc_model_path,
+                    queries=query_set.get_cameras(),
+                    pairs_path=loc_pairs_path,
+                    features=q_features_path,
+                    matches=loc_matches_path,
+                    save_path=args.save_path)
     # import pycolmap
     # sfm_model = pycolmap.Reconstruction(mapper.visloc_model_path)  
     # sample_data = open3d.data.DemoCustomVisualization()
