@@ -1,7 +1,184 @@
-[12/24 23:45 loc]: init visloc_localization
-[12/24 23:45 loc]: data workspace /media/dl/Data/datasets/aachen
-[12/24 23:45 loc]: visloc workspace /media/dl/Data/datasets/aachen/visloc
-[12/24 23:45 loc]: init Colmap Mapper
-[12/24 23:45 loc]: reading Colmap model
-[12/24 23:45 loc]: model successfully loaded
-[12/24 23:45 loc]: found 947 images with 922 intrinsics
+[12/26 00:02 loc]: init visloc_localization
+[12/26 00:02 loc]: data workspace /media/dl/Data/datasets/aachen
+[12/26 00:02 loc]: visloc workspace /media/dl/Data/datasets/aachen/visloc
+[12/26 00:02 loc]: dataset:
+  name: aachen
+mapper:
+  name: colmap
+  num_covis: 10
+  min_match_score: None
+  skip_geometric_verification: false
+  max_num_trials: 20000
+  min_inlier_ratio: 0.1
+  max_epip_error: 4.0
+retrieval:
+  model_name: sfm_resnet50_gem_2048
+  max_size: 1024
+  num_topK: 20
+extractor:
+  name: superpoint
+  max_keypoints: 1024
+  max_size: 640
+  keypoint_threshold: 0.005
+  remove_borders: 4
+  nms_radius: 3
+matcher:
+  distance_thresh: 0.7
+solver:
+  ransac:
+    max_reproj_error: 12.0
+    max_epipolar_error: 1.0
+  bundle:
+    max_iterations: 100
+localize:
+  covis_clustering: false
+query:
+  images: images/images_upright/
+  cameras: queries/*_time_queries_with_intrinsics.txt
+db:
+  images: images/images_upright/
+  cameras: null
+
+[12/26 00:02 loc]: init Colmap Mapper
+[12/26 00:02 loc]: reading Colmap model
+[12/26 00:02 loc]: model successfully loaded
+[12/26 00:02 loc]: searching for 10 covisibility pairs 
+[12/26 00:03 loc]: found 43169 covisible pairs saved /media/dl/Data/datasets/aachen/visloc/sfm_pairs_10.txt
+[12/26 00:03 loc]: init feature extractor superpoint
+[12/26 00:03 loc]: extract local features for database images 
+[12/26 00:03 loc]: found 4479 images with None intrinsics
+[12/26 00:03 loc]: extract local features for query images 
+[12/26 00:03 loc]: found 947 images with 922 intrinsics
+[12/26 00:03 loc]: matching 29734 pairs
+[12/26 00:03 loc]: Matcher type ( mutual_nearest_neighbor ) is initialized
+[12/26 00:06 loc]: matches saved to /media/dl/Data/datasets/aachen/visloc/sfm_matches.h5
+[12/26 00:06 loc]: The database already exists, deleting it.
+[12/26 00:06 loc]: importing features into the database...
+[12/26 00:06 loc]: importing matches into the database...
+[12/26 00:06 loc]: performing geometric verification of the matches...
+[12/26 00:09 loc]: mean/med/min/max valid matches 62.72/70.59/0.00/100.00%.
+[12/26 00:09 loc]: running 3D triangulation...
+[12/26 00:10 loc]: finished the triangulation with statistics:
+Reconstruction:
+	num_reg_images = 4328
+	num_cameras = 4328
+	num_points3D = 246760
+	num_observations = 1392642
+	mean_track_length = 5.64371
+	mean_observations_per_image = 321.775
+	mean_reprojection_error = 0.766815
+[12/26 00:10 loc]: init retrieval sfm_resnet50_gem_2048
+[12/26 00:10 loc]: extract global features for databse images 
+[12/26 00:10 loc]: found 4479 images with None intrinsics
+[12/26 00:11 loc]: extract global features for query images 
+[12/26 00:11 loc]: found 947 images with 922 intrinsics
+[12/26 00:11 loc]: retrive top 20 images
+[12/26 00:11 loc]: 18940 pairs have been found, saved /media/dl/Data/datasets/aachen/visloc/pairs_sfm_resnet50_gem_2048_20.txt
+[12/26 00:11 loc]: matching 18940 pairs
+[12/26 00:11 loc]: Matcher type ( mutual_nearest_neighbor ) is initialized
+[12/26 00:13 loc]: matches saved to /media/dl/Data/datasets/aachen/visloc/loc_matches.h5
+[12/26 00:13 loc]: found 947 images with 922 intrinsics
+[12/26 00:13 loc]: loading visloc model
+[12/26 00:13 loc]: load retrievals pairs
+[12/26 00:13 loc]: starting localization
+[12/26 00:13 loc]: zero 3D points for db/557.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2426.jpg.
+[12/26 00:13 loc]: zero 3D points for db/1246.jpg.
+[12/26 00:13 loc]: zero 3D points for db/557.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2043.jpg.
+[12/26 00:13 loc]: zero 3D points for db/557.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2043.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3839.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2606.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2654.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3970.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2039.jpg.
+[12/26 00:13 loc]: zero 3D points for db/4043.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2606.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2593.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2976.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2048.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3970.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2606.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2654.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2606.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2663.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2593.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2654.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2593.jpg.
+[12/26 00:13 loc]: zero 3D points for db/4043.jpg.
+[12/26 00:13 loc]: zero 3D points for db/294.jpg.
+[12/26 00:13 loc]: zero 3D points for db/294.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2593.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/294.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2593.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3970.jpg.
+[12/26 00:13 loc]: zero 3D points for db/294.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2225.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2222.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2223.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2224.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2663.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2662.jpg.
+[12/26 00:13 loc]: zero 3D points for db/557.jpg.
+[12/26 00:13 loc]: zero 3D points for db/294.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2663.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3970.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2654.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3970.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2043.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3839.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2663.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2656.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2663.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3312.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2053.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2435.jpg.
+[12/26 00:13 loc]: zero 3D points for db/257.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3970.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2593.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2663.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2435.jpg.
+[12/26 00:13 loc]: zero 3D points for db/257.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2662.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2606.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2593.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2663.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2606.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2593.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2043.jpg.
+[12/26 00:13 loc]: zero 3D points for db/3970.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2606.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2656.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2593.jpg.
+[12/26 00:13 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:13 loc]: zero 3D points for db/294.jpg.
+[12/26 00:14 loc]: zero 3D points for db/2426.jpg.
+[12/26 00:14 loc]: zero 3D points for db/557.jpg.
+[12/26 00:14 loc]: zero 3D points for db/2663.jpg.
+[12/26 00:14 loc]: zero 3D points for db/294.jpg.
+[12/26 00:14 loc]: zero 3D points for db/2225.jpg.
+[12/26 00:14 loc]: zero 3D points for db/3839.jpg.
+[12/26 00:14 loc]: zero 3D points for db/3839.jpg.
+[12/26 00:14 loc]: zero 3D points for db/2004.jpg.
+[12/26 00:14 loc]: zero 3D points for db/2039.jpg.
+[12/26 00:14 loc]: zero 3D points for db/3970.jpg.
+[12/26 00:14 loc]: zero 3D points for db/2043.jpg.
+[12/26 00:14 loc]: writing poses to /media/dl/Data/datasets/aachen/visloc/visloc.poses.txt...
+[12/26 00:14 loc]: writing logs to /media/dl/Data/datasets/aachen/visloc/visloc.logs.pkl 
+[12/26 00:14 loc]: localized 922 / 922 images.
+[12/26 00:14 loc]: done!

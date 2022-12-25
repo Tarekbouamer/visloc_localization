@@ -151,7 +151,7 @@ def do_matching(pairs_path, src_path, dst_path, save_path=None, num_threads=4):
     logger.info("matching %s pairs", len(pair_dataset))    
     
     # workers
-    writer_queue  = WorkQueue(partial(matcher_writer, match_path=save_path), num_threads)
+    writer_queue  = WorkQueue(partial(matcher_writer, save_path=save_path), num_threads)
             
     # matcher
     matcher = matchers.MutualNearestNeighbor()

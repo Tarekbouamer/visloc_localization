@@ -7,7 +7,7 @@ import torch
 import collections.abc as collections
 import os 
 
-from loc.tools.dataset        import ImagesFromList, ImagesTransform
+from loc.datasets.dataset        import ImagesFromList, ImagesTransform
 from loc.extractors     import FeatureExtractor
 
 from loc.utils.io import  find_unique_new_pairs
