@@ -49,7 +49,7 @@ class ColmapMapper(Mapper):
         self.sfm_pairs_path = workspace / str('sfm_pairs_' + str(self.cfg.mapper.num_covis) + '.txt') 
                          
         # read model
-        self.read_model(self.colmap_model_path)
+        # self.read_model(self.colmap_model_path)
         
     def load_model(self):
         """load colmap sift model
@@ -422,5 +422,39 @@ class ColmapMapper(Mapper):
         
         return reconstruction                 
     
-    def run(self):
-        raise NotImplementedError
+    def run_sfm(self, database_path, image_dir, output_path):
+        
+        logger.info("colmap extract features")
+        sift_options = {
+            "num_threads": 4,
+            "max_image_size": 640,
+            "max_num_features": 4096,
+        }
+        # pycolmap.extract_features(database_path, image_dir, 
+        #                           sift_options=sift_options, 
+        #                           verbose=True)
+        
+        
+        logger.info("colmap match exhaustive")
+        
+        sift_matching_options = {
+            "num_threads": 4
+            }
+        exhaustive_options = {}
+        
+        pycolmap.match_exhaustive(database_path, 
+                                #   exhaustive_options=exhaustive_options,
+                                  verbose=True)
+        
+        logger.info("colmap incremental mapping")
+        
+        mapper_options = {
+            "num_threads": 4
+        }
+        maps = pycolmap.incremental_mapping(database_path, image_dir, output_path,
+                                            mapper_options=mapper_options)
+        
+        logger.info("write colmap model")
+        maps[0].write(output_path)
+        
+        exit(0)
