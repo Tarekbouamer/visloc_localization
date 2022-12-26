@@ -35,7 +35,7 @@ from loc.utils.colmap.database import COLMAPDatabase
 from loc.utils.colmap.read_write_model import read_model
 from loc.utils.configurations import make_config
 from loc.utils.logging import setup_logger
-from loc.utils.viewer3d import Visualizer, VisualizerGui
+from loc.utils.viewer import VisualizerGui, Visualizer
 
 # retrieval
 # import retrieval as ret
@@ -102,6 +102,10 @@ def main(args):
     mapper = ColmapMapper(data_path=args.directory,
                           workspace=args.save_path, 
                           cfg=cfg)
+    
+    mapper.run_sfm(database_path="/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/data/database.db",
+                   image_dir="/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/data/images",
+                   output_path="/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/data")
     
     # # covisibility
     sfm_pairs_path = mapper.covisible_pairs()
