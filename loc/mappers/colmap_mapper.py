@@ -438,13 +438,17 @@ class ColmapMapper(Mapper):
         logger.info("colmap match exhaustive")
         
         sift_matching_options = {
-            "num_threads": 4
+            "num_threads": 16
             }
-        exhaustive_options = {}
+        exhaustive_options = {
+            "block_size": 500
+        }
         
-        pycolmap.match_exhaustive(database_path, 
-                                #   exhaustive_options=exhaustive_options,
-                                  verbose=True)
+        # pycolmap.match_exhaustive(database_path, 
+        #                           sift_options = sift_matching_options,
+        #                           matching_options=exhaustive_options,
+        #                         #   exhaustive_options=exhaustive_options,
+        #                           verbose=True)
         
         logger.info("colmap incremental mapping")
         
@@ -452,7 +456,7 @@ class ColmapMapper(Mapper):
             "num_threads": 4
         }
         maps = pycolmap.incremental_mapping(database_path, image_dir, output_path,
-                                            mapper_options=mapper_options)
+                                            options=mapper_options)
         
         logger.info("write colmap model")
         maps[0].write(output_path)
