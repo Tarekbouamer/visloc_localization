@@ -1,7 +1,7 @@
-[12/26 17:13 loc]: init visloc_localization
-[12/26 17:13 loc]: data workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
-[12/26 17:13 loc]: visloc workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-[12/26 17:13 loc]: dataset:
+[12/27 14:02 loc]: init visloc_localization
+[12/27 14:02 loc]: data workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+[12/27 14:02 loc]: visloc workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
+[12/27 14:02 loc]: dataset:
   name: aachen
 mapper:
   name: colmap
@@ -39,6 +39,6 @@ db:
   images: images/images_upright/
   cameras: null
 
-[12/26 17:13 loc]: init Colmap Mapper
-[12/26 17:13 loc]: colmap extract features
-[12/26 17:13 loc]: colmap match exhaustive
+[12/27 14:02 loc]: init Colmap Mapper
+[12/27 14:02 loc]: colmap extract features
+[12/27 14:02 loc]: colmap match exhaustive
