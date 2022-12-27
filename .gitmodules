@@ -9,3 +9,6 @@
 [submodule "thirdparty/Pangolin"]
 	path = thirdparty/Pangolin
 	url = https://github.com/stevenlovegrove/Pangolin
+[submodule "thirdparty/pycolmap"]
+	path = thirdparty/pycolmap
+	url = https://github.com/colmap/pycolmap
