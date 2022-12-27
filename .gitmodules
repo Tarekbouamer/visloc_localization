@@ -1,14 +1,6 @@
 [submodule "thirdparty/SuperGluePretrainedNetwork"]
 	path = thirdparty/SuperGluePretrainedNetwork
 	url = https://github.com/magicleap/SuperGluePretrainedNetwork
-
-[submodule "thirdparty/--force"]
-	path = thirdparty/--force
-	url = https://github.com/stevenlovegrove/Pangolin
-
-[submodule "thirdparty/Pangolin"]
-	path = thirdparty/Pangolin
-	url = https://github.com/stevenlovegrove/Pangolin
 [submodule "thirdparty/pycolmap"]
 	path = thirdparty/pycolmap
 	url = https://github.com/colmap/pycolmap

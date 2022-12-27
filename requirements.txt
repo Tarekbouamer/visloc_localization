@@ -1,3 +1,4 @@
+setuptools==58.2.0
 Pillow
 numpy
 Cython
@@ -11,7 +12,7 @@ matplotlib
 termcolor  
 gdown==4.5.4
 timm==0.6.12
-pycolmap==0.3.0
+# pycolmap==0.3.0
 tabulate==0.8.10
 PyOpenGL
 omegaconf
