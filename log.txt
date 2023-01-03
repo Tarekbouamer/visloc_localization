@@ -1,7 +1,9 @@
-[12/30 11:41 loc]: init visloc_localization
-[12/30 11:41 loc]: data workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
-[12/30 11:41 loc]: visloc workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-[12/30 11:41 loc]: dataset:
+[01/03 14:23 loc]: init visloc_localization
+[01/03 14:23 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+[01/03 14:23 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
+[01/03 14:23 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
+[01/03 14:23 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
+[01/03 14:23 loc]: dataset:
   name: aachen
 mapper:
   name: colmap
@@ -33,14 +35,13 @@ solver:
 localize:
   covis_clustering: false
 query:
-  images: images/images_upright/
+  images: images_upright/
   cameras: queries/*_time_queries_with_intrinsics.txt
 db:
-  images: images/images_upright/
+  images: images_upright/
   cameras: null
 
-[12/30 11:41 loc]: init Colmap Mapper
-[12/30 11:41 loc]: colmap extract features
-[12/30 11:41 loc]: colmap match exhaustive
-[12/30 11:41 loc]: colmap incremental mapping
-[12/31 08:16 loc]: write colmap model /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/data
+[01/03 14:23 loc]: init Colmap Mapper
+[01/03 14:23 loc]: run colmap incremental mapping
+[01/03 14:23 loc]: colmap extract features
+[01/03 14:27 loc]: colmap match exhaustive

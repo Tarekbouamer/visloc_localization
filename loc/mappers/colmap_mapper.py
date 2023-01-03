@@ -27,7 +27,7 @@ class ColmapMapper(Mapper):
         cfg  (dict) : configuration parameters
     """ 
     
-    def __init__(self, data_path, workspace, cfg={}):
+    def __init__(self, workspace: Path, images_path: Path,  cfg: dict ={}):
         
         # cfg
         self.cfg = cfg
@@ -35,21 +35,25 @@ class ColmapMapper(Mapper):
         #
         logger.info("init Colmap Mapper")
         
-        #
+        # workspace
         self.workspace      = workspace
-        self.images_path    = data_path / self.cfg.db.images
         
-        self.colmap_model_path     = workspace / 'colmap_model'
-        self.visloc_model_path     = workspace / 'visloc_model'  
-
-        self.colmap_model_path.mkdir(parents=True, exist_ok=True)
-        self.visloc_model_path.mkdir(parents=True, exist_ok=True)
+        # images
+        self.images_path    = images_path / self.cfg.db.images if self.cfg.db.images else images_path
+        
+        # 
+        self.colmap_path     = workspace / 'mapper'
+        self.visloc_path     = workspace / 'visloc'  
+        
         #
-        self.database_path   = self.visloc_model_path / 'database.db'
-        self.sfm_pairs_path = workspace / str('sfm_pairs_' + str(self.cfg.mapper.num_covis) + '.txt') 
-                         
+        self.database_path   = self.visloc_path / 'database.db'
+        
+        # 
+        self.sfm_pairs_path  = workspace / str('sfm_pairs_' + str(self.cfg.mapper.num_covis) + '.txt') 
+        
+
         # read model
-        # self.read_model(self.colmap_model_path)
+        # self.read_model(self.colmap_path)
         
     def load_model(self):
         """load colmap sift model
@@ -65,7 +69,7 @@ class ColmapMapper(Mapper):
         Returns:
             pycolmap.Reconstruction: visloc reconstruction 
         """        
-        return pycolmap.Reconstruction(self.visloc_model_path)  
+        return pycolmap.Reconstruction(self.visloc_path)  
      
     def read_model(self, model_path):
         """read colmap model
@@ -81,6 +85,7 @@ class ColmapMapper(Mapper):
 
         # read
         cameras, images, points3D = read_model(model_path)
+        
         logger.info('model successfully loaded')
 
         self.cameras  = cameras
@@ -398,7 +403,7 @@ class ColmapMapper(Mapper):
         """        
         
         # 
-        output_path = self.visloc_model_path
+        output_path = self.visloc_path
         output_path.mkdir(parents=True, exist_ok=True)
         
         #
@@ -422,44 +427,62 @@ class ColmapMapper(Mapper):
         
         return reconstruction                 
     
-    def run_sfm(self, database_path, image_dir, output_path):
+    def run_sfm(self):
         
-        logger.info("colmap extract features")
+        # 
+        logger.info("run colmap incremental mapping")
+
+        
+        # 
+        database_path = self.colmap_path / "database.db"
+        database_path.unlink()
+
+        # extraction options
         sift_options = {
             "num_threads": 4,
             "max_image_size": 640,
-            "max_num_features": 4096,
-        }
-        # pycolmap.extract_features(database_path, image_dir, 
-        #                           sift_options=sift_options, 
-        #                           verbose=True)
-        
-        
-        logger.info("colmap match exhaustive")
-        
-        sift_matching_options = {
-            "num_threads": 16
+            "max_num_features": 4096
             }
-        exhaustive_options = {
-            "block_size": 500
-        }
         
-        # pycolmap.match_exhaustive(database_path, 
-        #                           sift_options = sift_matching_options,
-        #                           matching_options=exhaustive_options,
-        #                         #   exhaustive_options=exhaustive_options,
-        #                           verbose=True)
+
+        # extract features
+        logger.info("colmap extract features")
+        pycolmap.extract_features(database_path, 
+                                  self.images_path, 
+                                  sift_options=sift_options, 
+                                  verbose=True)
         
-        logger.info("colmap incremental mapping")
         
+        # matcher options 
+        sift_matching_options = { "num_threads": 16 }
+        exhaustive_options  = { "block_size": 500 }
+        
+        # match exhaustive
+        logger.info("colmap match exhaustive")
+        pycolmap.match_exhaustive(database_path, 
+                                  sift_options = sift_matching_options,
+                                  matching_options=exhaustive_options,
+                                  exhaustive_options=exhaustive_options,
+                                  verbose=True)
+        
+        # mapper options 
         mapper_options = {
             "num_threads": 4
         }
-        
-        maps = pycolmap.incremental_mapping(database_path, image_dir, output_path,
+
+        # incremental mapping 
+        logger.info("colmap incremental mapping")
+        maps = pycolmap.incremental_mapping(database_path, 
+                                            self.images_path, 
+                                            self.colmap_path,
                                             options=mapper_options)
+
+        # write model
+        logger.info(f"write colmap model {self.colmap_path}")
+        maps[0].write(self.colmap_path)
         
-        logger.info(f"write colmap model {output_path}")
-        maps[0].write(output_path)
+        #
+        return self.colmap_path
         
-        exit(0)
+
+        

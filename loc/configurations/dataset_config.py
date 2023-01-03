@@ -6,11 +6,11 @@ class DataConfigs(object):
     
     Aachen = {
         'query': {
-            'images':   "images/images_upright/",
+            'images':   "images_upright/",
             'cameras':  'queries/*_time_queries_with_intrinsics.txt'
             },
         'db': { 
-            'images':   "images/images_upright/",
+            'images':   "images_upright/",
             'cameras':  None
             }
         }

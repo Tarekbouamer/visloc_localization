@@ -48,7 +48,7 @@ def make_parser():
     # ArgumentParser
     parser = argparse.ArgumentParser(description='VisLoc Localization')
 
-    parser.add_argument('--directory', metavar='IMPORT_DIR',
+    parser.add_argument('--workspace', metavar='IMPORT_DIR',
                         help='data folder')
     parser.add_argument('--save_path', metavar='EXPORT_DIR',
                         help='path to localization folder')
@@ -72,14 +72,24 @@ def main(args):
     logger = setup_logger(output=".", name="loc")
     logger.info("init visloc_localization")
     
-    args.directory = Path(args.directory)
-    logger.info(f"data workspace {args.directory}")
+    # workspace
+    args.workspace = Path(args.workspace)
+    logger.info(f"workspace {args.workspace}")
     
-    if args.save_path is None:
-        args.save_path = args.directory / 'visloc' 
+    # images
+    args.images_path = args.workspace / 'images' 
+    args.images_path.mkdir(parents=True, exist_ok=True)
+    logger.info(f"images {args.images_path}")
     
-    logger.info(f"visloc workspace {args.save_path}")
-    args.save_path.mkdir(parents=True, exist_ok=True)
+    # visloc
+    args.visloc_path = args.workspace / 'visloc' 
+    args.visloc_path.mkdir(parents=True, exist_ok=True)
+    logger.info(f"visloc {args.visloc_path}")
+    
+    # mapper
+    args.mapper_path = args.workspace / 'mapper' 
+    args.mapper_path.mkdir(parents=True, exist_ok=True)
+    logger.info(f"mapper {args.mapper_path}")
         
     # load config 
     cfg = OmegaConf.load(args.config)
@@ -99,19 +109,17 @@ def main(args):
     
     
     # mapper  
-    mapper = ColmapMapper(data_path=args.directory,
-                          workspace=args.save_path, 
+    mapper = ColmapMapper(workspace=args.workspace, 
+                          images_path=args.images_path,
                           cfg=cfg)
-    
-    mapper.run_sfm(database_path="/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/data/database.db",
-                   image_dir="/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/data/images",
-                   output_path="/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/data")
+
+    mapper.run_sfm()
     
     # # covisibility
     sfm_pairs_path = mapper.covisible_pairs()
 
     # # 
-    db_features_path, q_features_path = do_extraction(workspace=args.directory,
+    db_features_path, q_features_path = do_extraction(workspace=args.workspace,
                                                       save_path=args.save_path,
                                                       cfg=cfg)
 
@@ -131,7 +139,7 @@ def main(args):
                                    sfm_matches_path)
     
     # # # retrieve
-    loc_pairs_path = do_retrieve(workspace=args.directory ,
+    loc_pairs_path = do_retrieve(workspace=args.workspace ,
                                  save_path=args.save_path,
                                  cfg=cfg
                                  ) 
@@ -145,7 +153,7 @@ def main(args):
                                   num_threads=args.num_threads)
     
     # # localize
-    query_set = ImagesFromList(root=args.directory, split="query", cfg=data_cfg, gray=True)
+    query_set = ImagesFromList(root=args.workspace, split="query", cfg=data_cfg, gray=True)
 
     do_localization(visloc_model=mapper.visloc_model_path,
                     queries=query_set.get_cameras(),
