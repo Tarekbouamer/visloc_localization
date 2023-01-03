@@ -455,10 +455,11 @@ class ColmapMapper(Mapper):
         mapper_options = {
             "num_threads": 4
         }
+        
         maps = pycolmap.incremental_mapping(database_path, image_dir, output_path,
                                             options=mapper_options)
         
-        logger.info("write colmap model")
+        logger.info(f"write colmap model {output_path}")
         maps[0].write(output_path)
         
         exit(0)

@@ -35,5 +35,6 @@
     "tvec",
     "unsqueeze",
     "visloc"
-  ]
+  ],
+  "ros.distro": "melodic"
 }
