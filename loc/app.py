@@ -3,6 +3,8 @@
 from flask import Flask, jsonify, request
 import json
 
+from PIL import Image
+
 #declared an empty variable for reassignment
 response = ''
 
@@ -18,12 +20,21 @@ def nameRoute():
 
     #checking the request type we get from the app
     if(request.method == 'POST'):
-        request_data = request.data #getting the response data
-        request_data = json.loads(request_data.decode('utf-8')) #converting it from json to key value pair
-        print(request_data)
-        name = request_data['name'] #assigning it to name
-        print(name)
-        response = f'Hi {name}! this is Python' #re-assigning response with the name we got from the user
+        # file = request.files #getting the response data
+        file = request.files
+        print(file)
+        
+        image = Image.open(file["image"])
+        print(image.size)
+        image.show()
+
+        # image = Image.open(file).resize((32, 32))
+        # print(request_data['name'])
+        # request_data = json.loads(request_data.decode('utf-8')) #converting it from json to key value pair
+        # print(request_data)
+        # name = request_data['name'] #assigning it to name
+        # print(name)
+        # response = f'Hi {name}! this is Python' #re-assigning response with the name we got from the user
         return " " #to avoid a type error 
     else:
         print(response)
@@ -31,4 +42,4 @@ def nameRoute():
 
 
 if __name__ == "__main__":
-    app.run(host='10.18.30.56', port=5000, debug=True)
+    app.run(host="0.0.0.0", debug=True)

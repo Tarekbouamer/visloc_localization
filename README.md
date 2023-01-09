@@ -21,7 +21,25 @@ Visloc-Localization library is a collection of various localization algorithmsn 
 
 ![demo_vid](assets/aachen.png)
 
+install:
 
+```
+git clone --recurse-submodules https://github.com/Tarekbouamer/visloc_localization
+```
+
+Main system requirements:
+  * Python 3.7
+  * CUDA 11.3
+  * PyColmap
+  * Poselib
+
+
+```
+conda create -n loc
+conda activate loc
+conda install pytorch torchvision cudatoolkit=11.3 -c pytorch
+pip install gdown timm==0.5.4
+```
 
 ## Roadmap
 
