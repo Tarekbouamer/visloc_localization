@@ -24,7 +24,7 @@ def nameRoute():
         file = request.files
         print(file)
         
-        image = Image.open(file["image"])
+        image = Image.open(file["image"]).resize((320, 320))
         print(image.size)
         image.show()
 
