@@ -4,3 +4,6 @@
 [submodule "thirdparty/pycolmap"]
 	path = thirdparty/pycolmap
 	url = https://github.com/colmap/pycolmap
+[submodule "thirdparty/PoseLib"]
+	path = thirdparty/PoseLib
+	url = https://github.com/vlarsson/PoseLib
