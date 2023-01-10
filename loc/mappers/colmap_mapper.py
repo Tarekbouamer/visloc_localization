@@ -5,7 +5,7 @@ import numpy as np
 from tqdm import tqdm
 from collections import defaultdict
 
-from loc.colmap.database import COLMAPDatabase
+from loc.utils.colmap.database import COLMAPDatabase
 from loc.utils.colmap.read_write_model import read_model
 from loc.utils.io import parse_name, find_pair, get_keypoints, get_matches, parse_retrieval, OutputCapture
 from loc.utils.geometry import compute_epipolar_errors
@@ -432,10 +432,10 @@ class ColmapMapper(Mapper):
         # 
         logger.info("run colmap incremental mapping")
 
-        
         # 
         database_path = self.colmap_path / "database.db"
-        database_path.unlink()
+        if database_path.exists():
+            database_path.unlink()
 
         # extraction options
         sift_options = {
@@ -447,6 +447,7 @@ class ColmapMapper(Mapper):
 
         # extract features
         logger.info("colmap extract features")
+
         pycolmap.extract_features(database_path, 
                                   self.images_path, 
                                   sift_options=sift_options, 
