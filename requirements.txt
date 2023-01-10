@@ -12,7 +12,6 @@ matplotlib
 termcolor  
 gdown==4.5.4
 timm==0.6.12
-pycolmap
 tabulate==0.8.10
 PyOpenGL
 omegaconf
@@ -20,6 +19,3 @@ pybind11
 flask
 open3d
 asmk
-
-# pangolin==0.8
-# visloc_retrieval
