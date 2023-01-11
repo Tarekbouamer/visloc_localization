@@ -434,41 +434,42 @@ class ColmapMapper(Mapper):
 
         # 
         database_path = self.colmap_path / "database.db"
-        if database_path.exists():
-            database_path.unlink()
+        
+        # if database_path.exists():
+        #     database_path.unlink()
 
         # extraction options
         sift_options = {
-            "num_threads": 4,
+            "num_threads": 16,
             "max_image_size": 640,
-            "max_num_features": 4096
+            "max_num_features": 2048
             }
         
 
         # extract features
         logger.info("colmap extract features")
 
-        pycolmap.extract_features(database_path, 
-                                  self.images_path, 
-                                  sift_options=sift_options, 
-                                  verbose=True)
+        # pycolmap.extract_features(database_path, 
+        #                           self.images_path, 
+        #                           sift_options=sift_options, 
+        #                           verbose=True)
         
         
         # matcher options 
-        sift_matching_options = { "num_threads": 16 }
+        sift_matching_options = { 
+                                 "num_threads": 4,
+                                 }
         exhaustive_options  = { "block_size": 500 }
         
         # match exhaustive
         logger.info("colmap match exhaustive")
         pycolmap.match_exhaustive(database_path, 
                                   sift_options = sift_matching_options,
-                                  matching_options=exhaustive_options,
-                                  exhaustive_options=exhaustive_options,
-                                  verbose=True)
+                                  matching_options=exhaustive_options)
         
         # mapper options 
         mapper_options = {
-            "num_threads": 4
+            "num_threads": 16
         }
 
         # incremental mapping 

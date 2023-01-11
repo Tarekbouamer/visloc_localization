@@ -1,9 +1,9 @@
-[01/11 01:56 loc]: init visloc_localization
-[01/11 01:56 loc]: workspace /media/dl/Data/datasets/aachen
-[01/11 01:56 loc]: images /media/dl/Data/datasets/aachen/images
-[01/11 01:56 loc]: visloc /media/dl/Data/datasets/aachen/visloc
-[01/11 01:56 loc]: mapper /media/dl/Data/datasets/aachen/mapper
-[01/11 01:56 loc]: dataset:
+[01/11 23:06 loc]: init visloc_localization
+[01/11 23:06 loc]: workspace /media/dl/Data/datasets/aachen
+[01/11 23:06 loc]: images /media/dl/Data/datasets/aachen/images
+[01/11 23:06 loc]: visloc /media/dl/Data/datasets/aachen/visloc
+[01/11 23:06 loc]: mapper /media/dl/Data/datasets/aachen/mapper
+[01/11 23:06 loc]: dataset:
   name: aachen
 mapper:
   name: colmap
@@ -35,12 +35,15 @@ solver:
 localize:
   covis_clustering: false
 query:
-  images: images_upright/
+  images: images_upright/query/
   cameras: queries/*_time_queries_with_intrinsics.txt
 db:
-  images: images_upright/
+  images: images_upright/db/
   cameras: null
 
-[01/11 01:56 loc]: init Colmap Mapper
-[01/11 01:56 loc]: run colmap incremental mapping
-[01/11 01:56 loc]: colmap extract features
+[01/11 23:06 loc]: init Colmap Mapper
+[01/11 23:06 loc]: run colmap incremental mapping
+[01/11 23:06 loc]: colmap extract features
+[01/11 23:06 loc]: colmap match exhaustive
+[01/11 23:06 loc]: colmap incremental mapping
+[01/11 23:06 loc]: write colmap model /media/dl/Data/datasets/aachen/mapper

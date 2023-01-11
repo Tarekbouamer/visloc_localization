@@ -36,5 +36,6 @@
     "unsqueeze",
     "visloc"
   ],
-  "ros.distro": "melodic"
+  "ros.distro": "melodic",
+  "cmake.sourceDirectory": "${workspaceFolder}/thirdparty/pycolmap/pybind11/tests"
 }
