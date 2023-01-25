@@ -3,7 +3,7 @@ dataset:
 
 mapper:
     name: colmap
-    num_covis: 10
+    num_covis: 20
     min_match_score: None
     skip_geometric_verification: False
     max_num_trials: 20000

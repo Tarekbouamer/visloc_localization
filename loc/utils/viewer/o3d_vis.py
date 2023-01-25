@@ -179,10 +179,11 @@ class VisualizerGui:
         self.gui.initialize()
         self.vis = open3d.visualization.O3DVisualizer(title="SFM", width=2048, height=1024)
     
-    def pcd_from_colmap(rec, min_track_length=3, max_reprojection_error=100):
+    def pcd_from_colmap(self, min_track_length=3, max_reprojection_error=100):   
         points = []
         colors = []
-        for p3D in rec.points3D.values():
+
+        for p3D in self.model.points3D.values():
             if p3D.track.length() < min_track_length:
                 continue
 
@@ -195,7 +196,7 @@ class VisualizerGui:
     
     def add_points(self):
         
-        pcd = self.pcd_from_colmap(self.model)
+        pcd = self.pcd_from_colmap()
         self.vis.add_geometry('pcd', pcd)
         
     def add_cameras(self):

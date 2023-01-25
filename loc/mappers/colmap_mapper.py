@@ -27,7 +27,7 @@ class ColmapMapper(Mapper):
         cfg  (dict) : configuration parameters
     """ 
     
-    def __init__(self, workspace: Path, images_path: Path,  cfg: dict ={}):
+    def __init__(self, workspace: Path,  cfg: dict ={}):
         
         # cfg
         self.cfg = cfg
@@ -39,8 +39,8 @@ class ColmapMapper(Mapper):
         self.workspace      = workspace
         
         # images
-        self.images_path    = images_path / self.cfg.db.images if self.cfg.db.images else images_path
-        
+        self.images_path    = workspace / self.cfg.db.images
+
         # 
         self.colmap_path     = workspace / 'mapper'
         self.visloc_path     = workspace / 'visloc'  
@@ -53,7 +53,7 @@ class ColmapMapper(Mapper):
         
 
         # read model
-        # self.read_model(self.colmap_path)
+        self.read_model(self.colmap_path)
         
     def load_model(self):
         """load colmap sift model
@@ -61,7 +61,7 @@ class ColmapMapper(Mapper):
         Returns:
             pycolmap.Reconstruction: colmap sift reconstruction 
         """        
-        return pycolmap.Reconstruction(self.colmap_model_path)
+        return pycolmap.Reconstruction(self.colmap_path)
  
     def load_visloc(self):
         """load visloc model

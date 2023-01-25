@@ -68,6 +68,7 @@ class Extraction(object):
         
         images          = ImagesFromList(root=images_path, split=split, cfg=self.cfg, gray=True)
         features_path   = Path(str(self.save_path) + '/' + str(split) + '_local_features' + '.h5')
+        logger.info(f"features will be saved to {features_path}")
         preds = self.extractor.extract_keypoints(images, save_path=features_path, normalize=False)
                 
         return preds, features_path
@@ -127,7 +128,7 @@ def do_extraction(workspace, save_path, cfg):
     Returns:
         str: path to retrieval pairs
     """  
-      
+
     ext = Extraction(workspace=workspace, save_path=save_path, cfg=cfg)
     
     # run

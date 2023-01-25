@@ -109,7 +109,7 @@ class SuperPoint(torch.nn.Module):
         
         for it, data in enumerate(tqdm(dataloader, total=len(dataloader), colour='red', desc='load locals'.rjust(15))):
             name = data['name'][0]
-            
+                        
             features[name] = {}
             
             #

@@ -37,12 +37,6 @@ from loc.utils.configurations import make_config
 from loc.utils.logging import setup_logger
 from loc.utils.viewer import VisualizerGui, Visualizer
 
-# retrieval
-# import retrieval as ret
-
-
-# third 
-
 
 def make_parser():
     # ArgumentParser
@@ -102,70 +96,69 @@ def main(args):
     logger.info(OmegaConf.to_yaml(cfg))
     
     # #TODO: Nvm to Colmap
-    # colmap_from_nvm(dataset_path / '3D-models/aachen_cvpr2018_db.nvm',
-    #                 dataset_path / '3D-models/database_intrinsics.txt',
-    #                 dataset_path / 'aachen.db',
-    #                 model_path) 
+    # colmap_from_nvm(args.workspace / '3D-models/aachen_cvpr2018_db.nvm',
+    #                 args.workspace / '3D-models/database_intrinsics.txt',
+    #                 args.workspace / 'aachen.db',
+    #                 args.mapper_path) 
     
     
     # mapper  
     mapper = ColmapMapper(workspace=args.workspace, 
-                          images_path=args.images_path,
                           cfg=cfg)
 
-    mapper.run_sfm()
+    # mapper.run_sfm()
     
     # # covisibility
-    sfm_pairs_path = mapper.covisible_pairs()
+    # sfm_pairs_path = mapper.covisible_pairs()
 
     # # 
-    db_features_path, q_features_path = do_extraction(workspace=args.workspace,
-                                                      save_path=args.save_path,
-                                                      cfg=cfg)
+    # db_features_path, q_features_path = do_extraction(workspace=args.workspace,
+    #                                                   save_path=args.visloc_path,
+    #                                                   cfg=cfg)
 
     # # sfm pairs
-    sfm_matches_path = args.save_path / 'sfm_matches.h5' 
-    sfm_matches_path = do_matching( src_path=db_features_path, 
-                                    dst_path=db_features_path, 
-                                    pairs_path=sfm_pairs_path, 
-                                    save_path=sfm_matches_path,
-                                    num_threads=args.num_threads)
+    sfm_matches_path = args.visloc_path / 'sfm_matches.h5' 
+    # sfm_matches_path = do_matching( src_path=db_features_path, 
+    #                                 dst_path=db_features_path, 
+    #                                 pairs_path=sfm_pairs_path, 
+    #                                 save_path=sfm_matches_path,
+    #                                 num_threads=args.num_threads)
 
     
     # # triangulate
-    reconstruction = do_reconstruction(mapper, 
-                                   sfm_pairs_path, 
-                                   db_features_path, 
-                                   sfm_matches_path)
+    # reconstruction = do_reconstruction(mapper, 
+    #                                sfm_pairs_path, 
+    #                                db_features_path, 
+    #                                sfm_matches_path)
     
     # # # retrieve
-    loc_pairs_path = do_retrieve(workspace=args.workspace ,
-                                 save_path=args.save_path,
-                                 cfg=cfg
-                                 ) 
+    # loc_pairs_path = do_retrieve(workspace=args.workspace ,
+    #                              save_path=args.visloc_path,
+    #                              cfg=cfg
+    #                              ) 
     
     # # match
-    loc_matches_path = args.save_path / 'loc_matches.h5' 
-    loc_matches_path= do_matching(src_path=q_features_path, 
-                                  dst_path=db_features_path, 
-                                  pairs_path=loc_pairs_path, 
-                                  save_path=loc_matches_path,
-                                  num_threads=args.num_threads)
+    loc_matches_path = args.visloc_path / 'loc_matches.h5' 
+    # loc_matches_path= do_matching(src_path=q_features_path, 
+    #                               dst_path=db_features_path, 
+    #                               pairs_path=loc_pairs_path, 
+    #                               save_path=loc_matches_path,
+    #                               num_threads=args.num_threads)
     
     # # localize
     query_set = ImagesFromList(root=args.workspace, split="query", cfg=data_cfg, gray=True)
 
-    do_localization(visloc_model=mapper.visloc_model_path,
-                    queries=query_set.get_cameras(),
-                    pairs_path=loc_pairs_path,
-                    features=q_features_path,
-                    matches=loc_matches_path,
-                    cfg=cfg,
-                    save_path=args.save_path)
+    # do_localization(visloc_model=mapper.visloc_path,
+    #                 queries=query_set.get_cameras(),
+    #                 pairs_path=loc_pairs_path,
+    #                 features=q_features_path,
+    #                 matches=loc_matches_path,
+    #                 cfg=cfg,
+    #                 save_path=args.visloc_path)
 
     # vis_gui
     vis = VisualizerGui()
-    vis.read_model(mapper.visloc_model_path)
+    vis.read_model(mapper.visloc_path)
     vis.create_window()
     vis.show()
 

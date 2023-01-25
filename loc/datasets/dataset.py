@@ -139,6 +139,9 @@ class ImagesFromList(data.Dataset):
     
     def __init__(self, root, cfg, split=None, transform=None, max_size=None, **kwargs): 
         
+        # 
+        self.split = split
+        
         # cfg
         cfg =  cfg[split]
         
@@ -156,15 +159,15 @@ class ImagesFromList(data.Dataset):
             self.images_path  = Path(root) / str(cfg['images']) 
 
         # split path
-        self.split_images_path  = self.images_path / str(split)
+        # self.split_images_path  = self.images_path / str(split)
 
         # load images
         paths = []
         for ext in _EXT:
-            paths += list(Path(self.split_images_path).glob('**/'+ ext)) 
+            paths += list(Path(self.images_path).glob('**/'+ ext)) 
                                         
         if len(paths) == 0:
-            raise ValueError(f'could not find any image in path: {self.split_images_path}.')
+            raise ValueError(f'could not find any image in path: {self.images_path}.')
         
         # sort   
         self.images_fn = sorted(list(set(paths)))
@@ -255,6 +258,10 @@ class ImagesFromList(data.Dataset):
              
     def get_name(self, _path):
         name = _path.relative_to(self.images_path).as_posix()
+        
+        if self.split is not None:
+            name = str(self.split) + "/" + name
+            
         return name
      
     def __getitem__(self, item):
