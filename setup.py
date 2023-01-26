@@ -33,7 +33,6 @@ setup(
     install_requires=dependencies,
 
     dependency_links=[
-        # 'git+https://github.com/Tarekbouamer/visloc_retrieval#egg=visloc_retrieval',
         'git+https://github.com/jenicek/asmk#egg=asmk'
         ]
 

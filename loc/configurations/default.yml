@@ -17,8 +17,8 @@ retrieval:
 
 extractor:
     name: superpoint
-    max_keypoints: 1024
-    max_size:  640
+    max_keypoints: 4096
+    max_size:  1024
     keypoint_threshold: 0.005  
     remove_borders: 4
     nms_radius: 3                
