@@ -1,4 +1,5 @@
 
+from typing import Any, Union, Dict, List
 
 class Mapper(object):
   """base mapping class (SFM) 

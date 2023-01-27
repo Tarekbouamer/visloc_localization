@@ -12,7 +12,6 @@ from tqdm import tqdm
 
 from loc.solvers.pnp import (AbsolutePoseEstimationPoseLib,
                              AbsolutePoseEstimationPyColmap)
-
 from loc.utils.io import (dump_logs, get_keypoints, get_matches,
                           parse_retrieval_file, write_poses_txt)
 
