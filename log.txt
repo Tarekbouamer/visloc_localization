@@ -1,9 +1,9 @@
-[02/06 16:37 loc]: init visloc_localization
-[02/06 16:37 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
-[02/06 16:37 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
-[02/06 16:37 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-[02/06 16:37 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
-[02/06 16:37 loc]: name: loc
+[02/06 23:35 loc]: init visloc_localization
+[02/06 23:35 loc]: workspace /media/dl/Data/datasets/aachen
+[02/06 23:35 loc]: images /media/dl/Data/datasets/aachen/images
+[02/06 23:35 loc]: visloc /media/dl/Data/datasets/aachen/visloc
+[02/06 23:35 loc]: mapper /media/dl/Data/datasets/aachen/mapper
+[02/06 23:35 loc]: name: loc
 num_workers: 8
 dataset:
   name: aachen
@@ -47,12 +47,58 @@ db:
   cameras: null
 convert:
   type: nvm
-  nvm_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/aachen_cvpr2018_db.nvm
-  intrinsics: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/database_intrinsics.txt
-  database: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/aachen.db
-workspace: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+  nvm_path: /media/dl/Data/datasets/aachen/3D-models/aachen_cvpr2018_db.nvm
+  intrinsics: /media/dl/Data/datasets/aachen/3D-models/database_intrinsics.txt
+  database: /media/dl/Data/datasets/aachen/aachen.db
+workspace: !!python/object/apply:pathlib.PosixPath
+- /
+- media
+- dl
+- Data
+- datasets
+- aachen
 config: loc/configurations/default.yml
-images_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
-visloc_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-mapper_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
+images_path: !!python/object/apply:pathlib.PosixPath
+- /
+- media
+- dl
+- Data
+- datasets
+- aachen
+- images
+visloc_path: !!python/object/apply:pathlib.PosixPath
+- /
+- media
+- dl
+- Data
+- datasets
+- aachen
+- visloc
+mapper_path: !!python/object/apply:pathlib.PosixPath
+- /
+- media
+- dl
+- Data
+- datasets
+- aachen
+- mapper
 
+[02/06 23:35 loc]: convert 3D model to colmap format
+[02/06 23:35 loc]: init mapper
+[02/06 23:35 loc]: init Colmap Mapper
+[02/06 23:35 loc]: reading Colmap model
+[02/06 23:35 loc]: model successfully loaded
+[02/06 23:35 loc]: compute database covisibility pairs
+[02/06 23:35 loc]: searching for 10 covisibility pairs 
+[02/06 23:36 loc]: found 43169 covisible pairs saved /media/dl/Data/datasets/aachen/sfm_pairs_10.txt
+[02/06 23:36 loc]: extract database features
+[02/06 23:36 loc]: perform databse matching
+[02/06 23:36 loc]: The database already exists, deleting it.
+[02/06 23:36 loc]: import features to database
+[02/06 23:36 loc]: import matches to database
+[02/06 23:36 loc]: geometric verification
+[02/06 23:36 loc]: triangulation
+[02/06 23:36 loc]: init retrieval sfm_resnet50_gem_2048
+[02/06 23:36 loc]: init nn matcher
+[02/06 23:36 loc]: loading visloc model
+[02/06 23:36 loc]: found 947 images with 922 intrinsics

@@ -177,7 +177,7 @@ class ImagesFromList(data.Dataset):
             self.cameras = None
                     
         # gray scale
-        self.gray = kwcfg.pop('gray', False)
+        self.gray = kwargs.pop('gray', False)
             
         # transform numpy ->  tensor
         self.transform = ImagesTransform(max_size=max_size) if transform is None else transform
@@ -283,8 +283,9 @@ class ImagesFromList(data.Dataset):
         img = img / 255.
         
         # dict
-        out["img"]   = img
-        out["name"]  = img_name
-        out["size"]  = np.array(size, dtype=float)
+        out["img"]      = img
+        out["name"]     = img_name
+        out["size"]     = np.array(size, dtype=float)
+        out["camera"]   = self.cameras[img_name]
         
         return out

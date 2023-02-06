@@ -22,10 +22,10 @@ logger = logging.getLogger("loc")
     
     
 class WorkQueue():
-    def __init__(self, work_fn, num_threads=1):
-        self.queue      = Queue(num_threads)
+    def __init__(self, work_fn, num_workers=1):
+        self.queue      = Queue(num_workers)
         self.threads    = [Thread(target=self.thread_fn, args=(work_fn,)) 
-                           for _ in range(num_threads)]
+                           for _ in range(num_workers)]
         
         for thread in self.threads:
             thread.start()
@@ -49,7 +49,7 @@ class WorkQueue():
         self.queue.put(data)
 
         
-def do_matching(pairs_path, src_path, dst_path, cfg=None, save_path=None, num_threads=4):
+def do_matching(pairs_path, src_path, dst_path, cfg=None, save_path=None, num_workers=4):
     """general matching 
 
     Args:
@@ -57,7 +57,7 @@ def do_matching(pairs_path, src_path, dst_path, cfg=None, save_path=None, num_th
         src_path (str): src image features path
         dst_path (str): dst image features path
         save_path (str, optional): path to save matches. Defaults to None.
-        num_threads (int, optional): number of workers. Defaults to 4.
+        num_workers (int, optional): number of workers. Defaults to 4.
 
     Returns:
         str: path to save matches 
@@ -86,7 +86,7 @@ def do_matching(pairs_path, src_path, dst_path, cfg=None, save_path=None, num_th
     writer = MatchesWriter(save_path=save_path)
     
     # workers
-    writer_queue  = WorkQueue(partial(writer.write_matches), num_threads)
+    writer_queue  = WorkQueue(partial(writer.write_matches), num_workers)
             
     # matcher
     matcher = Matcher(cfg=cfg)

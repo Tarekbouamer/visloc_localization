@@ -467,7 +467,7 @@ class ColmapMapper(Mapper):
 
         # extraction options
         sift_options = {
-            "num_threads": 16,
+            "num_workers": 16,
             "max_image_size": 640,
             "max_num_features": 2048
             }
@@ -484,7 +484,7 @@ class ColmapMapper(Mapper):
         
         # matcher options 
         sift_matching_options = { 
-                                 "num_threads": 4,
+                                 "num_workers": 4,
                                  }
         exhaustive_options  = { "block_size": 500 }
         
@@ -496,7 +496,7 @@ class ColmapMapper(Mapper):
         
         # mapper options 
         mapper_options = {
-            "num_threads": 16
+            "num_workers": 16
         }
 
         # incremental mapping 
