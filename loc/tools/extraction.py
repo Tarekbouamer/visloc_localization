@@ -117,6 +117,6 @@ def do_extraction(workspace, save_path, cfg):
     ext = Extraction(workspace=workspace, save_path=save_path, cfg=cfg)
     
     # run
-    image_pairs = ext.extract_images_database()    
+    db_path, q_path = ext.extract()  
     
-    return image_pairs
+    return db_path, q_path

@@ -184,7 +184,6 @@ class ColmapMapper(Mapper):
 
             # Collect pairs 
             for i in top_covis_ids:
-
                 pair = (image.name, images[i].name)
                 sfm_pairs.append(pair)
         
@@ -281,6 +280,7 @@ class ColmapMapper(Mapper):
                 continue
             
             matches, scores = self.matches_loader.load_matches(name0, name1)
+            
             if self.cfg.pop("min_match_score", None):
                 matches = matches[scores > self.cfg.pop("min_match_score", 0.)]
             

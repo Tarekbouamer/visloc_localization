@@ -13,17 +13,6 @@ logger = logging.getLogger("loc")
 
 def build_map_colmap(args, cfg, sfm_pairs_path, sfm_matches_path) -> None:
     """
-      Build a colmap model using custom features with the kapture data.
-      :param kapture_data: kapture data to use
-      :param kapture_path: path to the kapture to use
-      :param tar_handler: collection of preloaded tar archives
-      :param colmap_path: path to the colmap build
-      :param colmap_binary: path to the colmap executable
-      :param keypoints_type: type of keypoints, name of the keypoints subfolder
-      :param use_colmap_matches_importer: bool,
-      :param point_triangulator_options: options for the point triangulator
-      :param skip_list: list of steps to skip
-      :param force: Silently overwrite kapture files if already exists.
     """
 
     # convert 3d model
@@ -43,6 +32,10 @@ def build_map_colmap(args, cfg, sfm_pairs_path, sfm_matches_path) -> None:
     db_features_path, q_features_path = do_extraction(workspace=args.workspace,
                                                       save_path=args.visloc_path,
                                                       cfg=cfg)
+    
+    
+    db_features_path  = Path(str(args.visloc_path) + '/' + str("db")    + '_local_features' + '.h5')
+    q_features_path   = Path(str(args.visloc_path) + '/' + str("query") + '_local_features' + '.h5')
 
     logger.info('perform databse matching')
     sfm_matches_path = do_matching(src_path=db_features_path,
@@ -51,7 +44,7 @@ def build_map_colmap(args, cfg, sfm_pairs_path, sfm_matches_path) -> None:
                                    cfg=cfg,
                                    save_path=sfm_matches_path,
                                    num_threads=args.num_threads)
-    #
+    
     mapper.create_database()
 
     logger.info('import features to database')
@@ -68,4 +61,4 @@ def build_map_colmap(args, cfg, sfm_pairs_path, sfm_matches_path) -> None:
     logger.info('triangulation')
     reconstruction = mapper.triangulate_points()
 
-    return mapper
+    return mapper, db_features_path, q_features_path

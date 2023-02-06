@@ -427,23 +427,19 @@ def read_model(path, ext=""):
         elif detect_model_format(path, ".txt"):
             ext = ".txt"
         else:
-            try:
-                cameras, images, points3D = read_model(os.path.join(path, "model/"))
-                logger.warning(
-                    "This SfM file structure was deprecated in hloc v1.1")
-                return cameras, images, points3D
-            except FileNotFoundError:
-                raise FileNotFoundError(
-                    f"Could not find binary or text COLMAP model at {path}")
+            print("Provide model format: '.bin' or '.txt'")
+            return
 
     if ext == ".txt":
         cameras     = read_cameras_text(os.path.join(path, "cameras" + ext))
         images      = read_images_text(os.path.join(path, "images" + ext))
         points3D    = read_points3D_text(os.path.join(path, "points3D") + ext)
+    
     else:
         cameras     = read_cameras_binary(os.path.join(path, "cameras" + ext))
         images      = read_images_binary(os.path.join(path, "images" + ext))
         points3D    = read_points3D_binary(os.path.join(path, "points3D") + ext)
+    
     return cameras, images, points3D
 
 

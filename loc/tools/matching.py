@@ -78,7 +78,7 @@ def do_matching(pairs_path, src_path, dst_path, cfg=None, save_path=None, num_th
 
     # pair dataset loader
     pair_dataset = PairsDataset(pairs=pairs, src_path=src_path, dst_path=dst_path)
-    pair_loader  = DataLoader(pair_dataset, num_workers=16, batch_size=1, shuffle=False, pin_memory=True)
+    pair_loader  = DataLoader(pair_dataset, num_workers=8, batch_size=1, shuffle=False, pin_memory=True)
     
     logger.info("matching %s pairs", len(pair_dataset))  
     
@@ -96,7 +96,7 @@ def do_matching(pairs_path, src_path, dst_path, cfg=None, save_path=None, num_th
 
         # match
         preds = matcher.match_pair(data)
-        
+
         # get key
         pair_key = pairs2key(src_name[0], dst_name[0])
         
@@ -105,7 +105,7 @@ def do_matching(pairs_path, src_path, dst_path, cfg=None, save_path=None, num_th
     
     # collect workers    
     writer_queue.join()
-    writer.close()
+    # writer.close()
 
     #      
     logger.info("matches saved to %s", str(save_path) )

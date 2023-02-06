@@ -47,7 +47,10 @@ class MatchesLoader(Loader):
     def __init__(self, save_path: Path) -> None:
         super().__init__(save_path)
 
-    def load_matches(self, name0: str, name1: str):
+    def load_matches(self, 
+                     name0: str, 
+                     name1: str
+                     ):
 
         pair_key, reversed = find_pair(self.hfile, name0, name1)
 

@@ -101,7 +101,7 @@ def find_pair(hfile: h5py.File,
     Returns:
         Tuple[str, bool]: return key and if reverse
     """
-
+    
     if pairs2key(name0, name1) in hfile:
         return pairs2key(name0, name1), False
 
@@ -113,7 +113,7 @@ def find_pair(hfile: h5py.File,
         'Maybe you matched with a different list of pairs? ')
 
 
-def remove_duplicate_pairs(pairs: List[Tuple[str]],
+def remove_duplicate_pairs(pairs_all: List[Tuple[str]],
                            matches_path: Path = None
                            ) -> List[Tuple[str, str]]:
     """remove duplicate pairs F(name0, name1) == F(name1, name0)
@@ -126,13 +126,13 @@ def remove_duplicate_pairs(pairs: List[Tuple[str]],
         List[Tuple[str, str]]: filtred pairs
     """
 
-    _pairs = set()
+    pairs = set()
 
-    for i, j in pairs:
+    for i, j in pairs_all:
         if (j, i) not in pairs:
-            _pairs.add((i, j))
+            pairs.add((i, j))
     #
-    pairs = list(_pairs)
+    pairs = list(pairs)
 
     if matches_path is not None and matches_path.exists():
         with h5py.File(str(matches_path), 'r', libver='latest') as hfile:

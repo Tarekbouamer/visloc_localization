@@ -93,7 +93,7 @@ class MatchesWriter(Writer):
     def write_matches(self, data):
         
         pair_key, preds = data
-        
+    
         # del
         if pair_key in self.hfile:
             del self.hfile[pair_key]
