@@ -1,3 +1,4 @@
+name: loc
 num_workers: 8
 dataset: 
     name: aachen

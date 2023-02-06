@@ -15,6 +15,6 @@ def do_convert_3d_model(args, cfg):
         colmap_from_nvm(nvm=Path(cfg.convert.nvm_path),
                         intrinsics=Path(cfg.convert.intrinsics),
                         database=Path(cfg.convert.database),
-                        output=args.mapper_path) 
+                        output=cfg.mapper_path) 
     
   

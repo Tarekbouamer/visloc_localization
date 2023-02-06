@@ -199,4 +199,4 @@ if __name__ == '__main__':
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--skip_points', action='store_true')
     args = parser.parse_args()
-    main(**args.__dict__)
+    main(**cfg.__dict__)

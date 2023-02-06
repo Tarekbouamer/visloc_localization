@@ -1,5 +1,10 @@
-[02/04 20:03 loc]: init visloc_localization
-[02/04 20:03 loc]: num_workers: 8
+[02/06 16:37 loc]: init visloc_localization
+[02/06 16:37 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+[02/06 16:37 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
+[02/06 16:37 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
+[02/06 16:37 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
+[02/06 16:37 loc]: name: loc
+num_workers: 8
 dataset:
   name: aachen
 mapper:
@@ -42,70 +47,12 @@ db:
   cameras: null
 convert:
   type: nvm
-  nvm_path: /media/dl/Data/datasets/aachen//3D-models/aachen_cvpr2018_db.nvm
-  intrinsics: /media/dl/Data/datasets/aachen//3D-models/database_intrinsics.txt
-  database: /media/dl/Data/datasets/aachen//aachen.db
+  nvm_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/aachen_cvpr2018_db.nvm
+  intrinsics: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/database_intrinsics.txt
+  database: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/aachen.db
+workspace: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+config: loc/configurations/default.yml
+images_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
+visloc_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
+mapper_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
 
-[02/04 20:03 loc]: workspace /media/dl/Data/datasets/aachen
-[02/04 20:03 loc]: images /media/dl/Data/datasets/aachen/images
-[02/04 20:03 loc]: visloc /media/dl/Data/datasets/aachen/visloc
-[02/04 20:03 loc]: mapper /media/dl/Data/datasets/aachen/mapper
-[02/04 20:03 loc]: convert 3D model to colmap format
-[02/04 20:03 loc]: convert 3d model from nvm to colmap format
-[02/04 20:03 loc]: 3D model has 13026 images and 13026 cameras in database.
-[02/04 20:03 loc]: reading the NVM model...
-[02/04 20:03 loc]: reading 4328 cameras
-[02/04 20:03 loc]: reading 4328 images...
-[02/04 20:03 loc]: reading 1652687 points...
-[02/04 20:03 loc]: parsing image data
-[02/04 20:04 loc]: writing Colmap model...
-[02/04 20:05 loc]: NVM to Colmap conversion done !
-[02/04 20:05 loc]: init mapper
-[02/04 20:05 loc]: init Colmap Mapper
-[02/04 20:05 loc]: reading Colmap model
-[02/04 20:06 loc]: model successfully loaded
-[02/04 20:06 loc]: compute database covisibility pairs
-[02/04 20:06 loc]: searching for 10 covisibility pairs 
-[02/04 20:06 loc]: found 43169 covisible pairs saved /media/dl/Data/datasets/aachen/sfm_pairs_10.txt
-[02/04 20:06 loc]: extract database features
-[02/04 20:06 loc]: init feature extractor superpoint
-[02/04 20:06 loc]: extract local features for database images 
-[02/04 20:06 loc]: found 4479 images with None intrinsics
-[02/04 20:06 loc]: features will be saved to /media/dl/Data/datasets/aachen/visloc/db_local_features.h5
-[02/04 20:09 loc]: extraction done 164.2 seconds saved /media/dl/Data/datasets/aachen/visloc/db_local_features.h5
-[02/04 20:09 loc]: extract local features for query images 
-[02/04 20:09 loc]: found 947 images with 922 intrinsics
-[02/04 20:09 loc]: features will be saved to /media/dl/Data/datasets/aachen/visloc/query_local_features.h5
-[02/04 20:10 loc]: extraction done 29.43 seconds saved /media/dl/Data/datasets/aachen/visloc/query_local_features.h5
-[02/04 20:10 loc]: perform databse matching
-[02/04 20:10 loc]: matching 16299 pairs
-[02/04 20:10 loc]: init nn matcher
-[02/04 20:11 loc]: matches saved to /media/dl/Data/datasets/aachen/visloc/sfm_matches.h5
-[02/04 20:11 loc]: The database already exists, deleting it.
-[02/04 20:11 loc]: import features to database
-[02/04 20:11 loc]: importing features into the database...
-[02/04 20:11 loc]: import matches to database
-[02/04 20:11 loc]: importing matches into the database...
-[02/04 20:12 loc]: geometric verification
-[02/04 20:12 loc]: performing geometric verification of the matches...
-[02/04 20:14 loc]: mean/med/min/max valid matches 62.71/70.59/0.00/100.00%.
-[02/04 20:14 loc]: triangulation
-[02/04 20:14 loc]: running 3D triangulation...
-[02/04 20:15 loc]: finished the triangulation with statistics:
-Reconstruction:
-	num_reg_images = 4328
-	num_cameras = 4328
-	num_points3D = 246740
-	num_observations = 1392560
-	mean_track_length = 5.64384
-	mean_observations_per_image = 321.756
-	mean_reprojection_error = 0.76683
-[02/04 20:15 loc]: init retrieval sfm_resnet50_gem_2048
-[02/04 20:15 loc]: extract global features for databse images 
-[02/04 20:15 loc]: found 4479 images with None intrinsics
-[02/04 20:18 loc]: extraction done 172.5 seconds saved /media/dl/Data/datasets/aachen/visloc/db_global_features.h5
-[02/04 20:18 loc]: extract global features for query images 
-[02/04 20:18 loc]: found 947 images with 922 intrinsics
-[02/04 20:18 loc]: extraction done 29.93 seconds saved /media/dl/Data/datasets/aachen/visloc/query_global_features.h5
-[02/04 20:18 loc]: retrive top 10 images
-[02/04 20:18 loc]: 9470 pairs have been found, saved /media/dl/Data/datasets/aachen/visloc/pairs_sfm_resnet50_gem_2048_10.txt

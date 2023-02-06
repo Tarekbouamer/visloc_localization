@@ -87,7 +87,7 @@
 #     def __prepare_input__(self, x, **kwargs):
         
 #         #
-#         normalize = kwargs.pop('normalize', False)
+#         normalize = kwcfg.pop('normalize', False)
         
 #         # normalize
 #         if normalize:

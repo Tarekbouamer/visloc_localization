@@ -193,9 +193,6 @@ def do_retrieve(workspace, save_path, cfg={}):
         str: path to retrieval pairs (*.txt)
     """    
     
-    ret = Retrieval(workspace=workspace, save_path=save_path, cfg=cfg)
-    
-    # run
-    image_pairs = ret.retrieve()   
+
        
     return image_pairs

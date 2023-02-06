@@ -497,14 +497,14 @@ def main():
                         help="outut model format", default=".txt")
     args = parser.parse_args()
 
-    cameras, images, points3D = read_model(path=args.input_model, ext=args.input_format)
+    cameras, images, points3D = read_model(path=cfg.input_model, ext=cfg.input_format)
 
     print("num_cameras:", len(cameras))
     print("num_images:", len(images))
     print("num_points3D:", len(points3D))
 
-    if args.output_model is not None:
-        write_model(cameras, images, points3D, path=args.output_model, ext=args.output_format)
+    if cfg.output_model is not None:
+        write_model(cameras, images, points3D, path=cfg.output_model, ext=cfg.output_format)
 
 
 if __name__ == "__main__":

@@ -100,23 +100,50 @@ class Extraction(object):
         return db_path, q_path
     
     
+def do_database_extraction(workspace, save_path, cfg):
     
-    
-def do_extraction(workspace, save_path, cfg):
-    """general extraction function 
+    # extractor
+    logger.info(f"init feature extractor {cfg.extractor.model_name}")
 
-    Args:
-        workspace (str): workspace path
-        save_path (str): save path
-        cfg (str): configurations 
-
-    Returns:
-        str: path to retrieval pairs
-    """  
-
-    ext = Extraction(workspace=workspace, save_path=save_path, cfg=cfg)
+    extractor = LocalExtractor(cfg=cfg)
     
-    # run
-    db_path, q_path = ext.extract()  
+    split   = "db"
+    images  = ImagesFromList(root=workspace, split=split, cfg=cfg, gray=True)
+    features_path = Path(str(save_path) + '/' + str(split) + '_local_features' + '.h5')
     
-    return db_path, q_path
+    logger.info(f"features will be saved to {features_path}")
+    preds = extractor.extract_dataset(images, save_path=features_path, normalize=False)
+    
+    return save_path
+    
+def do_query_extraction(workspace, save_path, cfg):
+    
+    # extractor
+    logger.info(f"init feature extractor {cfg.extractor.model_name}")
+
+    extractor = LocalExtractor(cfg=cfg)
+    
+    split   = "query"
+    images  = ImagesFromList(root=workspace, split=split, cfg=cfg, gray=True)
+    features_path = Path(str(save_path) + '/' + str(split) + '_local_features' + '.h5')
+    
+    logger.info(f"features will be saved to {features_path}")
+    preds = extractor.extract_dataset(images, save_path=features_path, normalize=False)
+    
+    return save_path
+
+        
+    
+# def do_extraction(workspace, save_path, cfg):
+#     """general extraction function 
+#     Args:
+#         workspace (str): workspace path
+#         save_path (str): save path
+#         cfg (str): configurations 
+#     Returns:
+#         str: path to retrieval pairs
+#     """  
+#     ext = Extraction(workspace=workspace, save_path=save_path, cfg=cfg) 
+#     # run
+#     db_path, q_path = ext.extract()    
+#     return db_path, q_path

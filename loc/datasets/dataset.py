@@ -177,7 +177,7 @@ class ImagesFromList(data.Dataset):
             self.cameras = None
                     
         # gray scale
-        self.gray = kwargs.pop('gray', False)
+        self.gray = kwcfg.pop('gray', False)
             
         # transform numpy ->  tensor
         self.transform = ImagesTransform(max_size=max_size) if transform is None else transform

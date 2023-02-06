@@ -21,9 +21,9 @@ def make_aachen_cfg(args, cfg):
         
         'convert':{
             'type':         "nvm",
-            'nvm_path':     args.workspace + "/"  +'3D-models/aachen_cvpr2018_db.nvm',
-            'intrinsics':   args.workspace + "/"  + '3D-models/database_intrinsics.txt',
-            'database':     args.workspace + "/"  + 'aachen.db',
+            'nvm_path':     cfg.workspace + "/"  +'3D-models/aachen_cvpr2018_db.nvm',
+            'intrinsics':   cfg.workspace + "/"  + '3D-models/database_intrinsics.txt',
+            'database':     cfg.workspace + "/"  + 'aachen.db',
         }
         
     } 
@@ -31,20 +31,24 @@ def make_aachen_cfg(args, cfg):
     return meta 
           
           
-def make_config(name="default", args={}) :
+def make_config(name="default", cli_cfg={}) :
+    
+    # read cli cfg 
+    # base cfg
+    # dataset cfg --> TODO: to yml files for each dataset
+    # merger by order 
     
     # load config file
-    cfg = OmegaConf.load(args.config)
+    cfg = OmegaConf.load(cli_cfg.config)
     
     # make data confgi file
     if name == "default":
         data_cfg = {}
     elif name == "aachen":
-        data_cfg = make_aachen_cfg(args, cfg)
+        data_cfg = make_aachen_cfg(cli_cfg, cfg)
         
     # merge
-    cfg = OmegaConf.merge(cfg, data_cfg)
-    logger.info(OmegaConf.to_yaml(cfg))
+    cfg = OmegaConf.merge(cfg, data_cfg, cli_cfg)
     
     return cfg
     

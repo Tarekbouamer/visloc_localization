@@ -4,7 +4,7 @@ from pathlib import Path
 from loc.datasets.dataset import ImagesFromList
 from loc.mappers.colmap_mapper import ColmapMapper
 from loc.tools.convert import do_convert_3d_model
-from loc.tools.extraction import do_extraction
+from loc.tools.extraction import do_database_extraction
 from loc.tools.matching import do_matching
 
 # logger
@@ -17,11 +17,11 @@ def build_map_colmap(args, cfg, sfm_pairs_path, sfm_matches_path) -> None:
 
     # convert 3d model
     logger.info('convert 3D model to colmap format')
-    do_convert_3d_model(args=args, cfg=cfg)
+    do_convert_3d_model(cfg=cfg)
 
     # mapper
     logger.info('init mapper')
-    mapper = ColmapMapper(workspace=args.workspace, cfg=cfg)
+    mapper = ColmapMapper(workspace=cfg.workspace, cfg=cfg)
 
     # covisibility
     logger.info('compute database covisibility pairs')
@@ -29,13 +29,11 @@ def build_map_colmap(args, cfg, sfm_pairs_path, sfm_matches_path) -> None:
 
     #
     logger.info('extract database features')
-    db_features_path, q_features_path = do_extraction(workspace=args.workspace,
-                                                      save_path=args.visloc_path,
+    db_features_path = do_database_extraction(workspace=cfg.workspace,
+                                                      save_path=cfg.visloc_path,
                                                       cfg=cfg)
     
-    
-    db_features_path  = Path(str(args.visloc_path) + '/' + str("db")    + '_local_features' + '.h5')
-    q_features_path   = Path(str(args.visloc_path) + '/' + str("query") + '_local_features' + '.h5')
+    db_features_path  = Path(str(cfg.visloc_path) + '/' + str("db")    + '_local_features' + '.h5')
 
     logger.info('perform databse matching')
     sfm_matches_path = do_matching(src_path=db_features_path,
@@ -43,7 +41,7 @@ def build_map_colmap(args, cfg, sfm_pairs_path, sfm_matches_path) -> None:
                                    pairs_path=sfm_pairs_path,
                                    cfg=cfg,
                                    save_path=sfm_matches_path,
-                                   num_threads=args.num_threads)
+                                   num_threads=cfg.num_threads)
     
     mapper.create_database()
 
@@ -61,4 +59,4 @@ def build_map_colmap(args, cfg, sfm_pairs_path, sfm_matches_path) -> None:
     logger.info('triangulation')
     reconstruction = mapper.triangulate_points()
 
-    return mapper, db_features_path, q_features_path
+    return mapper, db_features_path
