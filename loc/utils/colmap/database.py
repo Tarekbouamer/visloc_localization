@@ -243,13 +243,13 @@ def example_usage():
     parser.add_argument("--database_path", default="database.db")
     args = parser.parse_args()
 
-    if os.path.exists(cfg.database_path):
+    if os.path.exists(args.database_path):
         print("ERROR: database path already exists -- will not modify it.")
         return
 
     # Open the database.
 
-    db = COLMAPDatabase.connect(cfg.database_path)
+    db = COLMAPDatabase.connect(args.database_path)
 
     # For convenience, try creating all the tables upfront.
 
@@ -354,8 +354,8 @@ def example_usage():
 
     db.close()
 
-    if os.path.exists(cfg.database_path):
-        os.remove(cfg.database_path)
+    if os.path.exists(args.database_path):
+        os.remove(args.database_path)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,8 @@
+import sys
+from pathlib import Path
+
+sys.path.append(str(Path(__file__).parent / '../'))
+
 from loc.utils.viewer import VisualizerGui
 from loc.utils.logging import setup_logger
 from loc.tools.run_localization import run_localization
@@ -6,10 +11,7 @@ from loc.configurations.dataset_config import make_config
 from omegaconf import OmegaConf
 import argparse
 import logging
-import sys
-from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent / '../'))
 
 
 # from loc.mappers.colmap_mapper import ColmapMapper
@@ -46,22 +48,22 @@ def make_workspace(cfg):
     logger = logging.getLogger("loc")
 
     # workspace
-    cfg.workspace = cfg.workspace
+    cfg.workspace = Path(cfg.workspace)
     logger.info(f"workspace {cfg.workspace}")
 
     # images
-    cfg.images_path = cfg.workspace + '/images'
-    Path(cfg.images_path).mkdir(parents=True, exist_ok=True)
+    cfg.images_path = cfg.workspace / 'images'
+    cfg.images_path.mkdir(parents=True, exist_ok=True)
     logger.info(f"images {cfg.images_path}")
 
     # visloc
-    cfg.visloc_path = cfg.workspace + '/visloc'
-    Path(cfg.visloc_path).mkdir(parents=True, exist_ok=True)
+    cfg.visloc_path = cfg.workspace / 'visloc'
+    cfg.visloc_path.mkdir(parents=True, exist_ok=True)
     logger.info(f"visloc {cfg.visloc_path}")
 
     # mapper
-    cfg.mapper_path = cfg.workspace + '/mapper'
-    Path(cfg.mapper_path).mkdir(parents=True, exist_ok=True)
+    cfg.mapper_path = cfg.workspace / 'mapper'
+    cfg.mapper_path.mkdir(parents=True, exist_ok=True)
     logger.info(f"mapper {cfg.mapper_path}")
 
     return cfg
@@ -80,17 +82,12 @@ def main(cli_cfg):
     cfg = make_workspace(cfg=cfg)
     logger.info(OmegaConf.to_yaml(cfg))
 
-    # sfm pairs
-    sfm_pairs_path = cfg.workspace / \
-        str('sfm_pairs_' + str(cfg.mapper.num_covis) + '.txt')
-    sfm_matches_path = cfg.visloc_path / 'sfm_matches.h5'
-    loc_matches_path = cfg.visloc_path / 'loc_matches.h5'
+
 
     # build map colmap
-    mapper, db_features_path = build_map_colmap(
-        cfg=cfg, sfm_pairs_path=sfm_pairs_path, sfm_matches_path=sfm_matches_path)
+    mapper, db_features_path = build_map_colmap(cfg=cfg)
 
-    run_localization(cfg=cfg, cfg=cfg, mapper=mapper)
+    run_localization(cfg=cfg, mapper=mapper)
 
     # vis_gui
     vis = VisualizerGui()

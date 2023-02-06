@@ -1,3 +1,4 @@
+from pathlib import Path 
 from loc.localize import do_localization
 from loc.datasets.dataset import ImagesFromList
 
@@ -8,7 +9,10 @@ from loc.tools.retrieval import do_retrieve, Retrieval
 import logging
 logger = logging.getLogger("loc")
 
-def run_localization(args, cfg, mapper):
+def run_localization(cfg, mapper):
+
+    # 
+    loc_matches_path  = Path(cfg.visloc_path) / 'loc_matches.h5'
 
     # 
     logger.info("compute retrieval")

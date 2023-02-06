@@ -11,10 +11,14 @@ from loc.tools.matching import do_matching
 logger = logging.getLogger("loc")
 
 
-def build_map_colmap(args, cfg, sfm_pairs_path, sfm_matches_path) -> None:
+def build_map_colmap(cfg) -> None:
     """
     """
-
+    
+    # sfm pairs
+    sfm_pairs_path    = Path(cfg.workspace) / str('sfm_pairs_' + str(cfg.mapper.num_covis) + '.txt')
+    sfm_matches_path  = Path(cfg.visloc_path) / 'sfm_matches.h5'
+   
     # convert 3d model
     logger.info('convert 3D model to colmap format')
     do_convert_3d_model(cfg=cfg)

@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger("loc")
 
 
-def make_aachen_cfg(args, cfg):
+def make_aachen_cfg(cfg):
     
     meta = {
         'query': {
@@ -40,12 +40,12 @@ def make_config(name="default", cli_cfg={}) :
     
     # load config file
     cfg = OmegaConf.load(cli_cfg.config)
-    
+
     # make data confgi file
     if name == "default":
         data_cfg = {}
     elif name == "aachen":
-        data_cfg = make_aachen_cfg(cli_cfg, cfg)
+        data_cfg = make_aachen_cfg(cli_cfg)
         
     # merge
     cfg = OmegaConf.merge(cfg, data_cfg, cli_cfg)
