@@ -19,7 +19,7 @@ import pycolmap
 import cv2
 import h5py
 
-from loc.utils.io import load_aachen_intrinsics, parse_name
+from loc.utils.io import load_aachen_intrinsics, path2key
 
 # logger
 import logging
@@ -49,11 +49,6 @@ def list_h5_names(path):
       
     return list(set(names))
 
-
-def get_keypoints(path: Path, name: str) -> np.ndarray:
-    with h5py.File(str(path), 'r') as hfile:
-        p = hfile[name]['keypoints'].__array__()
-    return p
   
 def parse_image_list(path, with_intrinsics=False, logger=None):
     images = []

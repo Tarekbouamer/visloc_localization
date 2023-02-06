@@ -1,7 +1,7 @@
 
 from torchvision import transforms
 
-from loc.utils.constants import *
+from loc.utils.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
 
 normalize_img_net = transforms.Compose([

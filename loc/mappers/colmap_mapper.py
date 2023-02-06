@@ -7,8 +7,10 @@ from collections import defaultdict
 
 from loc.utils.colmap.database import COLMAPDatabase
 from loc.utils.colmap.read_write_model import read_model
-from loc.utils.io import parse_name, find_pair, get_keypoints, get_matches, parse_retrieval, OutputCapture
+from loc.utils.io import path2key, find_pair, OutputCapture, read_pairs_dict
 from loc.utils.geometry import compute_epipolar_errors
+
+from loc.utils.readers import MatchesLoader, KeypointsLoader
 
 from .base import Mapper
 
@@ -125,7 +127,7 @@ class ColmapMapper(Mapper):
         model = self.load_model()
         return {image.name: i for i, image in model.images.items()}  
     
-    def covisible_pairs(self, num_covis=None):
+    def covisible_pairs(self, sfm_pairs_path=None, num_covis=None):
         """get co-visible image pairs
 
         Args:
@@ -135,6 +137,9 @@ class ColmapMapper(Mapper):
             str: path tp list of pairs (*.txt)
         """        
 
+        if sfm_pairs_path is None:
+            sfm_pairs_path = self.sfm_pairs_path
+            
         if num_covis is None:
             num_covis = self.cfg.mapper.num_covis
         
@@ -228,19 +233,23 @@ class ColmapMapper(Mapper):
         
         logger.info('importing features into the database...')
         
+        self.keypoints_loader = KeypointsLoader(features_path)
         db = COLMAPDatabase.connect(self.database_path)
         
         image_ids = self.names_to_ids()
         
         for image_name, image_id in tqdm(image_ids.items()):        
-            keypoints = get_keypoints(features_path, image_name)
+            keypoints, _ = self.keypoints_loader.load_keypoints(image_name)
             keypoints += 0.5  # COLMAP origin
             db.add_keypoints(image_id, keypoints)
 
         db.commit()
         db.close()  
 
-    def import_matches(self, pairs_path, matches_path):
+    def import_matches(self, 
+                       pairs_path: Path, 
+                       matches_path:Path
+                       ):
         """import matches to database
 
         Args:
@@ -250,6 +259,12 @@ class ColmapMapper(Mapper):
         
         logger.info('importing matches into the database...')
 
+        # 
+        assert matches_path.exists, matches_path
+
+        # loaders
+        self.matches_loader = MatchesLoader(matches_path)
+        
         with open(str(pairs_path), 'r') as f:
             pairs = [p.split() for p in f.readlines()]
 
@@ -265,8 +280,7 @@ class ColmapMapper(Mapper):
             if len({(id0, id1), (id1, id0)} & matched) > 0:
                 continue
             
-            matches, scores = get_matches(matches_path, name0, name1)
-            
+            matches, scores = self.matches_loader.load_matches(name0, name1)
             if self.cfg.pop("min_match_score", None):
                 matches = matches[scores > self.cfg.pop("min_match_score", 0.)]
             
@@ -302,7 +316,11 @@ class ColmapMapper(Mapper):
                                         max_num_trials=max_num_trials, 
                                         min_inlier_ratio=min_inlier_ratio)
 
-    def geometric_verification(self, features_path, pairs_path, matches_path):
+    def geometric_verification(self, 
+                               features_path: Path, 
+                               pairs_path:Path, 
+                               matches_path:Path
+                               ) -> None:
         """geometric verification for pair matches 
 
         Args:
@@ -310,6 +328,14 @@ class ColmapMapper(Mapper):
             pairs_path (str): path to images pairs (*.txt)
             matches_path (str): path to features data (*.h5) 
         """
+        assert features_path.exists,    features_path
+        assert pairs_path.exists,       pairs_path
+        assert matches_path.exists,     matches_path
+        
+        # loader
+        self.keypoints_loader   =  KeypointsLoader(features_path)
+        self.matches_loader     =  MatchesLoader(matches_path)
+        
         
         # maximum epipolar error
         max_epip_error = self.cfg.mapper.max_epip_error 
@@ -321,7 +347,7 @@ class ColmapMapper(Mapper):
         reference = self.load_model()
         
         #
-        pairs = parse_retrieval(pairs_path)
+        pairs = read_pairs_dict(pairs_path)
         db = COLMAPDatabase.connect(self.database_path)
 
         #
@@ -334,7 +360,7 @@ class ColmapMapper(Mapper):
             image0  = reference.images[id0]
             cam0    = reference.cameras[image0.camera_id]
             
-            kps0, noise0    = get_keypoints(features_path, name0, return_uncertainty=True)
+            kps0, noise0 = self.keypoints_loader.load_keypoints(name0)
             
             if len(kps0) > 0:
                 kps0 = np.stack(cam0.image_to_world(kps0))
@@ -348,7 +374,8 @@ class ColmapMapper(Mapper):
                 image1 = reference.images[id1]
                 cam1 = reference.cameras[image1.camera_id]
                 
-                kps1, noise1 = get_keypoints(features_path, name1, return_uncertainty=True)
+                kps1, noise1 = self.keypoints_loader.load_keypoints(name1)
+
                 noise1 = 1.0 if noise1 is None else noise1
 
                 if len(kps1) > 0:
@@ -356,7 +383,7 @@ class ColmapMapper(Mapper):
                 else:
                     kps1 = np.zeros((0, 2))
                     
-                matches = get_matches(matches_path, name0, name1)[0]
+                matches, _ = self.matches_loader.load_matches(name0, name1)
 
                 if len({(id0, id1), (id1, id0)} & matched) > 0:
                     continue

@@ -1,10 +1,15 @@
-from enum import Enum
+# logger
+from pathlib import Path
+
+from omegaconf import OmegaConf
+
+import logging
+logger = logging.getLogger("loc")
 
 
-class DataConfigs(object):
-    meta = {}
+def make_aachen_cfg(args, cfg):
     
-    Aachen = {
+    meta = {
         'query': {
             'images':   "images/images_upright/query/",
             'cameras':  'queries/*_time_queries_with_intrinsics.txt'
@@ -12,17 +17,34 @@ class DataConfigs(object):
         'db': { 
             'images':   "images/images_upright/db/",
             'cameras':  None
-            }
+            },
+        
+        'convert':{
+            'type':         "nvm",
+            'nvm_path':     args.workspace + "/"  +'3D-models/aachen_cvpr2018_db.nvm',
+            'intrinsics':   args.workspace + "/"  + '3D-models/database_intrinsics.txt',
+            'database':     args.workspace + "/"  + 'aachen.db',
         }
         
-def make_data_config(name="default"): 
+    } 
     
-    if name=="default":
-        return DataConfigs.Default
+    return meta 
+          
+          
+def make_config(name="default", args={}) :
     
-    elif name=="aachen":
-        return DataConfigs.Aachen
+    # load config file
+    cfg = OmegaConf.load(args.config)
     
-    else:
-        NameError
+    # make data confgi file
+    if name == "default":
+        data_cfg = {}
+    elif name == "aachen":
+        data_cfg = make_aachen_cfg(args, cfg)
+        
+    # merge
+    cfg = OmegaConf.merge(cfg, data_cfg)
+    logger.info(OmegaConf.to_yaml(cfg))
+    
+    return cfg
     

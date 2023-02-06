@@ -7,27 +7,31 @@ import torch.nn as nn
 
 from torch.utils.data import Dataset, DataLoader
 
+from loc.utils.transforms import normalize_img_net
+
 # logging
 import logging
 logger = logging.getLogger("loc")
 
-
-class BaseExtractor:
+class FeaturesExtractor:
     def __init__(self, 
-                 name:str,
-                 model:Union[str, nn.Module]=None, 
                  cfg:Dict=None
                  ) -> None:
-      
-        self.name   = name
-        self.model  = model
+
+        #
         self.cfg    = cfg
-               
+        
+        # device
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        
+        # transform / normalize
+        self.transform =  normalize_img_net
+                       
     def _set_device(self) -> None:      
-        self.model.to(device=self.device)              
+        self.extractor.to(device=self.device)              
     
     def _eval(self) -> None:
-        self.model.eval()
+        self.extractor.eval()
             
     def _load_weights(self) -> None:     
         raise NotImplementedError
@@ -38,17 +42,31 @@ class BaseExtractor:
         return self.transform(x)
          
     def _prepare_inputs(self, 
-                        x: torch.Tensor
-                        ) -> torch.Tensor:
+                        data: Dict,
+                        ) -> Dict:
         # bached
-        if len(x.shape) < 4:
-            x = x.unsqueeze(0)
+        if len(data["img"].shape) < 4:
+            data["img"] = data["img"].unsqueeze(0)
         
         # device
-        x = x.to(device=self.device) 
+        for k, v in data.items():
+            if isinstance(v, torch.Tensor):
+                data[k] = v.to(device=self.device)
 
-        return x
-            
+        return data
+
+    def _dataloader(self, 
+                    _iter
+                    )-> DataLoader:
+        
+        if isinstance(_iter, DataLoader):
+            return _iter
+        else:
+            return DataLoader(_iter, 
+                              num_workers=self.cfg.num_workers, 
+                              shuffle=False, 
+                              drop_last=False)
+                
     @torch.no_grad()     
     def extract_image(self, 
                       img: torch.Tensor, 

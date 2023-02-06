@@ -5,13 +5,13 @@ from typing import Dict, List, Tuple, Union
 import torch
 import torch.functional as f
 
-from . import BaseMatcher, MutualNearestNeighbor, SuperGlueMatcher
+from loc.matchers import BaseMatcher, MutualNearestNeighbor, SuperGlueMatcher
 
-logger = logging.getLogger("VPS")
+logger = logging.getLogger("loc")
 
 
 def make_matcher(cfg):
-    
+        
     matcher_name = cfg.matcher.name
     
     if matcher_name == "nn":
@@ -35,18 +35,24 @@ class Matcher(BaseMatcher):
         # init
         self._set_device()
         self._eval()
+        self._load_weights()
+        
+        # 
+        logger.info(f"init {cfg.matcher.name} matcher")
     
     def _prepare_inputs(self,
                         data: Dict[str, Union[torch.Tensor, List, Tuple]]
                         ) -> Dict:
-        raise NotImplementedError
+        
+        for k, v  in data.items():
+            # device
+            if isinstance(v, torch.Tensor):
+                data[k] = v.to(self.device) 
+            
+        return data
  
     def _good_matches(self, 
-                      keypoints0:torch.Tensor, 
-                      keypoints1:torch.Tensor, 
-                      matches0:torch.BoolTensor, 
-                      matching_scores0:torch.FloatTensor, 
-                      **kwargs
+                      preds: Dict[str, Union[torch.Tensor, List, Tuple]]
                       )-> Dict:
         raise NotImplementedError
       
@@ -54,7 +60,18 @@ class Matcher(BaseMatcher):
     def match_pair(self, 
                    data: Dict[str, Union[torch.Tensor, List, Tuple]]
                    ) -> Dict:
-    
+        
+        assert "descriptors0" in data, KeyError("descriptors0 missing")
+        assert "descriptors1" in data, KeyError("descriptors1 missing")
+        
+        # prepare
+        data = self._prepare_inputs(data)
+
+        # match
         preds =  self.matcher(data)
+        
+        # good matches
+        if self.cfg.matcher.good_matches:
+            preds = self._good_matches(preds)
     
         return preds

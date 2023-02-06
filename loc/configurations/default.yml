@@ -1,9 +1,10 @@
+num_workers: 8
 dataset: 
     name: aachen
 
 mapper:
     name: colmap
-    num_covis: 20
+    num_covis: 10
     min_match_score: None
     skip_geometric_verification: False
     max_num_trials: 20000
@@ -13,18 +14,21 @@ mapper:
 retrieval:
     model_name: sfm_resnet50_gem_2048
     max_size: 1024
-    num_topK : 20
+    num_topK : 10
 
 extractor:
-    name: superpoint
-    max_keypoints: 4096
-    max_size:  1024
+    model_name: superpoint
+    max_keypoints: 1024
+    max_size:  600
     keypoint_threshold: 0.005  
     remove_borders: 4
     nms_radius: 3                
 
 matcher:
+    name: nn
     distance_thresh: 0.7
+    cross_check: True
+    good_matches: False
 
 solver:
     ransac:

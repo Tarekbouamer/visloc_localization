@@ -8,27 +8,12 @@ import collections.abc as collections
 import os 
 
 from loc.datasets.dataset        import ImagesFromList, ImagesTransform
-from loc.extractors      import SuperPoint
+from loc.extractors      import LocalExtractor
 
-from loc.utils.io import  find_unique_new_pairs
 
 # logger
 import logging
 logger = logging.getLogger("loc")
-
-
-def get_descriptors(desc_path, names, key='global_descriptor'):
-    
-    descs = []
-
-    for n in names:
-        with h5py.File(str(desc_path), 'r') as fd:
-            x = fd[n][key].__array__()
-            descs.append(fd[n][key].__array__())
-            
-    out = torch.from_numpy(np.stack(descs, 0)).float()
-    
-    return out
 
 
 class Extraction(object):
@@ -46,9 +31,9 @@ class Extraction(object):
         self.cfg = cfg
         
         # extractor
-        logger.info(f"init feature extractor {cfg.extractor.name}")
+        logger.info(f"init feature extractor {cfg.extractor.model_name}")
 
-        self.extractor = SuperPoint(config=self.cfg.extractor)
+        self.extractor = LocalExtractor(cfg=cfg)
         
         #
         self.workspace  = workspace
@@ -69,7 +54,7 @@ class Extraction(object):
         images          = ImagesFromList(root=images_path, split=split, cfg=self.cfg, gray=True)
         features_path   = Path(str(self.save_path) + '/' + str(split) + '_local_features' + '.h5')
         logger.info(f"features will be saved to {features_path}")
-        preds = self.extractor.extract_keypoints(images, save_path=features_path, normalize=False)
+        preds = self.extractor.extract_dataset(images, save_path=features_path, normalize=False)
                 
         return preds, features_path
     
@@ -132,6 +117,6 @@ def do_extraction(workspace, save_path, cfg):
     ext = Extraction(workspace=workspace, save_path=save_path, cfg=cfg)
     
     # run
-    image_pairs = ext.extract()    
+    image_pairs = ext.extract_images_database()    
     
     return image_pairs

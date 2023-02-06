@@ -8,9 +8,9 @@ import collections.abc as collections
 import os 
 
 from loc.datasets.dataset        import ImagesFromList, ImagesTransform
-from loc.extractors     import FeatureExtractor
+from loc.extractors     import GlobalExtractor
 
-from loc.utils.io import  find_unique_new_pairs
+from loc.utils.io import  remove_duplicate_pairs
 
 # logger
 import logging
@@ -30,12 +30,12 @@ class Retrieval(object):
         
         # cfg
         self.cfg    = cfg
-        model_name  = self.cfg.retrieval.model_name
         num_topK    = self.cfg.retrieval.num_topK
-       
+        model_name  = self.cfg.retrieval.model_name
+        
         # extractor
         logger.info(f"init retrieval {model_name}")
-        self.extractor = FeatureExtractor(model_name=model_name)
+        self.extractor = GlobalExtractor(cfg=cfg)
         
         #
         self.workspace  = workspace
@@ -61,7 +61,9 @@ class Retrieval(object):
         images          = ImagesFromList(root=images_path, split=split, cfg=self.cfg)
         features_path   = Path(str(self.save_path) + '/' + str(split) + '_global_features' + '.h5')
         
-        preds = self.extractor.extract_global(images, save_path=features_path, normalize=True, )
+        preds = self.extractor.extract_dataset(images, 
+                                               save_path=features_path, 
+                                               normalize=True)
         
         return preds
     
@@ -91,7 +93,7 @@ class Retrieval(object):
         
         return db_preds    
     
-    def __match(self, q_preds, db_preds):
+    def _search(self, q_preds, db_preds):
         """descriptor bases matcher
 
         Args:
@@ -138,7 +140,7 @@ class Retrieval(object):
         
         return name_pairs
     
-    def __remove_duplicates(self, pairs):
+    def _remove_duplicates(self, pairs):
         """remove duplicate pairs (a,b) (b,a)
 
         Args:
@@ -147,7 +149,7 @@ class Retrieval(object):
         Returns:
             dict: filtred named pairs
         """        
-        return find_unique_new_pairs(pairs)
+        return remove_duplicate_pairs(pairs)
     
     def retrieve(self, remove_duplicates=True):
         """retrieval main
@@ -164,11 +166,11 @@ class Retrieval(object):
         q_preds     = self.extract_images_queries()
         
         # match
-        image_pairs = self.__match(q_preds, db_preds)
+        image_pairs = self._search(q_preds, db_preds)
         
         # remove duplicates
         if remove_duplicates:
-            image_pairs = self.__remove_duplicates(image_pairs)
+            image_pairs = self._remove_duplicates(image_pairs)
 
         # save pairs
         with open(self.pairs_path, 'w') as f:

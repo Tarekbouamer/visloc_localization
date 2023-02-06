@@ -12,12 +12,10 @@ from tqdm import tqdm
 
 from loc.solvers.pnp import (AbsolutePoseEstimationPoseLib,
                              AbsolutePoseEstimationPyColmap)
-from loc.utils.io import (dump_logs, get_keypoints, get_matches,
-                          parse_retrieval_file, write_poses_txt)
+from loc.utils.io import (dump_logs,
+                          read_pairs_dict, write_poses_txt)
 
 logger = logging.getLogger("loc")
-
-
 
 class VisLoc(object):
     """_summary_

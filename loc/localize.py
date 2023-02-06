@@ -12,8 +12,10 @@ from tqdm import tqdm
 
 from loc.solvers.pnp import (AbsolutePoseEstimationPoseLib,
                              AbsolutePoseEstimationPyColmap)
-from loc.utils.io import (dump_logs, get_keypoints, get_matches,
-                          parse_retrieval_file, write_poses_txt)
+from loc.utils.io import (dump_logs, read_pairs_dict,
+                          write_poses_txt)
+
+from loc.utils.readers import MatchesLoader, KeypointsLoader
 
 logger = logging.getLogger("loc")
 
@@ -79,7 +81,7 @@ class Localizer(object):
         matches (str): path to queries matches 
     """
 
-    def __init__(self, visloc_model, features, matches, cfg={}):
+    def __init__(self, visloc_model, features_path, matches_path, cfg={}):
 
         #
         self.cfg = cfg
@@ -95,11 +97,11 @@ class Localizer(object):
         self.visloc_model = visloc_model
         self.pose_estimator = pose_estimator
 
-        assert features.exists(), features
-        assert matches.exists(),  matches
+        assert features_path.exists(), features_path
+        assert matches_path.exists(),  matches_path
 
-        self.features = features
-        self.matches = matches
+        self.keypoints_loader = KeypointsLoader(features_path)
+        self.matches_loader   = MatchesLoader(matches_path)
 
         self.covis_clustering = self.cfg.localize.covis_clustering
 
@@ -125,7 +127,7 @@ class Localizer(object):
         """
 
         # get 2D points
-        kpq = get_keypoints(self.features, qname)
+        kpq, _ = self.keypoints_loader.load_keypoints(qname)
         kpq += 0.5  # COLMAP coordinates
 
         # get 3D points
@@ -148,7 +150,7 @@ class Localizer(object):
                 [p.point3D_id if p.has_point3D() else -1 for p in image.points2D])
 
             # matches
-            matches, _ = get_matches(self.matches, qname, image.name)
+            matches, _ = self.matches_loader.load_matches(qname, image.name)
             matches = matches[points3D_ids[matches[:, 1]] != -1]
 
             num_matches += len(matches)
@@ -202,7 +204,7 @@ class Localizer(object):
 
         # load retrieval pairs
         logger.info('load retrievals pairs')
-        retrieval_pairs = parse_retrieval_file(pairs_path)
+        retrieval_pairs = read_pairs_dict(pairs_path)
 
         #
         db_name_to_id = self.db_name_to_id()
@@ -295,7 +297,7 @@ class Localizer(object):
 
 
 def do_localization(queries, pairs_path,
-                    visloc_model, features, matches,
+                    visloc_model, features_path, matches_path,
                     save_path=None,
                     cfg={}):
     """general localization 
@@ -313,8 +315,8 @@ def do_localization(queries, pairs_path,
     """
 
     loc = Localizer(visloc_model=visloc_model,
-                    features=features,
-                    matches=matches,
+                    features_path=features_path,
+                    matches_path=matches_path,
                     cfg=cfg)
 
     # run
