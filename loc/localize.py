@@ -101,7 +101,7 @@ class DatasetLocalizer(object):
         assert matches_path.exists(),  matches_path
 
         self.keypoints_loader = KeypointsLoader(features_path)
-        self.matches_loader   = MatchesLoader(matches_path)
+        self.matches_loader = MatchesLoader(matches_path)
 
         self.covis_clustering = self.cfg.localize.covis_clustering
 
@@ -296,7 +296,6 @@ class DatasetLocalizer(object):
         logger.info('done!')
 
 
-
 class ImageLocalizer(object):
     """ general localizer
 
@@ -306,7 +305,7 @@ class ImageLocalizer(object):
         matches (str): path to queries matches 
     """
 
-    def __init__(self, visloc_model, retrieval, matcher, cfg={}):
+    def __init__(self, visloc_model, extractor, retrieval, matcher, cfg={}):
 
         #
         self.cfg = cfg
@@ -315,18 +314,19 @@ class ImageLocalizer(object):
         logger.info('loading visloc model')
         if not isinstance(visloc_model, pycolmap.Reconstruction):
             visloc_model = pycolmap.Reconstruction(visloc_model)
-        
-        # pose estimator 
+
+        # pose estimator
         pose_estimator = AbsolutePoseEstimationPoseLib(visloc_model, cfg)
-        
+
+        # extractor
+        self.extractor = extractor
         # retrieval
         self.retrieval = retrieval
-        
         # matcher
         self.matcher = matcher
 
         self.covis_clustering = self.cfg.localize.covis_clustering
-        
+
         self.visloc_model = visloc_model
         self.pose_estimator = pose_estimator
 
@@ -416,7 +416,10 @@ class ImageLocalizer(object):
 
         return ret, log
 
-    def __call__(self, queries, pairs_path, save_path=None):
+    def _match_pairs(self, q_preds, pairs):
+        
+        pass
+    def __call__(self, data: Dict):
         """localize
 
         Args:
@@ -425,11 +428,18 @@ class ImageLocalizer(object):
             save_path (str, optional): save directory. Defaults to None.
         """
 
-        assert pairs_path.exists(),   pairs_path
+        # find best image pairs
+        pairs = self.retrieval(data)
+        # print(image_pairs)
+        # print(len(image_pairs))
 
-        # load retrieval pairs
-        logger.info('load retrievals pairs')
-        retrieval_pairs = read_pairs_dict(pairs_path)
+        # extract locals
+        q_preds = self.extractor.extract_image(data, gray=True)
+        
+        # print(q_preds)
+        
+        self.matcher.match_query_database(q_preds, pairs)
+        input()
 
         #
         db_name_to_id = self.db_name_to_id()
@@ -519,7 +529,6 @@ class ImageLocalizer(object):
 
         logger.info(f'localized {len(poses)} / {len(queries)} images.')
         logger.info('done!')
-
 
 
 def do_localization(queries, pairs_path,

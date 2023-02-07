@@ -286,6 +286,5 @@ class ImagesFromList(data.Dataset):
         out["img"]      = img
         out["name"]     = img_name
         out["size"]     = np.array(size, dtype=float)
-        out["camera"]   = self.cameras[img_name]
         
         return out

@@ -1,9 +1,9 @@
-[02/06 23:35 loc]: init visloc_localization
-[02/06 23:35 loc]: workspace /media/dl/Data/datasets/aachen
-[02/06 23:35 loc]: images /media/dl/Data/datasets/aachen/images
-[02/06 23:35 loc]: visloc /media/dl/Data/datasets/aachen/visloc
-[02/06 23:35 loc]: mapper /media/dl/Data/datasets/aachen/mapper
-[02/06 23:35 loc]: name: loc
+[02/08 02:08 loc]: init visloc_localization
+[02/08 02:08 loc]: workspace /media/dl/Data/datasets/aachen
+[02/08 02:08 loc]: images /media/dl/Data/datasets/aachen/images
+[02/08 02:08 loc]: visloc /media/dl/Data/datasets/aachen/visloc
+[02/08 02:08 loc]: mapper /media/dl/Data/datasets/aachen/mapper
+[02/08 02:08 loc]: name: loc
 num_workers: 8
 dataset:
   name: aachen
@@ -83,22 +83,21 @@ mapper_path: !!python/object/apply:pathlib.PosixPath
 - aachen
 - mapper
 
-[02/06 23:35 loc]: convert 3D model to colmap format
-[02/06 23:35 loc]: init mapper
-[02/06 23:35 loc]: init Colmap Mapper
-[02/06 23:35 loc]: reading Colmap model
-[02/06 23:35 loc]: model successfully loaded
-[02/06 23:35 loc]: compute database covisibility pairs
-[02/06 23:35 loc]: searching for 10 covisibility pairs 
-[02/06 23:36 loc]: found 43169 covisible pairs saved /media/dl/Data/datasets/aachen/sfm_pairs_10.txt
-[02/06 23:36 loc]: extract database features
-[02/06 23:36 loc]: perform databse matching
-[02/06 23:36 loc]: The database already exists, deleting it.
-[02/06 23:36 loc]: import features to database
-[02/06 23:36 loc]: import matches to database
-[02/06 23:36 loc]: geometric verification
-[02/06 23:36 loc]: triangulation
-[02/06 23:36 loc]: init retrieval sfm_resnet50_gem_2048
-[02/06 23:36 loc]: init nn matcher
-[02/06 23:36 loc]: loading visloc model
-[02/06 23:36 loc]: found 947 images with 922 intrinsics
+[02/08 02:08 loc]: convert 3D model to colmap format
+[02/08 02:08 loc]: init mapper
+[02/08 02:08 loc]: init Colmap Mapper
+[02/08 02:08 loc]: compute database covisibility pairs
+[02/08 02:08 loc]: extract database features
+[02/08 02:08 loc]: perform databse matching
+[02/08 02:08 loc]: The database already exists, deleting it.
+[02/08 02:08 loc]: import features to database
+[02/08 02:08 loc]: import matches to database
+[02/08 02:08 loc]: geometric verification
+[02/08 02:08 loc]: triangulation
+[02/08 02:08 loc]: init retrieval sfm_resnet50_gem_2048
+[02/08 02:08 loc]: load global features from /media/dl/Data/datasets/aachen/visloc/db_global_features.h5
+[02/08 02:08 loc]: found 4479 images with None intrinsics
+[02/08 02:09 loc]: init nn matcher
+[02/08 02:09 loc]: loading visloc model
+[02/08 02:09 loc]: found 947 images with 922 intrinsics
+[02/08 02:09 loc]: retrive top 10 images

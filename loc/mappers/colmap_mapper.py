@@ -55,7 +55,7 @@ class ColmapMapper(Mapper):
         
 
         # read model
-        self.read_model(self.colmap_path)
+        # self.read_model(self.colmap_path)
         
     def load_model(self):
         """load colmap sift model

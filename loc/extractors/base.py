@@ -7,7 +7,7 @@ import torch.nn as nn
 
 from torch.utils.data import Dataset, DataLoader
 
-from loc.utils.transforms import normalize_img_net
+from loc.utils.transforms import normalize_img_net, to_gray
 
 # logging
 import logging
@@ -23,9 +23,6 @@ class FeaturesExtractor:
         
         # device
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        
-        # transform / normalize
-        self.transform =  normalize_img_net
                        
     def _set_device(self) -> None:      
         self.extractor.to(device=self.device)              
@@ -39,8 +36,13 @@ class FeaturesExtractor:
     def _normalize_imagenet(self, 
                             x: torch.Tensor
                             ) -> torch.Tensor:
-        return self.transform(x)
-         
+        return normalize_img_net(x)
+
+    def _to_gray(self, 
+                 x: torch.Tensor
+                ) -> torch.Tensor:
+        return to_gray(x)         
+    
     def _prepare_inputs(self, 
                         data: Dict,
                         ) -> Dict:

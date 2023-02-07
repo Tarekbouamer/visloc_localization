@@ -65,6 +65,38 @@ class LocalExtractor(FeaturesExtractor):
         return out
 
     @torch.no_grad()
+    def extract_image(self,
+                      data: Dict,
+                      scales: List = [1.0],
+                      **kwargs
+                      ) -> dict:
+        #
+        it_name = data['name'][0]
+        original_size = data['size'][0].cpu().numpy()
+
+        # normalize
+        if kwargs.pop("gray", False):
+            data['img'] = self._to_gray(data['img'])
+
+        # prepare inputs
+        data = self._prepare_inputs(data)
+
+        # extract
+        preds = self.extractor({'image': data["img"]})
+        preds = self._to_numpy(preds)
+
+        # scale keypoints to original scale
+        current_size = np.array(data["img"].shape[-2:][::-1])
+        scales = (original_size / current_size).astype(np.float32)
+
+        #
+        preds['keypoints'] = (preds['keypoints'] + .5) * scales[None] - .5
+        preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()
+        preds['size'] = original_size
+        
+        return preds
+
+    @torch.no_grad()
     def extract_dataset(self,
                         dataset: Union[Dataset, DataLoader],
                         scales: List = [1.0],

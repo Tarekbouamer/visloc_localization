@@ -29,7 +29,7 @@ def build_map_colmap(cfg) -> None:
 
     # covisibility
     logger.info('compute database covisibility pairs')
-    sfm_pairs_path = mapper.covisible_pairs(sfm_pairs_path=sfm_pairs_path)
+    # sfm_pairs_path = mapper.covisible_pairs(sfm_pairs_path=sfm_pairs_path)
 
     #
     logger.info('extract database features')
@@ -44,8 +44,7 @@ def build_map_colmap(cfg) -> None:
     #                                dst_path=db_features_path,
     #                                pairs_path=sfm_pairs_path,
     #                                cfg=cfg,
-    #                                save_path=sfm_matches_path,
-    #                                num_workers=cfg.num_workers)
+    #                                save_path=sfm_matches_path)
     
     mapper.create_database()
 

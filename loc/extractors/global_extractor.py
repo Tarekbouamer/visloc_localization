@@ -37,21 +37,32 @@ class GlobalExtractor(FeaturesExtractor):
         self._set_device()
         self._eval()
             
-      # @torch.no_grad()     
-      # def extract_image(self, 
-      #                   img: torch.Tensor, 
-      #                   name: str, 
-      #                   scales: List=[1.0]
-      #                   ) -> dict:
-      #     """extract an image features
-      #     Args:
-      #         img (torch.Tensor): image tensor
-      #         name (str): image name
-      #         scales (list, optional): extraction sclaes. Defaults to [1.0].
-      #     Returns:
-      #         dict: network output data
-      #     """  
-      #     raise NotImplementedError
+    @torch.no_grad()     
+    def extract_image(self, 
+                        data: Dict, 
+                        scales: List=[1.0],
+                        **kwargs 
+                        ) -> dict:          
+        # 
+        it_name = data['name']
+            
+        # normalize
+        if kwargs.pop("normalize", False):
+            data['img'] = self._normalize_imagenet(data['img'])                    
+            
+        # prepare inputs
+        data  = self._prepare_inputs(data)
+            
+        # extract
+        preds = self.extractor.extract_global(data['img'], scales=scales, do_whitening=True)    
+        preds["features"] = preds["features"][0]
+        
+        out = {
+          "features" :  torch.stack([preds["features"]]),
+          "names" :     np.stack(it_name),
+        }
+        
+        return out
 
     @torch.no_grad()     
     def extract_dataset(self, 

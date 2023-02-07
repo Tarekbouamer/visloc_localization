@@ -21,9 +21,15 @@ class Loader:
 
         # writer
         self.hfile = h5py.File(str(save_path), 'r', libver='latest')
+        
+        # device
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
     
     def load():
         pass
+    
+    def device(self):
+        return self.device
     
     def close(self):
         self.hfile.close()
@@ -39,9 +45,39 @@ class KeypointsLoader(Loader):
         
         keypoint    = dset.__array__()
         uncertainty = dset.attrs.get('uncertainty')
-        
+
+        keypoint    = keypoint.to(self.device)
+        uncertainty = uncertainty.to(self.device)    
+           
         return keypoint, uncertainty
 
+class GlobalFeaturesLoader(Loader):
+    def __init__(self, save_path: Path) -> None:
+        super().__init__(save_path)
+        
+    def load(self, name):
+        
+        desc    = self.hfile[name]["features"].__array__()
+        preds   = torch.from_numpy(desc).float()
+        
+        preds   = preds.to(self.device)
+        
+        return preds
+class LocalFeaturesLoader(Loader):
+    def __init__(self, save_path: Path) -> None:
+        super().__init__(save_path)
+        
+    def load(self, name):
+        
+        preds = {}
+        keys = list(self.hfile[name].keys())
+        
+        for k in keys:
+            v = self.hfile[name][k].__array__()
+            v = torch.from_numpy(v).float()
+            preds[k] = v.to(self.device)
+        
+        return preds
 
 class MatchesLoader(Loader):
     def __init__(self, save_path: Path) -> None:
