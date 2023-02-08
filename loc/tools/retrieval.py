@@ -54,7 +54,7 @@ class Retrieval(object):
                                            str(num_topK) + '.txt')
         # preds
         self.db_features_path = Path(
-            str(save_path) + '/' + 'db_global_features' + '.h5')
+            str(save_path) + '/' + 'db_features' + '.h5')
 
         self.db_features_preds = None
 

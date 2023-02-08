@@ -48,20 +48,14 @@ class LocalExtractor(FeaturesExtractor):
         self._set_device()
         self._eval()
 
-    def _to_numpy(self, preds):
+    def _unpack(self, preds):
         out = {}
 
         for k, v in preds.items():
-
-            # ? list
             if isinstance(v, (List, Tuple)):
                 v = v[0]
+            out[k] = v
 
-            # numpy
-            if v.is_cuda:
-                out[k] = v.cpu().numpy()
-            else:
-                out[k] = v.numpy()
         return out
 
     @torch.no_grad()
@@ -71,29 +65,38 @@ class LocalExtractor(FeaturesExtractor):
                       **kwargs
                       ) -> dict:
         #
+        __to_gray__ = kwargs.pop("gray", False)
+        __normalize__ = kwargs.pop("normalize", False)
+
+        #
         it_name = data['name'][0]
-        original_size = data['size'][0].cpu().numpy()
+        original_size = data['size'][0]
+
+        # gray
+        if __to_gray__:
+            data['img'] = self._to_gray(data['img'])
 
         # normalize
-        if kwargs.pop("gray", False):
-            data['img'] = self._to_gray(data['img'])
+        if __normalize__:
+            data['img'] = self._normalize_imagenet(data['img'])
 
         # prepare inputs
         data = self._prepare_inputs(data)
 
         # extract
         preds = self.extractor({'image': data["img"]})
-        preds = self._to_numpy(preds)
+        preds = self._unpack(preds)
 
         # scale keypoints to original scale
-        current_size = np.array(data["img"].shape[-2:][::-1])
-        scales = (original_size / current_size).astype(np.float32)
+        current_size = data["img"].shape[-2:][::-1]
+        scales = torch.Tensor(
+            (original_size[0] / current_size[0], original_size[1] / current_size[1])).to(original_size).cuda()
 
         #
         preds['keypoints'] = (preds['keypoints'] + .5) * scales[None] - .5
         preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()
         preds['size'] = original_size
-        
+
         return preds
 
     @torch.no_grad()
@@ -101,8 +104,11 @@ class LocalExtractor(FeaturesExtractor):
                         dataset: Union[Dataset, DataLoader],
                         scales: List = [1.0],
                         save_path: Path = None,
-                        normalize: bool = False
+                        **kwargs
                         ) -> Dict:
+        #
+        __to_gray__ = kwargs.pop("gray", False)
+        __normalize__ = kwargs.pop("normalize", False)
 
         # features writer
         self.writer = FeaturesWriter(save_path)
@@ -119,6 +125,14 @@ class LocalExtractor(FeaturesExtractor):
             #
             it_name = data['name'][0]
             original_size = data['size'][0].numpy()
+
+            # gray
+            if __to_gray__:
+                data['img'] = self._to_gray(data['img'])
+
+            # normalize
+            if __normalize__:
+                data['img'] = self._normalize_imagenet(data['img'])
 
             # prepare inputs
             data = self._prepare_inputs(data)

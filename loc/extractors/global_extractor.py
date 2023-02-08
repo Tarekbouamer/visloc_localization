@@ -44,11 +44,19 @@ class GlobalExtractor(FeaturesExtractor):
                         **kwargs 
                         ) -> dict:          
         # 
+        __to_gray__     =  kwargs.pop("gray", False)
+        __normalize__   =  kwargs.pop("normalize", False)
+        
+        # 
         it_name = data['name']
             
+        # gray
+        if __to_gray__:
+            data['img'] = self._to_gray(data['img'])
+                
         # normalize
-        if kwargs.pop("normalize", False):
-            data['img'] = self._normalize_imagenet(data['img'])                    
+        if __normalize__:
+            data['img'] = self._normalize_imagenet(data['img'])                
             
         # prepare inputs
         data  = self._prepare_inputs(data)
@@ -69,8 +77,11 @@ class GlobalExtractor(FeaturesExtractor):
                         dataset: Union[Dataset, DataLoader], 
                         scales:List=[1.0], 
                         save_path:Path=None,
-                        normalize: bool = False 
+                        **kwargs
                         ) -> Dict:
+        # 
+        __to_gray__     =  kwargs.pop("gray", False)
+        __normalize__   =  kwargs.pop("normalize", False)
         
         # features writer 
         self.writer = FeaturesWriter(save_path)
@@ -91,9 +102,13 @@ class GlobalExtractor(FeaturesExtractor):
             #
             it_name = data['name'][0] 
             
+            # gray
+            if __to_gray__:
+                data['img'] = self._to_gray(data['img'])
+                
             # normalize
-            if normalize:
-                data['img'] = self._normalize_imagenet(data['img'])                    
+            if __normalize__:
+                data['img'] = self._normalize_imagenet(data['img'])               
             
             # prepare inputs
             data  = self._prepare_inputs(data)
