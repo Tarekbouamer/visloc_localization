@@ -47,15 +47,20 @@ class FeaturesWriter(Writer):
         """
 
         try:
-            if key in self.hfile:
-                del self.hfile[key]
-
-            g = self.hfile.create_group(key)
-
+            # create new group
+            if key not in self.hfile:
+                grp = self.hfile.create_group(key)
+            else:
+                grp = self.hfile[key]
+           
             if isinstance(data, torch.Tensor):
                 data = self._to_numpy(data)
 
-            g.create_dataset(name, data=data)
+            # insert 
+            if name in grp:
+                grp[name][...] = data
+            else:
+                grp.create_dataset(name, data=data)
 
         except OSError as error:
             raise error
@@ -66,22 +71,23 @@ class FeaturesWriter(Writer):
                     ) -> None:
 
         try:
-            # delete
-            if key in self.hfile:
-                del self.hfile[key]
-
             # create new group
-            g = self.hfile.create_group(key)
-
+            if key not in self.hfile:
+                grp = self.hfile.create_group(key)
+            else:
+                grp = self.hfile[key]
+                
             # write dict items
             for k, v in data.items():
-
-                # convert data type
+                # convert 
                 if isinstance(v, torch.Tensor):
                     v = self._to_numpy(v)
-
-                g.create_dataset(k, data=v)
-
+                # insert 
+                if k in grp:
+                    grp[k][...] = v
+                else:
+                    grp.create_dataset(k, data=v)
+                    
         except OSError as error:
             raise error
 

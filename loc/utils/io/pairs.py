@@ -80,7 +80,6 @@ def read_pairs_dict(path: Union[str, Path]) -> Dict[str,  List]:
 
             q_name, db_name = p.split()
             pairs[q_name].append(db_name)
-    dict(pairs)
     return pairs
 
 
