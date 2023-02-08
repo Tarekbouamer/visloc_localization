@@ -23,8 +23,12 @@ class MutualNearestNeighbor(nn.Module):
     @torch.no_grad()  
     def forward(self, data):
         
-        desc0 = data["descriptors0"].squeeze(0) 
-        desc1 = data["descriptors1"].squeeze(0) 
+        desc0 = data["descriptors0"]
+        desc1 = data["descriptors1"]
+
+        if len(data["descriptors0"].shape) > 2:
+            desc0 = desc0.squeeze(0) 
+            desc1 = desc1.squeeze(0) 
 
         assert desc0.shape[1] != 0 and desc1.shape[1] != 0
         assert desc0.shape[0] == desc1.shape[0]

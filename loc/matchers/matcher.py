@@ -146,7 +146,7 @@ class MatchSequence(Matcher):
 
             # match
             preds = self.match_pair(data)
-
+            
             # get key
             pair_key = pairs2key(src_name[0], dst_name[0])
 
@@ -160,37 +160,42 @@ class MatchSequence(Matcher):
 
         return save_path
 
-def wrap_keys_with_extenstion(data: Dict, ext="0"):
-    new_data = {}
-    
-    keys = list(data.keys())
-    for k in keys:
-        new_data[k+ext] = data.pop(k)
-        
-    return new_data
-        
-        
+
+def wrap_keys_with_extenstion(data: Dict,
+                              ext="0"
+                              ):
+    return { k+ext:v for k,v in data.items()}
+
 class MatchQueryDatabase(Matcher):
     def __init__(self, cfg: Dict = {}) -> None:
         super().__init__(cfg)
 
     def match_query_database(self, q_preds, pairs):
 
-        local_features_path     = Path(str(self.cfg.visloc_path) + '/' + 'db_local_features' + '.h5')
-        local_features_loader   = LocalFeaturesLoader(save_path=local_features_path)
+        local_features_path = Path(
+            str(self.cfg.visloc_path) + '/' + 'db_features' + '.h5')
+
+        local_features_loader = LocalFeaturesLoader(
+            save_path=local_features_path)
+        #
+        q_preds = wrap_keys_with_extenstion(q_preds, ext="0")
+        
+        #
+        pairs_matches = {}
 
         for src_name, dst_name in pairs:
+
             db_preds = local_features_loader.load(dst_name)
-            
-            q_preds     = wrap_keys_with_extenstion(q_preds,    ext="0")
-            db_preds    = wrap_keys_with_extenstion(db_preds,   ext="1")
-            print(list(q_preds.keys()))
-            print(list(db_preds.keys()))
-        
-            
+
+            db_preds = wrap_keys_with_extenstion(db_preds, ext="1")
+
+            #
             preds = self.match_pair({**q_preds, **db_preds})
-            
-            print(preds)
-            print(preds.keys())
-            input()
-        pass
+
+            #
+            pair_key = pairs2key(src_name, dst_name)
+
+            #
+            pairs_matches[pair_key] = preds
+
+        return pairs_matches

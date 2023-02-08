@@ -54,6 +54,7 @@ class FeaturesExtractor:
         for k, v in data.items():
             if isinstance(v, torch.Tensor):
                 data[k] = v.to(device=self.device)
+                
 
         return data
 
