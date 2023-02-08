@@ -41,7 +41,11 @@ def run_localization(cfg, mapper):
 
     #
     for item in tqdm(query_dl, total=len(query_set)):
-
+        
+        # camera
+        item["camera"] = query_set.cameras[item['name'][0]]
+        
+        # localize
         localizer(item)
 
         input()

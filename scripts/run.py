@@ -82,8 +82,6 @@ def main(cli_cfg):
     cfg = make_workspace(cfg=cfg)
     logger.info(OmegaConf.to_yaml(cfg))
 
-
-
     # build map colmap
     mapper, db_features_path = build_map_colmap(cfg=cfg)
 
