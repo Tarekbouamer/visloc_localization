@@ -13,7 +13,7 @@ from tqdm import tqdm
 from loc.solvers.pnp import (AbsolutePoseEstimationPoseLib,
                              AbsolutePoseEstimationPyColmap)
 from loc.utils.io import (dump_logs, read_pairs_dict,
-                          write_poses_txt)
+                          write_poses_txt, pairs2key)
 
 from loc.utils.readers import MatchesLoader, KeypointsLoader
 
@@ -338,7 +338,7 @@ class ImageLocalizer(object):
         """
         return {img.name: i for i, img in self.visloc_model.images.items()}
 
-    def pose_from_cluster(self, qname, qcam, db_ids, **kwargs):
+    def pose_from_cluster(self, qname, qcam, q_preds, db_ids, pairs_matches, **kwargs):
         """cluster and find the best camera pose 
 
         Args:
@@ -352,7 +352,7 @@ class ImageLocalizer(object):
         """
 
         # get 2D points
-        kpq, _ = self.keypoints_loader.load_keypoints(qname)
+        kpq = q_preds["keypoints"]
         kpq += 0.5  # COLMAP coordinates
 
         # get 3D points
@@ -364,7 +364,7 @@ class ImageLocalizer(object):
         for i, db_id in enumerate(db_ids):
 
             image = self.visloc_model.images[db_id]
-
+            
             #
             if image.num_points3D() == 0:
                 logger.warning(f'zero 3D points for {image.name}.')
@@ -375,7 +375,12 @@ class ImageLocalizer(object):
                 [p.point3D_id if p.has_point3D() else -1 for p in image.points2D])
 
             # matches
-            matches, _ = self.matches_loader.load_matches(qname, image.name)
+            matches = pairs_matches[pairs2key(qname, image.name)]["matches"]
+            matches = matches.cpu().numpy()
+            
+            _idx    = np.where(matches != -1)[0]
+            matches = np.stack([_idx, matches[_idx]], -1)
+             
             matches = matches[points3D_ids[matches[:, 1]] != -1]
 
             num_matches += len(matches)
@@ -415,10 +420,7 @@ class ImageLocalizer(object):
         }
 
         return ret, log
-
-    def _match_pairs(self, q_preds, pairs):
-        
-        pass
+    
     def __call__(self, data: Dict):
         """localize
 
@@ -427,109 +429,59 @@ class ImageLocalizer(object):
             pairs_path (str): path to pairs
             save_path (str, optional): save directory. Defaults to None.
         """
-
-        # find best image pairs
-        pairs = self.retrieval(data)
-        # print(image_pairs)
-        # print(len(image_pairs))
-
-        # extract locals
-        q_preds = self.extractor.extract_image(data, gray=True)
-        
-        # print(q_preds)
-        
-        self.matcher.match_query_database(q_preds, pairs)
-        input()
-
-        #
-        db_name_to_id = self.db_name_to_id()
+        qname = data['name'][0]
+        qcam = data['camera']
 
         #
         poses = {}
         logs = {
-            'retrieval': retrieval_pairs,
             'loc': {}
         }
+        
+        # find best image pairs
+        pairs_names = self.retrieval(data)
+
+        # extract locals
+        q_preds = self.extractor.extract_image(data, gray=True)
+        
+        
+        # match query to database
+        pairs_matches = self.matcher.match_query_database(q_preds, pairs_names)
+        print(q_preds.keys())
+
+        # indices
+        db_name_to_id = self.db_name_to_id()
+        db_names = [x[1] for x in pairs_names]
 
         logger.info('starting localization')
-
-        # -->
-        for qname, qcam in tqdm(queries.items(), total=len(queries)):
-
-            if qname not in retrieval_pairs:
-                logger.warning(
-                    f'no images retrieved for {qname} image. skipping...')
+        
+        db_ids = []
+        for n in db_names:
+            #
+            if n not in db_name_to_id:
+                logger.debug(f'image {n} not in database')
                 continue
+            db_ids.append(db_name_to_id[n])
 
-            db_names = retrieval_pairs[qname]
-            db_ids = []
+        # empty
+        if len(db_ids) < 1:
+            logger.error(f"empty retrieval for {data['name']}")
+            exit(0)
 
-            for n in db_names:
+        # pose 
+        ret, log = self.pose_from_cluster(qname, qcam, q_preds, db_ids, pairs_matches)
 
-                #
-                if n not in db_name_to_id:
-                    logger.debug(f'image {n} not in database')
-                    continue
-                db_ids.append(db_name_to_id[n])
+        if ret['success']:
+            poses[qname] = (ret['qvec'], ret['tvec'])
+        else:
+            logger.warn("not Succesful")
+            closest = self.visloc_model.images[db_ids[0]]
+            poses[qname] = (closest.qvec, closest.tvec)
 
-            # empty
-            if len(db_ids) < 1:
-                logger.error(f"empty retrieval for {qname}")
-                exit(0)
-
-            # covisibility clustering
-            if self.covis_clustering:
-                clusters = covisibility_clustering(db_ids, self.visloc_model)
-
-                best_inliers = 0
-                best_cluster_id = None
-                logs_clusters = []
-
-                # pose from each cluster
-                for id, cluster_ids in enumerate(clusters):
-
-                    #
-                    ret, log = self.pose_from_cluster(qname, qcam, cluster_ids)
-
-                    #
-                    if ret['success'] and ret['num_inliers'] > best_inliers:
-                        best_cluster_id = id
-                        best_inliers = ret['num_inliers']
-                    #
-                    logs_clusters.append(log)
-
-                # --> Best Cluster
-                if best_cluster_id is not None:
-                    ret = logs_clusters[best_cluster_id]['PnP_ret']
-                    poses[qname] = (ret['qvec'], ret['tvec'])
-
-                #
-                logs['loc'][qname] = {
-                    'db': db_ids,
-                    'best_cluster': best_cluster_id,
-                    'log_clusters': logs_clusters,
-                    'covis_clustering': self.covis_clustering
-                }
-            else:
-                ret, log = self.pose_from_cluster(qname, qcam, db_ids)
-
-                if ret['success']:
-                    poses[qname] = (ret['qvec'], ret['tvec'])
-                else:
-                    logger.warn("not Succesful")
-                    closest = self.visloc_model.images[db_ids[0]]
-                    poses[qname] = (closest.qvec, closest.tvec)
-
-                log['covis_clustering'] = self.covis_clustering
-                logs['loc'][qname] = log
-
-        if save_path is not None:
-            write_poses_txt(poses, save_path)
-            dump_logs(logs, save_path)
-
-        logger.info(f'localized {len(poses)} / {len(queries)} images.')
-        logger.info('done!')
-
+        log['covis_clustering'] = self.covis_clustering
+        logs['loc'][qname] = log
+        
+        
 
 def do_localization(queries, pairs_path,
                     visloc_model, features_path, matches_path,
