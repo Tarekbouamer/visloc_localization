@@ -45,7 +45,12 @@ class FeaturesExtractor:
     
     def _prepare_inputs(self, 
                         data: Dict,
+                        **kwargs
                         ) -> Dict:
+       # 
+        __to_gray__     =  kwargs.pop("gray", False)
+        __normalize__   =  kwargs.pop("normalize", False)
+        
         # bached
         if len(data["img"].shape) < 4:
             data["img"] = data["img"].unsqueeze(0)
@@ -55,6 +60,13 @@ class FeaturesExtractor:
             if isinstance(v, torch.Tensor):
                 data[k] = v.to(device=self.device)
                 
+        # gray
+        if __to_gray__:
+            data['img'] = self._to_gray(data['img'])
+                
+        # normalize
+        if __normalize__:
+            data['img'] = self._normalize_imagenet(data['img'])                 
 
         return data
 

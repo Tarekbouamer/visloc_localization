@@ -65,26 +65,15 @@ class LocalExtractor(FeaturesExtractor):
                       **kwargs
                       ) -> dict:
         #
-        __to_gray__ = kwargs.pop("gray", False)
-        __normalize__ = kwargs.pop("normalize", False)
-
-        #
-        it_name = data['name'][0]
         original_size = data['size'][0]
 
-        # gray
-        if __to_gray__:
-            data['img'] = self._to_gray(data['img'])
-
-        # normalize
-        if __normalize__:
-            data['img'] = self._normalize_imagenet(data['img'])
-
         # prepare inputs
-        data = self._prepare_inputs(data)
+        data = self._prepare_inputs(data, **kwargs)
 
         # extract
         preds = self.extractor({'image': data["img"]})
+
+        # unpack
         preds = self._unpack(preds)
 
         # scale keypoints to original scale
@@ -106,10 +95,6 @@ class LocalExtractor(FeaturesExtractor):
                         save_path: Path = None,
                         **kwargs
                         ) -> Dict:
-        #
-        __to_gray__ = kwargs.pop("gray", False)
-        __normalize__ = kwargs.pop("normalize", False)
-
         # features writer
         self.writer = FeaturesWriter(save_path)
 
@@ -120,35 +105,12 @@ class LocalExtractor(FeaturesExtractor):
         start_time = time.time()
 
         # run -->
-        for it, data in enumerate(tqdm(_dataloader, total=len(_dataloader), colour='green', desc='extract global'.rjust(15))):
-
+        for it, data in enumerate(tqdm(_dataloader, total=len(_dataloader), colour='green', desc='extract locals'.rjust(15))):
             #
             it_name = data['name'][0]
-            original_size = data['size'][0].numpy()
-
-            # gray
-            if __to_gray__:
-                data['img'] = self._to_gray(data['img'])
-
-            # normalize
-            if __normalize__:
-                data['img'] = self._normalize_imagenet(data['img'])
-
-            # prepare inputs
-            data = self._prepare_inputs(data)
-
-            # extract locals
-            preds = self.extractor({'image': data["img"]})
-            preds = self._to_numpy(preds)
-
-            # scale keypoints to original scale
-            current_size = np.array(data["img"].shape[-2:][::-1])
-            scales = (original_size / current_size).astype(np.float32)
 
             #
-            preds['keypoints'] = (preds['keypoints'] + .5) * scales[None] - .5
-            preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()
-            preds['size'] = original_size
+            preds = self.extract_image(data, scales=scales, **kwargs)
 
             # write preds
             self.writer.write_items(key=it_name, data=preds)

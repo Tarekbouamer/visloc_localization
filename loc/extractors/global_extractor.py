@@ -43,34 +43,18 @@ class GlobalExtractor(FeaturesExtractor):
                         scales: List=[1.0],
                         **kwargs 
                         ) -> dict:          
-        # 
-        __to_gray__     =  kwargs.pop("gray", False)
-        __normalize__   =  kwargs.pop("normalize", False)
         
-        # 
-        it_name = data['name']
-            
-        # gray
-        if __to_gray__:
-            data['img'] = self._to_gray(data['img'])
-                
-        # normalize
-        if __normalize__:
-            data['img'] = self._normalize_imagenet(data['img'])                
-            
         # prepare inputs
-        data  = self._prepare_inputs(data)
+        data  = self._prepare_inputs(data, **kwargs)
             
         # extract
-        preds = self.extractor.extract_global(data['img'], scales=scales, do_whitening=True)    
-        preds["features"] = preds["features"][0]
+        preds = self.extractor.extract_global(data['img'], scales=scales, do_whitening=True)  
         
-        out = {
-          "features" :  torch.stack([preds["features"]]),
-          "names" :     np.stack(it_name),
-        }
+        # 
+        preds["features"]  = preds["features"][0]  
         
-        return out
+        #        
+        return preds
 
     @torch.no_grad()     
     def extract_dataset(self, 
@@ -79,19 +63,12 @@ class GlobalExtractor(FeaturesExtractor):
                         save_path:Path=None,
                         **kwargs
                         ) -> Dict:
-        # 
-        __to_gray__     =  kwargs.pop("gray", False)
-        __normalize__   =  kwargs.pop("normalize", False)
         
         # features writer 
         self.writer = FeaturesWriter(save_path)
             
         # dataloader
         _dataloader = self._dataloader(dataset)
-
-        # 
-        features = []
-        names = []
         
         # time
         start_time = time.time()
@@ -101,25 +78,9 @@ class GlobalExtractor(FeaturesExtractor):
             
             #
             it_name = data['name'][0] 
-            
-            # gray
-            if __to_gray__:
-                data['img'] = self._to_gray(data['img'])
-                
-            # normalize
-            if __normalize__:
-                data['img'] = self._normalize_imagenet(data['img'])               
-            
-            # prepare inputs
-            data  = self._prepare_inputs(data)
-            
+                       
             # extract
-            preds = self.extractor.extract_global(data['img'], scales=scales, do_whitening=True)    
-            preds["features"] = preds["features"][0]
-
-            #
-            features.append(preds["features"])
-            names.append(it_name)
+            preds = self.extract_image(data, scales, **kwargs)
             
             # write preds
             self.writer.write_items(key=it_name, data=preds)
@@ -138,8 +99,6 @@ class GlobalExtractor(FeaturesExtractor):
       
         #
         out = {
-          "features" :  torch.stack(features),
-          "names" :     np.stack(names),
           "save_path":  save_path
         }
         
