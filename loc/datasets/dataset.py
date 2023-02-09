@@ -28,15 +28,6 @@ logger = logging.getLogger("loc")
 
 _EXT = ['*.jpg', '*.png', '*.jpeg', '*.JPG', '*.PNG']
 
-def read_image(path, grayscale=False):
-    if grayscale:
-        mode = cv2.IMREAD_GRAYSCALE
-    else:
-        mode = cv2.IMREAD_COLOR
-    image = cv2.imread(str(path), mode)
-
-    return image
-
 
 def list_h5_names(path):
     names = []
@@ -80,54 +71,6 @@ def parse_image_lists(paths, with_intrinsics=False):
         images += parse_image_list(lfile, with_intrinsics=with_intrinsics)
     return images
   
-
-
-
-class ImagesTransform:
-  
-    def __init__(self, max_size, 
-                 mean=IMAGENET_DEFAULT_MEAN,
-                 std=IMAGENET_DEFAULT_STD):
-        
-        # max_size
-        self.max_size = max_size
-        
-        # preprocessing 
-        self.postprocessing = transforms.Compose([
-                transforms.ToTensor(),
-                # transforms.Normalize(mean=mean, std=std)
-                ])
-
-        
-    def __resize__(self, img):
-        
-        # scale
-        width, height   = img.size
-        max_size        = max(width, height)
-        
-        # scale
-        scale = self.max_size / max_size
-        
-        #
-        out_size = tuple(int(dim * scale) for dim in img.size)
-
-        # resize
-        return img.resize(out_size, resample=Image.BILINEAR)
-    
-
-   
-    def __call__(self, img):
-        
-        # resize
-        # img = self.__resize__(img)
-        img = self.resize(img)
-
-        #
-        # img = self.postprocessing(img)           
-
-        return dict(img=img)
-
-
 
 
 class ImagesFromList(data.Dataset):
@@ -175,13 +118,7 @@ class ImagesFromList(data.Dataset):
             self.cameras = load_aachen_intrinsics(self.cameras_path)
         else:
             self.cameras = None
-                    
-        # gray scale
-        self.gray = kwargs.pop('gray', False)
-            
-        # transform numpy ->  tensor
-        self.transform = ImagesTransform(max_size=max_size) if transform is None else transform
-        
+                                        
         # cv
         self.resize_force   = False
         self.interpolation  = 'cv2_area'
@@ -208,10 +145,10 @@ class ImagesFromList(data.Dataset):
         
         return image
             
-    def read_image(self, path, grayscale=False):
+    def read_image(self, path):
         
         # mode
-        mode = cv2.IMREAD_GRAYSCALE if grayscale else cv2.IMREAD_COLOR
+        mode = cv2.IMREAD_COLOR
       
         # read 
         image = cv2.imread(str(path), mode)
@@ -220,7 +157,7 @@ class ImagesFromList(data.Dataset):
             raise ValueError(f'Cannot read image {path}.')
         
         # BGR to RGB
-        if not grayscale and len(image.shape) == 3:
+        if len(image.shape) == 3:
             image = image[:, :, ::-1]  
         # 
         image   = image.astype(np.float32)
@@ -235,10 +172,7 @@ class ImagesFromList(data.Dataset):
         
         # open 
         with open(img_path, 'rb') as f:
-            if self.gray:
-                img = Image.open(f).convert('L')
-            else:
-                img = Image.open(f).convert('RGB')
+            img = Image.open(f).convert('RGB')
                 
         return img
     
@@ -268,16 +202,13 @@ class ImagesFromList(data.Dataset):
         img_name    = self.get_name(img_path)
                     
         # cv
-        img, size = self.read_image(img_path, grayscale=self.gray)
+        img, size = self.read_image(img_path)
 
         # resize
         img = self.resize(img, size=size)
         
-        #
-        if self.gray:
-            img = img[None]
-        else:
-            img = img.transpose((2, 0, 1))
+        # CHW
+        img = img.transpose((2, 0, 1))
         
         # 
         img = img / 255.
