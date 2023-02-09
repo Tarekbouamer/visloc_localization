@@ -3,21 +3,14 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent / '../'))
 
-from loc.utils.viewer import VisualizerGui
-from loc.utils.logging import setup_logger
-from loc.tools.run_localization import run_localization
-from loc.tools.build_map_colmap import build_map_colmap
-from loc.configurations.dataset_config import make_config
-from omegaconf import OmegaConf
-import argparse
 import logging
-
-
-
-# from loc.mappers.colmap_mapper import ColmapMapper
-# from loc.tools.extraction   import do_extraction
-# from loc.tools.convert      import do_convert_3d_model
-# from loc.tools.reconstruction import do_reconstruction
+import argparse
+from omegaconf import OmegaConf
+from loc.configurations.dataset_config import make_config
+from loc.tools.build_map_colmap import build_map_colmap
+from loc.tools.run_localization import run_localization
+from loc.utils.logging import setup_logger
+from loc.utils.viewer import VisualizerGui
 
 
 def make_parser():
@@ -91,7 +84,7 @@ def main(cli_cfg):
     vis = VisualizerGui()
     vis.read_model(mapper.visloc_path)
     vis.create_window()
-    vis.show()
+    # vis.show()
 
     logger.info("Done")
 

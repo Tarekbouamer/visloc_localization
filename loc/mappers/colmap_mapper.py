@@ -55,7 +55,7 @@ class ColmapMapper(Mapper):
             str('sfm_pairs_' + str(self.cfg.mapper.num_covis) + '.txt')
 
         # read model
-        # self.read_model(self.colmap_path)
+        self.read_model(self.colmap_path)
 
     def load_model(self):
         """load colmap sift model

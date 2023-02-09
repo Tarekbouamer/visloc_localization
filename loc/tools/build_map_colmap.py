@@ -21,7 +21,7 @@ def build_map_colmap(cfg) -> None:
    
     # convert 3d model
     logger.info('convert 3D model to colmap format')
-    do_convert_3d_model(cfg=cfg)
+    # do_convert_3d_model(cfg=cfg)
 
     # mapper
     logger.info('init mapper')
@@ -37,7 +37,7 @@ def build_map_colmap(cfg) -> None:
                                                       save_path=cfg.visloc_path,
                                                       cfg=cfg)
     
-    db_features_path  = Path(str(cfg.visloc_path) + '/' + str("db")    + '_features' + '.h5')
+    db_features_path  = Path(str(cfg.visloc_path) + '/' + 'db_features.h5')
 
     logger.info('perform databse matching')
     sfm_matches_path = do_matching(src_path=db_features_path,
@@ -45,7 +45,7 @@ def build_map_colmap(cfg) -> None:
                                    pairs_path=sfm_pairs_path,
                                    cfg=cfg,
                                    save_path=sfm_matches_path)
-    
+
     mapper.create_database()
 
     logger.info('import features to database')

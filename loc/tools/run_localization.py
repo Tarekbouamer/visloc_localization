@@ -11,6 +11,9 @@ from loc.localize import ImageLocalizer
 from loc.matchers import MatchQueryDatabase
 from loc.tools.retrieval import Retrieval, do_retrieve
 
+from loc.utils.io import (dump_logs,
+                          write_poses_txt)
+
 logger = logging.getLogger("loc")
 
 
@@ -22,7 +25,7 @@ def run_localization(cfg, mapper):
     # retrieval
     retrieval = Retrieval(workspace=cfg.workspace,
                           save_path=cfg.visloc_path, cfg=cfg)
-    
+
     retrieval.load_database_features()
 
     # matcher
@@ -33,19 +36,37 @@ def run_localization(cfg, mapper):
         visloc_model=cfg.visloc_path, extractor=extractor, retrieval=retrieval, matcher=matcher, cfg=cfg)
 
     # localize
-    query_set = ImagesFromList(
-        root=cfg.workspace, split="query", cfg=cfg, gray=False)
+    query_set = ImagesFromList(root=cfg.workspace, split="query", cfg=cfg)
 
     #
     query_dl = DataLoader(query_set, num_workers=cfg.num_workers)
 
     #
-    for item in tqdm(query_dl, total=len(query_set)):
-        
-        # camera
-        item["camera"] = query_set.cameras[item['name'][0]]
-        
-        # localize
-        localizer(item)
+    logger.info('starting localization')
 
-        input()
+    for item in tqdm(query_dl, total=len(query_set)):
+
+        # name
+        qname = item['name'][0]
+
+        if qname not in query_set.cameras:
+            continue
+        
+        # camera params
+        item["camera"] = query_set.cameras[qname]
+
+        # localize
+        qpose = localizer(item)
+
+        # logger.info(f"{item['name'][0]} estimated pose")
+        # logger.info(qpose)
+
+    #
+    poses = localizer.poses
+    logs = localizer.logs
+
+    # 
+    write_poses_txt(poses, cfg.visloc_path)
+    dump_logs(logs, cfg.visloc_path)
+
+    logger.info('done!')

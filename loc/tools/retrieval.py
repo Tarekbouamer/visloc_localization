@@ -11,7 +11,7 @@ import os
 
 from tqdm import tqdm
 
-from loc.datasets.dataset import ImagesFromList, ImagesTransform
+from loc.datasets.dataset import ImagesFromList
 from loc.extractors import GlobalExtractor
 
 from loc.utils.io import remove_duplicate_pairs
@@ -53,8 +53,7 @@ class Retrieval(object):
                                            str(model_name) + '_' +
                                            str(num_topK) + '.txt')
         # preds
-        self.db_features_path = Path(
-            str(save_path) + '/' + 'db_features' + '.h5')
+        self.db_features_path = Path(str(save_path) + '/' + 'db_features.h5')
 
         self.db_features_preds = None
 
@@ -138,14 +137,12 @@ class Retrieval(object):
 
         q_names = q_preds["names"]
         db_names = db_preds["names"]
-
+        
         # similarity
         scores = torch.mm(q_descs, db_descs.t())
 
         # search for num_topK images
         num_topK = self.cfg.retrieval.num_topK
-
-        logger.info(f"retrive top {num_topK} images")
 
         invalid = np.array(q_names)[:, None] == np.array(db_names)[None]
         invalid = torch.from_numpy(invalid).to(scores.device)
@@ -217,7 +214,9 @@ class Retrieval(object):
         
         # extract query features
         q_preds = self.extractor.extract_image(item)
-    
+        q_preds["names"] = np.array(item["name"])
+        q_preds["features"] = q_preds["features"].unsqueeze(0)
+
         # search for pairs
         pairs = self._search(q_preds, db_preds)
 

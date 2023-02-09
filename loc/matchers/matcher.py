@@ -172,8 +172,7 @@ class MatchQueryDatabase(Matcher):
 
     def match_query_database(self, q_preds, pairs):
 
-        local_features_path = Path(
-            str(self.cfg.visloc_path) + '/' + 'db_features' + '.h5')
+        local_features_path = Path(str(self.cfg.visloc_path) + '/' + 'db_features.h5')
 
         local_features_loader = LocalFeaturesLoader(
             save_path=local_features_path)

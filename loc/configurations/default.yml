@@ -1,11 +1,11 @@
 name: loc
-num_workers: 8
+num_workers: 12
 dataset: 
     name: aachen
 
 mapper:
     name: colmap
-    num_covis: 10
+    num_covis: 20
     min_match_score: None
     skip_geometric_verification: False
     max_num_trials: 20000
@@ -15,12 +15,12 @@ mapper:
 retrieval:
     model_name: sfm_resnet50_gem_2048
     max_size: 1024
-    num_topK : 10
+    num_topK : 25
 
 extractor:
     model_name: superpoint
     max_keypoints: 1024
-    max_size:  600
+    max_size:  1600
     keypoint_threshold: 0.005  
     remove_borders: 4
     nms_radius: 3                

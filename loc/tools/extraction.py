@@ -7,7 +7,7 @@ import torch
 import collections.abc as collections
 import os
 
-from loc.datasets.dataset import ImagesFromList, ImagesTransform
+from loc.datasets.dataset import ImagesFromList
 from loc.extractors import LocalExtractor, GlobalExtractor
 
 
@@ -54,7 +54,7 @@ class Extraction(object):
         images = ImagesFromList(
             root=images_path, split=split, cfg=self.cfg, gray=True)
         features_path = Path(str(self.save_path) + '/' +
-                             str(split) + '_local_features' + '.h5')
+                             str(split) + '_local_features.h5')
         logger.info(f"features will be saved to {features_path}")
         preds = self.extractor.extract_dataset(
             images, save_path=features_path, normalize=False)
@@ -108,7 +108,7 @@ def database_feature_extraction(workspace, save_path, cfg):
     #
     split = "db"
     features_path = Path(str(save_path) + '/' +
-                         str(split) + '_features' + '.h5')
+                         str(split) + '_features.h5')
 
     logger.info(f"features saved to {features_path}")
 
@@ -137,7 +137,7 @@ def do_query_extraction(workspace, save_path, cfg):
     split = "query"
     images = ImagesFromList(root=workspace, split=split, cfg=cfg, gray=True)
     features_path = Path(str(save_path) + '/' +
-                         str(split) + '_features' + '.h5')
+                         str(split) + '_features.h5')
 
     logger.info(f"features will be saved to {features_path}")
     preds = extractor.extract_dataset(

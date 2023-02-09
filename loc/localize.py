@@ -229,12 +229,12 @@ class DatasetLocalizer(object):
             db_names = retrieval_pairs[qname]
             db_ids = []
 
+            # db indices
             for n in db_names:
-
-                #
                 if n not in db_name_to_id:
                     logger.debug(f'image {n} not in database')
                     continue
+                #
                 db_ids.append(db_name_to_id[n])
 
             # empty
@@ -320,8 +320,10 @@ class ImageLocalizer(object):
 
         # extractor
         self.extractor = extractor
+        
         # retrieval
         self.retrieval = retrieval
+        
         # matcher
         self.matcher = matcher
 
@@ -330,6 +332,13 @@ class ImageLocalizer(object):
         self.visloc_model = visloc_model
         self.pose_estimator = pose_estimator
 
+        # 
+        self.poses = {}
+        self.logs = {
+            'loc': {}
+        }
+        
+        # 
     def db_name_to_id(self):
         """name to ids
 
@@ -364,7 +373,7 @@ class ImageLocalizer(object):
         for i, db_id in enumerate(db_ids):
 
             image = self.visloc_model.images[db_id]
-            
+
             #
             if image.num_points3D() == 0:
                 logger.warning(f'zero 3D points for {image.name}.')
@@ -377,10 +386,10 @@ class ImageLocalizer(object):
             # matches
             matches = pairs_matches[pairs2key(qname, image.name)]["matches"]
             matches = matches.cpu().numpy()
-            
-            _idx    = np.where(matches != -1)[0]
+
+            _idx = np.where(matches != -1)[0]
             matches = np.stack([_idx, matches[_idx]], -1)
-             
+
             matches = matches[points3D_ids[matches[:, 1]] != -1]
 
             num_matches += len(matches)
@@ -420,7 +429,7 @@ class ImageLocalizer(object):
         }
 
         return ret, log
-    
+
     def __call__(self, data: Dict):
         """localize
 
@@ -430,37 +439,27 @@ class ImageLocalizer(object):
             save_path (str, optional): save directory. Defaults to None.
         """
         qname = data['name'][0]
-        qcam = data['camera']
+        qcam  = data['camera']
 
-        #
-        poses = {}
-        logs = {
-            'loc': {}
-        }
-        
         # find best image pairs
         pairs_names = self.retrieval(data)
 
         # extract locals
         q_preds = self.extractor.extract_image(data, gray=True)
-        
-        
+
         # match query to database
         pairs_matches = self.matcher.match_query_database(q_preds, pairs_names)
-        print(q_preds.keys())
 
-        # indices
+        # db indices and names
         db_name_to_id = self.db_name_to_id()
         db_names = [x[1] for x in pairs_names]
 
-        logger.info('starting localization')
-        
         db_ids = []
         for n in db_names:
-            #
             if n not in db_name_to_id:
                 logger.debug(f'image {n} not in database')
                 continue
+            #
             db_ids.append(db_name_to_id[n])
 
         # empty
@@ -468,20 +467,24 @@ class ImageLocalizer(object):
             logger.error(f"empty retrieval for {data['name']}")
             exit(0)
 
-        # pose 
-        ret, log = self.pose_from_cluster(qname, qcam, q_preds, db_ids, pairs_matches)
+        # pose
+        ret, log = self.pose_from_cluster(
+            qname, qcam, q_preds, db_ids, pairs_matches)
 
         if ret['success']:
-            poses[qname] = (ret['qvec'], ret['tvec'])
+            qpose = (ret['qvec'], ret['tvec'])
         else:
-            logger.warn("not Succesful")
             closest = self.visloc_model.images[db_ids[0]]
-            poses[qname] = (closest.qvec, closest.tvec)
+            qpose = (closest.qvec, closest.tvec)
+        
+        # 
+        self.poses[qname] = qpose
 
         log['covis_clustering'] = self.covis_clustering
-        logs['loc'][qname] = log
+        self.logs['loc'][qname] = log
         
-        
+        return qpose
+
 
 def do_localization(queries, pairs_path,
                     visloc_model, features_path, matches_path,
