@@ -14,11 +14,12 @@ logger = logging.getLogger("loc")
 def build_map_colmap(cfg) -> None:
     """
     """
-    
+
     # sfm pairs
-    sfm_pairs_path    = Path(cfg.workspace) / str('sfm_pairs_' + str(cfg.mapper.num_covis) + '.txt')
-    sfm_matches_path  = Path(cfg.visloc_path) / 'sfm_matches.h5'
-   
+    sfm_pairs_path = Path(cfg.workspace) / \
+        str('sfm_pairs_' + str(cfg.mapper.num_covis) + '.txt')
+    sfm_matches_path = Path(cfg.visloc_path) / 'sfm_matches.h5'
+
     # convert 3d model
     logger.info('convert 3D model to colmap format')
     # do_convert_3d_model(cfg=cfg)
@@ -33,11 +34,11 @@ def build_map_colmap(cfg) -> None:
 
     #
     logger.info('extract database features')
-    # db_features_path = database_feature_extraction(workspace=cfg.workspace,
-    #                                                   save_path=cfg.visloc_path,
-    #                                                   cfg=cfg)
-    
-    db_features_path  = Path(str(cfg.visloc_path) + '/' + 'db_features.h5')
+    # database_feature_extraction(workspace=cfg.workspace,
+    #                             save_path=cfg.visloc_path,
+    #                             cfg=cfg)
+
+    db_features_path = Path(str(cfg.visloc_path) + '/' + 'db_local_features.h5')
 
     logger.info('perform databse matching')
     # sfm_matches_path = do_matching(src_path=db_features_path,
@@ -45,7 +46,7 @@ def build_map_colmap(cfg) -> None:
     #                                pairs_path=sfm_pairs_path,
     #                                cfg=cfg,
     #                                save_path=sfm_matches_path)
-
+    # 
     # mapper.create_database()
 
     logger.info('import features to database')

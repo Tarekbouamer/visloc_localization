@@ -20,7 +20,7 @@ retrieval:
 extractor:
     model_name: superpoint
     max_keypoints: 1024
-    max_size:  1600
+    max_size:  1024
     keypoint_threshold: 0.005  
     remove_borders: 4
     nms_radius: 3                

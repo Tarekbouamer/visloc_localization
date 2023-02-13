@@ -26,7 +26,7 @@ def run_localization(cfg, mapper):
     retrieval = Retrieval(workspace=cfg.workspace,
                           save_path=cfg.visloc_path, cfg=cfg)
 
-    retrieval.load_database_features()
+    retrieval.extract_database()
 
     # matcher
     matcher = MatchQueryDatabase(cfg=cfg)
@@ -36,7 +36,7 @@ def run_localization(cfg, mapper):
         visloc_model=mapper.visloc_path, extractor=extractor, retrieval=retrieval, matcher=matcher, cfg=cfg)
 
     # localize
-    query_set = ImagesFromList(root=cfg.images_path, split="query", cfg=cfg)
+    query_set = ImagesFromList(root=cfg.workspace, split="query", cfg=cfg)
 
     #
     query_dl = DataLoader(query_set, num_workers=cfg.num_workers)

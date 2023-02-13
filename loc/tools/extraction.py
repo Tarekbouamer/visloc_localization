@@ -103,37 +103,39 @@ class Extraction(object):
         return db_path, q_path
 
 
-def database_feature_extraction(images_path, save_path, cfg):
+def database_feature_extraction(workspace, save_path, cfg):
 
     #
     split = "db"
-    features_path = Path(str(save_path) + '/' +
-                         str(split) + '_features.h5')
+    images = ImagesFromList(root=workspace, split=split, cfg=cfg)
 
-    logger.info(f"features saved to {features_path}")
+    #
+    db_local_features = Path(str(save_path) + '/' + 'db_local_features.h5')
+    db_global_features = Path(str(save_path) + '/' + 'db_global_features.h5')
 
-    images = ImagesFromList(root=images_path, split=split, cfg=cfg)
+    # loca
+    logger.info(
+        f"local feature extractor {cfg.extractor.model_name} to {db_local_features}")
 
-    # local
-    logger.info(f"local feature extractor {cfg.extractor.model_name}")
-    
     local_extractor = LocalExtractor(cfg=cfg)
-    
+
     loc_preds = local_extractor.extract_dataset(
-        images, save_path=features_path, normalize=False, gray=True)
+        images, save_path=db_local_features, normalize=False, gray=True)
 
     # global
-    logger.info(f"global feature extractor {cfg.retrieval.model_name}")
-    
+    logger.info(
+        f"global feature extractor {cfg.retrieval.model_name} to {db_global_features}")
+
     global_extractor = GlobalExtractor(cfg=cfg)
-    
+
     glb_preds = global_extractor.extract_dataset(
-        images, save_path=features_path, normalize=True, gray=False)
+        images, save_path=db_global_features, normalize=True, gray=False)
+
 
     return save_path
 
 
-def do_query_extraction(images_path, save_path, cfg):
+def do_query_extraction(workspace, save_path, cfg):
 
     # extractor
     logger.info(f"init feature extractor {cfg.extractor.model_name}")
@@ -141,7 +143,7 @@ def do_query_extraction(images_path, save_path, cfg):
     extractor = LocalExtractor(cfg=cfg)
 
     split = "query"
-    images = ImagesFromList(root=images_path, split=split, cfg=cfg, gray=True)
+    images = ImagesFromList(root=workspace, split=split, cfg=cfg, gray=True)
     features_path = Path(str(save_path) + '/' +
                          str(split) + '_features.h5')
 

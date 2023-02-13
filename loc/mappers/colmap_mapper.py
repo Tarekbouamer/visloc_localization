@@ -57,7 +57,7 @@ class ColmapMapper(Mapper):
             str('sfm_pairs_' + str(self.cfg.mapper.num_covis) + '.txt')
 
         # read model
-        self.read_model(self.colmap_path)
+        # self.read_model(self.colmap_path)
 
     def load_model(self):
         """load colmap sift model
@@ -139,6 +139,9 @@ class ColmapMapper(Mapper):
             str: path tp list of pairs (*.txt)
         """
 
+        # read model
+        self.read_model(self.colmap_path)
+        
         if sfm_pairs_path is None:
             sfm_pairs_path = self.sfm_pairs_path
 
@@ -437,11 +440,6 @@ class ColmapMapper(Mapper):
         output_path = self.visloc_path
         output_path.mkdir(parents=True, exist_ok=True)
 
-        #
-        image_path = self.images_path
-        print(image_path)
-        input()
-
         logger.info('running 3D triangulation...')
         if options is None:
             options = {}
@@ -452,7 +450,7 @@ class ColmapMapper(Mapper):
             with pycolmap.ostream():
                 reconstruction = pycolmap.triangulate_points(model,
                                                              self.database_path,
-                                                             image_path,
+                                                             self.cfg.images_path,
                                                              output_path,
                                                              options=options)
 

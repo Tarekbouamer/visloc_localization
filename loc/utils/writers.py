@@ -8,6 +8,7 @@ import numpy as np
 import logging
 logger = logging.getLogger("loc")
 
+
 class Writer:
     def __init__(self,
                  save_path: Path
@@ -16,7 +17,7 @@ class Writer:
         self.save_path = save_path
 
         # writer
-        self.hfile = h5py.File(str(save_path), 'a', libver='latest')
+        self.hfile = h5py.File(str(save_path), 'a')
         
     def close(self):
         self.hfile.close()
@@ -25,9 +26,16 @@ class Writer:
                   x: torch.Tensor
                   ) -> torch.Tensor:
         if x.is_cuda:
-            return x.cpu().numpy()
+            x = x.cpu().numpy()
         else:
-            return x.numpy()
+            x = x.numpy()
+        
+        # if x.dtype == np.float32 or x.dtype == np.float64:
+        #     x = x.astype(np.float16)
+        # elif x.dtype == np.int32 or x.dtype == np.int64:
+        #     x = x.astype(np.int16)
+
+        return x
         
 class FeaturesWriter(Writer):
     def __init__(self, save_path: Path) -> None:
@@ -48,19 +56,16 @@ class FeaturesWriter(Writer):
 
         try:
             # create new group
-            if key not in self.hfile:
-                grp = self.hfile.create_group(key)
-            else:
-                grp = self.hfile[key]
-           
+            if key in self.hfile:
+                del self.hfile[key]
+            
+            grp = self.hfile.create_group(key)
+          
             if isinstance(data, torch.Tensor):
                 data = self._to_numpy(data)
 
             # insert 
-            if name in grp:
-                grp[name][...] = data
-            else:
-                grp.create_dataset(name, data=data)
+            grp.create_dataset(name, data=data)
 
         except OSError as error:
             raise error

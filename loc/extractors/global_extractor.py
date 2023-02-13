@@ -46,7 +46,7 @@ class GlobalExtractor(FeaturesExtractor):
         
         # prepare inputs
         data  = self._prepare_inputs(data, **kwargs)
-            
+                    
         # extract
         preds = self.extractor.extract_global(data['img'], scales=scales, do_whitening=True)  
         
@@ -82,6 +82,7 @@ class GlobalExtractor(FeaturesExtractor):
             
             #
             it_name = data['name'][0] 
+            print(data['img'].shape)
                        
             # extract
             preds = self.extract_image(data, scales, **kwargs)
@@ -109,7 +110,9 @@ class GlobalExtractor(FeaturesExtractor):
             "features": torch.stack(features),
             "names": np.stack(names)
             }
-        
+
+        return out
+       
         return save_path
             
               

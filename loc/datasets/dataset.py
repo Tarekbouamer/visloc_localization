@@ -75,29 +75,29 @@ def parse_image_lists(paths, with_intrinsics=False):
 
 class ImagesFromList(data.Dataset):
     
-    def __init__(self, root, cfg, split=None, transform=None, max_size=None, **kwargs): 
+    def __init__(self, root, cfg, split=None, **kwargs): 
         
         # 
         self.split = split
-        
-        # cfg
-        cfg =  cfg[split]
-        
+  
         # options
-        self.max_size       = max_size
         self.root           = Path(root)
+        
+        if split == "db":
+            self.max_size = cfg.retrieval.max_size
+        elif split == "query":
+            self.max_size = cfg.extractor.max_size    
+        else:
+            self.max_size = None    
         
         # camera path
         self.cameras_path = None
-        if cfg['cameras'] is not None:
-            self.cameras_path   = Path(root) / str(".." + str(cfg['cameras']))
-
-        # images path
-        if cfg['images'] is not None:
-            self.images_path  = Path(root) / str(cfg["images"]) 
+        if cfg[split]['cameras'] is not None:
+            self.cameras_path   = Path(root) / str(cfg[split]['cameras'])
 
         # split path
-        self.split_images_path  = self.images_path / str(split)
+        self.split_images_path  = Path(root) / str(cfg[split]["images"])
+        self.images_rel_path    = self.split_images_path.parents[0]
 
         # load images
         paths = []
@@ -111,7 +111,7 @@ class ImagesFromList(data.Dataset):
         self.images_fn = sorted(list(set(paths)))
         
         # all names 
-        self.names = [i.relative_to(self.images_path).as_posix() for i in self.images_fn]         
+        self.names = [i.relative_to(self.images_rel_path).as_posix() for i in self.images_fn]         
         
         # load intrinsics
         if self.cameras_path is not None:
@@ -186,7 +186,7 @@ class ImagesFromList(data.Dataset):
         return self.names 
              
     def get_name(self, _path):
-        name = _path.relative_to(self.images_path).as_posix()    
+        name = _path.relative_to(self.images_rel_path).as_posix()    
         return name
      
     def __getitem__(self, item):
@@ -210,8 +210,8 @@ class ImagesFromList(data.Dataset):
         img = img / 255.
         
         # dict
-        out["img"]      = img
+        out["img"]      = img.astype(np.float32)
         out["name"]     = img_name
-        out["size"]     = np.array(size, dtype=float)
+        out["size"]     = np.array(size, dtype=np.float32)
         
         return out

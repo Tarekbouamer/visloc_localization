@@ -1,9 +1,9 @@
-[02/11 23:11 loc]: init visloc_localization
-[02/11 23:11 loc]: workspace /media/dl/Data/datasets/aachen
-[02/11 23:11 loc]: images /media/dl/Data/datasets/aachen/images
-[02/11 23:11 loc]: visloc /media/dl/Data/datasets/aachen/visloc
-[02/11 23:11 loc]: mapper /media/dl/Data/datasets/aachen/mapper
-[02/11 23:11 loc]: name: loc
+[02/13 18:59 loc]: init visloc_localization
+[02/13 18:59 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+[02/13 18:59 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
+[02/13 18:59 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
+[02/13 18:59 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
+[02/13 18:59 loc]: name: loc
 num_workers: 12
 dataset:
   name: aachen
@@ -22,7 +22,7 @@ retrieval:
 extractor:
   model_name: superpoint
   max_keypoints: 1024
-  max_size: 1600
+  max_size: 1024
   keypoint_threshold: 0.005
   remove_borders: 4
   nms_radius: 3
@@ -40,63 +40,63 @@ solver:
 localize:
   covis_clustering: false
 query:
-  images: images_upright/
+  images: images/query/
   cameras: queries/*_time_queries_with_intrinsics.txt
 db:
-  images: images_upright/
+  images: images/db/
   cameras: null
 convert:
   type: nvm
-  nvm_path: /media/dl/Data/datasets/aachen/3D-models/aachen_cvpr2018_db.nvm
-  intrinsics: /media/dl/Data/datasets/aachen/3D-models/database_intrinsics.txt
-  database: /media/dl/Data/datasets/aachen/aachen.db
+  nvm_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/aachen_cvpr2018_db.nvm
+  intrinsics: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/database_intrinsics.txt
+  database: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/aachen.db
 workspace: !!python/object/apply:pathlib.PosixPath
 - /
 - media
-- dl
-- Data
-- datasets
+- loc
+- D0AE6539AE65196C
+- VisualLocalization2020
 - aachen
 config: loc/configurations/default.yml
 images_path: !!python/object/apply:pathlib.PosixPath
 - /
 - media
-- dl
-- Data
-- datasets
+- loc
+- D0AE6539AE65196C
+- VisualLocalization2020
 - aachen
 - images
 visloc_path: !!python/object/apply:pathlib.PosixPath
 - /
 - media
-- dl
-- Data
-- datasets
+- loc
+- D0AE6539AE65196C
+- VisualLocalization2020
 - aachen
 - visloc
 mapper_path: !!python/object/apply:pathlib.PosixPath
 - /
 - media
-- dl
-- Data
-- datasets
+- loc
+- D0AE6539AE65196C
+- VisualLocalization2020
 - aachen
 - mapper
 
-[02/11 23:11 loc]: convert 3D model to colmap format
-[02/11 23:11 loc]: init mapper
-[02/11 23:11 loc]: init Colmap Mapper
-[02/11 23:11 loc]: reading Colmap model
-[02/11 23:11 loc]: model successfully loaded
-[02/11 23:11 loc]: compute database covisibility pairs
-[02/11 23:11 loc]: extract database features
-[02/11 23:11 loc]: perform databse matching
-[02/11 23:11 loc]: import features to database
-[02/11 23:11 loc]: import matches to database
-[02/11 23:11 loc]: geometric verification
-[02/11 23:11 loc]: triangulation
-[02/11 23:11 loc]: init retrieval sfm_resnet50_gem_2048
-[02/11 23:11 loc]: load global features from /media/dl/Data/datasets/aachen/visloc/db_features.h5
-[02/11 23:11 loc]: found 4479 images with None intrinsics
-[02/11 23:12 loc]: init nn matcher
-[02/11 23:12 loc]: loading visloc model
+[02/13 18:59 loc]: convert 3D model to colmap format
+[02/13 18:59 loc]: init mapper
+[02/13 18:59 loc]: init Colmap Mapper
+[02/13 18:59 loc]: compute database covisibility pairs
+[02/13 18:59 loc]: extract database features
+[02/13 18:59 loc]: perform databse matching
+[02/13 18:59 loc]: import features to database
+[02/13 18:59 loc]: import matches to database
+[02/13 18:59 loc]: geometric verification
+[02/13 18:59 loc]: triangulation
+[02/13 18:59 loc]: init retrieval sfm_resnet50_gem_2048
+[02/13 18:59 loc]: found 4479 images with None intrinsics
+[02/13 19:01 loc]: extraction done 104.9 seconds saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/db_global_features.h5
+[02/13 19:01 loc]: init nn matcher
+[02/13 19:01 loc]: loading visloc model
+[02/13 19:01 loc]: found 947 images with 922 intrinsics
+[02/13 19:01 loc]: starting localization

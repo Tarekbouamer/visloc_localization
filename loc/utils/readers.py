@@ -20,7 +20,7 @@ class Loader:
         self.save_path = save_path
 
         # writer
-        self.hfile = h5py.File(str(save_path), 'r', libver='latest')
+        self.hfile = h5py.File(str(save_path), 'r')
 
         # device
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -73,9 +73,14 @@ class GlobalFeaturesLoader(Loader):
 
         
     def load(self, name):
-        preds = self.load_as_numpy(name)
-        preds = torch.from_numpy(preds).float()
-        preds = preds.to(self.device)
+        preds = {}
+        keys = list(self.hfile[name].keys())
+
+        for k in keys:
+            v = self.hfile[name][k].__array__()
+            v = torch.from_numpy(v).float()
+            preds[k] = v.to(self.device)
+
         return preds
 
 

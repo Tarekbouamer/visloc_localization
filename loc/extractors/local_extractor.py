@@ -108,7 +108,7 @@ class LocalExtractor(FeaturesExtractor):
         for it, data in enumerate(tqdm(_dataloader, total=len(_dataloader), colour='green', desc='extract locals'.rjust(15))):
             #
             it_name = data['name'][0]
-        
+                    
             #
             preds = self.extract_image(data, scales=scales, **kwargs)
 

@@ -446,12 +446,12 @@ class ImageLocalizer(object):
         # find best image pairs
         pairs_names = self.retrieval(data)
         
-        # for p in pairs_names:
-        #     print(p)
-        # input()
+        for p in pairs_names:
+            print(p)
+        input()
 
         # extract locals
-        q_preds = self.extractor.extract_image(data, gray=True, normalize=False)
+        q_preds = self.extractor.extract_image(data, normalize=False,  gray=True)
 
         # match query to database
         pairs_matches = self.matcher.match_query_database(q_preds, pairs_names)
