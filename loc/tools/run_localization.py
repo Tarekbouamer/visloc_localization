@@ -33,10 +33,10 @@ def run_localization(cfg, mapper):
 
     # localizer
     localizer = ImageLocalizer(
-        visloc_model=cfg.visloc_path, extractor=extractor, retrieval=retrieval, matcher=matcher, cfg=cfg)
+        visloc_model=mapper.visloc_path, extractor=extractor, retrieval=retrieval, matcher=matcher, cfg=cfg)
 
     # localize
-    query_set = ImagesFromList(root=cfg.workspace, split="query", cfg=cfg)
+    query_set = ImagesFromList(root=cfg.images_path, split="query", cfg=cfg)
 
     #
     query_dl = DataLoader(query_set, num_workers=cfg.num_workers)

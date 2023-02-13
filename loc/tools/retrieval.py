@@ -53,14 +53,14 @@ class Retrieval(object):
                                            str(model_name) + '_' +
                                            str(num_topK) + '.txt')
         # preds
-        self.db_features_path = Path(str(save_path) + '/' + 'db_features.h5')
+        self.db_features_path = Path(str(cfg.visloc_path) + '/' + 'db_features.h5')
 
         self.db_features_preds = None
 
     def _database_images_loader(self,):
 
         images_list = ImagesFromList(
-            root=self.workspace, split="db", cfg=self.cfg)
+            root=self.cfg.images_path, split="db", cfg=self.cfg)
 
         images_dl = DataLoader(
             images_list, num_workers=self.cfg.num_workers, drop_last=False)
@@ -69,16 +69,17 @@ class Retrieval(object):
 
     def extract_database(self):
         """extract databse global features
-
         Returns:
             dict: database retrieval predictions         
         """
+        split = "db"
 
-        logger.info(f"extract database global features")
-        db_images = self._database_images_loader()
-        db_preds = self.extractor.extract_dataset(db_images,
-                                                  save_path=self.db_features_path,
-                                                  normalize=True)
+        images = ImagesFromList(root=self.cfg.images_path, split=split, cfg=self.cfg)
+        
+        db_preds = self.extractor.extract_dataset(images, save_path=self.db_features_path, normalize=True, gray=False)
+
+        self.db_features_preds = db_preds
+        
         return db_preds
 
     def load_database_features(self):
@@ -98,6 +99,8 @@ class Retrieval(object):
         for item in tqdm(database_dl):
 
             item_name = item["name"][0]
+            
+            print(item_name)
 
             pred = global_features_reader.load(item_name)
 
@@ -108,18 +111,14 @@ class Retrieval(object):
                                   "names": np.stack(names)
                                   }
 
-    def extract_images_queries(self):
-        """extract query global features
-
-        Returns:
-            dict: query retrieval predictions         
-        """
-
-        logger.info(f"extract global features for query images ")
-
-        db_preds = self.extract_images(self.workspace, split="query")
-
-        return db_preds
+    # def extract_images_queries(self):
+    #     """extract query global features
+    #     Returns:
+    #         dict: query retrieval predictions         
+    #     """
+    #     logger.info(f"extract global features for query images ")
+    #     db_preds = self.extract_images(self.workspace, split="query")
+    #     return db_preds
 
     def _search(self, q_preds, db_preds):
         """descriptor bases matcher
@@ -134,10 +133,10 @@ class Retrieval(object):
         #
         q_descs = q_preds["features"]
         db_descs = db_preds["features"]
-
+        
         q_names = q_preds["names"]
         db_names = db_preds["names"]
-        
+
         # similarity
         scores = torch.mm(q_descs, db_descs.t())
 
@@ -153,7 +152,7 @@ class Retrieval(object):
         topk = torch.topk(scores, k=num_topK, dim=1)
 
         indices = topk.indices.cpu().numpy()
-        valid = topk.values.isfinite().cpu().numpy()
+        valid   = topk.values.isfinite().cpu().numpy()
 
         # collect pairs
         pairs = []
@@ -163,7 +162,7 @@ class Retrieval(object):
         name_pairs = [(q_names[i], db_names[j]) for i, j in pairs]
 
         assert len(name_pairs) > 0, "No matching pairs has been found! "
-
+        
         return name_pairs
 
     def _remove_duplicates(self, pairs):
@@ -213,7 +212,9 @@ class Retrieval(object):
         db_preds = self.db_features_preds
         
         # extract query features
-        q_preds = self.extractor.extract_image(item)
+        q_preds = self.extractor.extract_image(item, normalize=True)
+        
+        #
         q_preds["names"] = np.array(item["name"])
         q_preds["features"] = q_preds["features"].unsqueeze(0)
 

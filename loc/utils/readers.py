@@ -68,15 +68,14 @@ class GlobalFeaturesLoader(Loader):
         super().__init__(save_path)
     
     def load_as_numpy(self, name):
-        return self.hfile[name]["features"].__array__()
+        x = self.hfile[name]["features"]
+        return x.__array__()
 
         
     def load(self, name):
-        
         preds = self.load_as_numpy(name)
         preds = torch.from_numpy(preds).float()
         preds = preds.to(self.device)
-
         return preds
 
 

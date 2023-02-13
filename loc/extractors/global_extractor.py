@@ -72,6 +72,10 @@ class GlobalExtractor(FeaturesExtractor):
         
         # time
         start_time = time.time()
+        
+        #
+        features = []
+        names = []
                 
         # run --> 
         for it, data in enumerate(tqdm(_dataloader, total=len(_dataloader), colour='green', desc='extract global'.rjust(15))):
@@ -82,6 +86,9 @@ class GlobalExtractor(FeaturesExtractor):
             # extract
             preds = self.extract_image(data, scales, **kwargs)
             
+            features.append(preds["features"])
+            names.append(it_name)
+
             # write preds
             self.writer.write_items(key=it_name, data=preds)
             
@@ -99,10 +106,11 @@ class GlobalExtractor(FeaturesExtractor):
       
         #
         out = {
-          "save_path":  save_path
-        }
+            "features": torch.stack(features),
+            "names": np.stack(names)
+            }
         
-        return out
+        return save_path
             
               
             

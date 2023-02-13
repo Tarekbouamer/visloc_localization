@@ -12,7 +12,7 @@ logger = logging.getLogger("loc")
 
 def read_key_from_h5py(name, _path, suffix=""):
     data = {}
-    with h5py.File(str(_path), 'r') as f:
+    with h5py.File(str(_path), 'r', libver='latest') as f:
 
         if name in f:
             g = f[name]

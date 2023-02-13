@@ -32,7 +32,7 @@ _EXT = ['*.jpg', '*.png', '*.jpeg', '*.JPG', '*.PNG']
 def list_h5_names(path):
     names = []
     
-    with h5py.File(str(path), 'r') as fd:
+    with h5py.File(str(path), 'r', libver='latest') as fd:
         def visit_fn(_, obj):
             if isinstance(obj, h5py.Dataset):
                 names.append(obj.parent.name.strip('/'))
@@ -90,22 +90,22 @@ class ImagesFromList(data.Dataset):
         # camera path
         self.cameras_path = None
         if cfg['cameras'] is not None:
-            self.cameras_path   = Path(root) / str(cfg['cameras'])
-        
+            self.cameras_path   = Path(root) / str(".." + str(cfg['cameras']))
+
         # images path
         if cfg['images'] is not None:
-            self.images_path  = Path(root) / str(cfg['images']) 
+            self.images_path  = Path(root) / str(cfg["images"]) 
 
         # split path
-        # self.split_images_path  = self.images_path / str(split)
+        self.split_images_path  = self.images_path / str(split)
 
         # load images
         paths = []
         for ext in _EXT:
-            paths += list(Path(self.images_path).glob('**/'+ ext)) 
+            paths += list(Path(self.split_images_path).glob('**/'+ ext)) 
                                         
         if len(paths) == 0:
-            raise ValueError(f'could not find any image in path: {self.images_path}.')
+            raise ValueError(f'could not find any image in path: {self.split_images_path}.')
         
         # sort   
         self.images_fn = sorted(list(set(paths)))
@@ -186,11 +186,7 @@ class ImagesFromList(data.Dataset):
         return self.names 
              
     def get_name(self, _path):
-        name = _path.relative_to(self.images_path).as_posix()
-        
-        if self.split is not None:
-            name = str(self.split) + "/" + name
-            
+        name = _path.relative_to(self.images_path).as_posix()    
         return name
      
     def __getitem__(self, item):

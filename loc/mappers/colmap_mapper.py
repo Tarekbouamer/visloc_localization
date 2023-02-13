@@ -42,6 +42,8 @@ class ColmapMapper(Mapper):
 
         # images
         self.images_path = workspace / self.cfg.db.images
+        
+        
 
         #
         self.colmap_path = workspace / 'mapper'
@@ -437,6 +439,8 @@ class ColmapMapper(Mapper):
 
         #
         image_path = self.images_path
+        print(image_path)
+        input()
 
         logger.info('running 3D triangulation...')
         if options is None:

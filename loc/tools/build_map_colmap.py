@@ -29,37 +29,37 @@ def build_map_colmap(cfg) -> None:
 
     # covisibility
     logger.info('compute database covisibility pairs')
-    sfm_pairs_path = mapper.covisible_pairs(sfm_pairs_path=sfm_pairs_path)
+    # sfm_pairs_path = mapper.covisible_pairs(sfm_pairs_path=sfm_pairs_path)
 
     #
     logger.info('extract database features')
-    db_features_path = database_feature_extraction(workspace=cfg.workspace,
-                                                      save_path=cfg.visloc_path,
-                                                      cfg=cfg)
+    # db_features_path = database_feature_extraction(workspace=cfg.workspace,
+    #                                                   save_path=cfg.visloc_path,
+    #                                                   cfg=cfg)
     
     db_features_path  = Path(str(cfg.visloc_path) + '/' + 'db_features.h5')
 
     logger.info('perform databse matching')
-    sfm_matches_path = do_matching(src_path=db_features_path,
-                                   dst_path=db_features_path,
-                                   pairs_path=sfm_pairs_path,
-                                   cfg=cfg,
-                                   save_path=sfm_matches_path)
+    # sfm_matches_path = do_matching(src_path=db_features_path,
+    #                                dst_path=db_features_path,
+    #                                pairs_path=sfm_pairs_path,
+    #                                cfg=cfg,
+    #                                save_path=sfm_matches_path)
 
-    mapper.create_database()
+    # mapper.create_database()
 
     logger.info('import features to database')
-    mapper.import_features(db_features_path)
+    # mapper.import_features(db_features_path)
 
     logger.info('import matches to database')
-    mapper.import_matches(sfm_pairs_path, sfm_matches_path)
+    # mapper.import_matches(sfm_pairs_path, sfm_matches_path)
 
     logger.info('geometric verification')
-    mapper.geometric_verification(
-        db_features_path, sfm_pairs_path, sfm_matches_path)
+    # mapper.geometric_verification(
+    #     db_features_path, sfm_pairs_path, sfm_matches_path)
 
     # triangulate
     logger.info('triangulation')
-    reconstruction = mapper.triangulate_points(verbose=True)
+    # reconstruction = mapper.triangulate_points(verbose=True)
 
     return mapper, db_features_path

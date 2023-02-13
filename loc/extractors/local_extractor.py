@@ -72,7 +72,7 @@ class LocalExtractor(FeaturesExtractor):
 
         # extract
         preds = self.extractor({'image': data["img"]})
-
+        
         # unpack
         preds = self._unpack(preds)
 
@@ -80,7 +80,7 @@ class LocalExtractor(FeaturesExtractor):
         current_size = data["img"].shape[-2:][::-1]
         scales = torch.Tensor(
             (original_size[0] / current_size[0], original_size[1] / current_size[1])).to(original_size).cuda()
-
+        
         #
         preds['keypoints'] = (preds['keypoints'] + .5) * scales[None] - .5
         preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()
@@ -108,7 +108,7 @@ class LocalExtractor(FeaturesExtractor):
         for it, data in enumerate(tqdm(_dataloader, total=len(_dataloader), colour='green', desc='extract locals'.rjust(15))):
             #
             it_name = data['name'][0]
-
+        
             #
             preds = self.extract_image(data, scales=scales, **kwargs)
 
@@ -127,9 +127,5 @@ class LocalExtractor(FeaturesExtractor):
 
         logger.info(f'extraction done {end_time:.4} seconds saved {save_path}')
 
-        #
-        out = {
-            "save_path":  save_path
-        }
 
-        return out
+        return save_path

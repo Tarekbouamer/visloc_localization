@@ -11,11 +11,11 @@ def make_aachen_cfg(cfg):
     
     meta = {
         'query': {
-            'images':   "images/images_upright/query/",
+            'images':   "images_upright/",
             'cameras':  'queries/*_time_queries_with_intrinsics.txt'
             },
         'db': { 
-            'images':   "images/images_upright/db/",
+            'images':   "images_upright/",
             'cameras':  None
             },
         

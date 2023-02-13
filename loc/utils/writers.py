@@ -16,7 +16,7 @@ class Writer:
         self.save_path = save_path
 
         # writer
-        self.hfile = h5py.File(str(save_path), 'a')
+        self.hfile = h5py.File(str(save_path), 'a', libver='latest')
         
     def close(self):
         self.hfile.close()
@@ -79,9 +79,11 @@ class FeaturesWriter(Writer):
                 
             # write dict items
             for k, v in data.items():
+                
                 # convert 
                 if isinstance(v, torch.Tensor):
                     v = self._to_numpy(v)
+                
                 # insert 
                 if k in grp:
                     grp[k][...] = v

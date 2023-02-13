@@ -103,7 +103,7 @@ class Extraction(object):
         return db_path, q_path
 
 
-def database_feature_extraction(workspace, save_path, cfg):
+def database_feature_extraction(images_path, save_path, cfg):
 
     #
     split = "db"
@@ -112,22 +112,28 @@ def database_feature_extraction(workspace, save_path, cfg):
 
     logger.info(f"features saved to {features_path}")
 
-    images = ImagesFromList(root=workspace, split=split, cfg=cfg)
+    images = ImagesFromList(root=images_path, split=split, cfg=cfg)
 
+    # local
     logger.info(f"local feature extractor {cfg.extractor.model_name}")
+    
     local_extractor = LocalExtractor(cfg=cfg)
+    
     loc_preds = local_extractor.extract_dataset(
         images, save_path=features_path, normalize=False, gray=True)
 
+    # global
     logger.info(f"global feature extractor {cfg.retrieval.model_name}")
+    
     global_extractor = GlobalExtractor(cfg=cfg)
+    
     glb_preds = global_extractor.extract_dataset(
         images, save_path=features_path, normalize=True, gray=False)
 
     return save_path
 
 
-def do_query_extraction(workspace, save_path, cfg):
+def do_query_extraction(images_path, save_path, cfg):
 
     # extractor
     logger.info(f"init feature extractor {cfg.extractor.model_name}")
@@ -135,7 +141,7 @@ def do_query_extraction(workspace, save_path, cfg):
     extractor = LocalExtractor(cfg=cfg)
 
     split = "query"
-    images = ImagesFromList(root=workspace, split=split, cfg=cfg, gray=True)
+    images = ImagesFromList(root=images_path, split=split, cfg=cfg, gray=True)
     features_path = Path(str(save_path) + '/' +
                          str(split) + '_features.h5')
 

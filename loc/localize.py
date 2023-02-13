@@ -326,9 +326,11 @@ class ImageLocalizer(object):
         
         # matcher
         self.matcher = matcher
-
+        
+        #
         self.covis_clustering = self.cfg.localize.covis_clustering
 
+        #
         self.visloc_model = visloc_model
         self.pose_estimator = pose_estimator
 
@@ -389,9 +391,9 @@ class ImageLocalizer(object):
 
             _idx = np.where(matches != -1)[0]
             matches = np.stack([_idx, matches[_idx]], -1)
-
+            
             matches = matches[points3D_ids[matches[:, 1]] != -1]
-
+            
             num_matches += len(matches)
 
             for idx, m in matches:
@@ -440,12 +442,16 @@ class ImageLocalizer(object):
         """
         qname = data['name'][0]
         qcam  = data['camera']
-
+        
         # find best image pairs
         pairs_names = self.retrieval(data)
+        
+        # for p in pairs_names:
+        #     print(p)
+        # input()
 
         # extract locals
-        q_preds = self.extractor.extract_image(data, gray=True)
+        q_preds = self.extractor.extract_image(data, gray=True, normalize=False)
 
         # match query to database
         pairs_matches = self.matcher.match_query_database(q_preds, pairs_names)

@@ -1,15 +1,15 @@
-[02/08 02:08 loc]: init visloc_localization
-[02/08 02:08 loc]: workspace /media/dl/Data/datasets/aachen
-[02/08 02:08 loc]: images /media/dl/Data/datasets/aachen/images
-[02/08 02:08 loc]: visloc /media/dl/Data/datasets/aachen/visloc
-[02/08 02:08 loc]: mapper /media/dl/Data/datasets/aachen/mapper
-[02/08 02:08 loc]: name: loc
-num_workers: 8
+[02/11 23:11 loc]: init visloc_localization
+[02/11 23:11 loc]: workspace /media/dl/Data/datasets/aachen
+[02/11 23:11 loc]: images /media/dl/Data/datasets/aachen/images
+[02/11 23:11 loc]: visloc /media/dl/Data/datasets/aachen/visloc
+[02/11 23:11 loc]: mapper /media/dl/Data/datasets/aachen/mapper
+[02/11 23:11 loc]: name: loc
+num_workers: 12
 dataset:
   name: aachen
 mapper:
   name: colmap
-  num_covis: 10
+  num_covis: 20
   min_match_score: None
   skip_geometric_verification: false
   max_num_trials: 20000
@@ -18,11 +18,11 @@ mapper:
 retrieval:
   model_name: sfm_resnet50_gem_2048
   max_size: 1024
-  num_topK: 10
+  num_topK: 25
 extractor:
   model_name: superpoint
   max_keypoints: 1024
-  max_size: 600
+  max_size: 1600
   keypoint_threshold: 0.005
   remove_borders: 4
   nms_radius: 3
@@ -40,10 +40,10 @@ solver:
 localize:
   covis_clustering: false
 query:
-  images: images/images_upright/query/
+  images: images_upright/
   cameras: queries/*_time_queries_with_intrinsics.txt
 db:
-  images: images/images_upright/db/
+  images: images_upright/
   cameras: null
 convert:
   type: nvm
@@ -83,21 +83,20 @@ mapper_path: !!python/object/apply:pathlib.PosixPath
 - aachen
 - mapper
 
-[02/08 02:08 loc]: convert 3D model to colmap format
-[02/08 02:08 loc]: init mapper
-[02/08 02:08 loc]: init Colmap Mapper
-[02/08 02:08 loc]: compute database covisibility pairs
-[02/08 02:08 loc]: extract database features
-[02/08 02:08 loc]: perform databse matching
-[02/08 02:08 loc]: The database already exists, deleting it.
-[02/08 02:08 loc]: import features to database
-[02/08 02:08 loc]: import matches to database
-[02/08 02:08 loc]: geometric verification
-[02/08 02:08 loc]: triangulation
-[02/08 02:08 loc]: init retrieval sfm_resnet50_gem_2048
-[02/08 02:08 loc]: load global features from /media/dl/Data/datasets/aachen/visloc/db_global_features.h5
-[02/08 02:08 loc]: found 4479 images with None intrinsics
-[02/08 02:09 loc]: init nn matcher
-[02/08 02:09 loc]: loading visloc model
-[02/08 02:09 loc]: found 947 images with 922 intrinsics
-[02/08 02:09 loc]: retrive top 10 images
+[02/11 23:11 loc]: convert 3D model to colmap format
+[02/11 23:11 loc]: init mapper
+[02/11 23:11 loc]: init Colmap Mapper
+[02/11 23:11 loc]: reading Colmap model
+[02/11 23:11 loc]: model successfully loaded
+[02/11 23:11 loc]: compute database covisibility pairs
+[02/11 23:11 loc]: extract database features
+[02/11 23:11 loc]: perform databse matching
+[02/11 23:11 loc]: import features to database
+[02/11 23:11 loc]: import matches to database
+[02/11 23:11 loc]: geometric verification
+[02/11 23:11 loc]: triangulation
+[02/11 23:11 loc]: init retrieval sfm_resnet50_gem_2048
+[02/11 23:11 loc]: load global features from /media/dl/Data/datasets/aachen/visloc/db_features.h5
+[02/11 23:11 loc]: found 4479 images with None intrinsics
+[02/11 23:12 loc]: init nn matcher
+[02/11 23:12 loc]: loading visloc model
