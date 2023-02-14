@@ -52,76 +52,65 @@ class Retrieval(object):
         self.pairs_path = save_path / Path('pairs' + '_' +
                                            str(model_name) + '_' +
                                            str(num_topK) + '.txt')
-        # preds
-        self.db_features_path = Path(
-            str(cfg.visloc_path) + '/' + 'db_global_features.h5')
 
-        self.db_features_preds = None
-
-    def _database_images_loader(self,):
+    def _make_images_loader(self, split=None):
 
         images_list = ImagesFromList(
-            root=self.workspace, split="db", cfg=self.cfg)
+            root=self.workspace, split=split, cfg=self.cfg)
 
         images_dl = DataLoader(
             images_list, num_workers=self.cfg.num_workers, drop_last=False)
 
         return images_dl
 
-    def extract_database(self):
-        """extract databse global features
-        Returns:
-            dict: database retrieval predictions         
-        """
-        split = "db"
+    def load_features(self, split):
 
-        images = ImagesFromList(root=self.workspace, split=split, cfg=self.cfg)
+        features_path = Path(str(self.cfg.visloc_path) +
+                             '/' + str(split) + '_global_features.h5')
 
-        db_preds = self.extractor.extract_dataset(
-            images, save_path=self.db_features_path, normalize=True, gray=False)
+        assert features_path.exists(), features_path
 
-        self.db_features_preds = db_preds
+        logger.info(f"load global features from {features_path}")
 
-        return db_preds
+        # reader
+        features_reader = GlobalFeaturesLoader(features_path)
 
-    def load_database_features(self):
-
-        assert self.db_features_path.exists(), self.db_features_path
-
-        logger.info(f"load global features from {self.db_features_path}")
-
-        global_features_reader = GlobalFeaturesLoader(self.db_features_path)
-
-        database_dl = self._database_images_loader()
+        # loader
+        loader = self._make_database_images_loader(split=split)
 
         #
         features = []
         names = []
 
-        for item in database_dl:
+        #
+        for item in tqdm(loader, total=len(loader)):
 
             item_name = item["name"][0]
 
-            print(item_name)
-
-            pred = global_features_reader.load(item_name)
+            # load
+            pred = features_reader.load(item_name)
 
             features.append(pred["features"])
             names.append(item_name)
 
-        self.db_features_preds = {"features": torch.stack(features),
-                                  "names": np.stack(names)
-                                  }
+        out = {"features": torch.stack(features),
+               "names": np.stack(names)
+               }
 
-    # def extract_images_queries(self):
-    #     """extract query global features
-    #     Returns:
-    #         dict: query retrieval predictions
-    #     """
-    #     logger.info(f"extract global features for query images ")
-    #     db_preds = self.extract_images(self.workspace, split="query")
-    #     return db_preds
+        return out
 
+    def load_database_features(self):
+        return self.load_features(split="db")
+
+    def load_query_features(self):
+        return self.load_features(split="query")
+    
+    def get_database_features(self):
+        if self.db_features_preds is not None:
+            return self.db_features_preds
+        else:
+            return self.load_database_features()
+    
     def _search(self, q_preds, db_preds):
         """descriptor bases matcher
 
@@ -138,11 +127,6 @@ class Retrieval(object):
 
         q_names = q_preds["names"]
         db_names = db_preds["names"]
-
-        print(q_descs.dtype)
-        print(db_descs.dtype)
-        print(q_descs.shape)
-        print(db_descs.shape)
 
         # similarity
         scores = torch.mm(q_descs, db_descs.t())
@@ -194,8 +178,8 @@ class Retrieval(object):
         """
 
         # extract
-        db_preds = self.extract_database()
-        q_preds = self.extract_images_queries()
+        db_preds = self.load_database_features()
+        q_preds  = self.load_query_features()
 
         # match
         image_pairs = self._search(q_preds, db_preds)
@@ -214,10 +198,7 @@ class Retrieval(object):
         return self.pairs_path
 
     def __call__(self, item: Dict) -> Any:
-
-        # database features
-        db_preds = self.db_features_preds
-
+        
         # extract query features
         q_preds = self.extractor.extract_image(
             item, normalize=True, gray=False)
@@ -231,18 +212,3 @@ class Retrieval(object):
 
         #
         return pairs
-
-
-def do_retrieve(workspace, save_path, cfg={}):
-    """perform retrieval 
-
-    Args:
-        workspace (str): workspace path
-        save_path (str): save path
-        cfg (dict): configurations 
-
-    Returns:
-        str: path to retrieval pairs (*.txt)
-    """
-
-    return image_pairs

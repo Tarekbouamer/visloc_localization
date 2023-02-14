@@ -20,7 +20,7 @@ class Loader:
         self.save_path = save_path
 
         # writer
-        self.hfile = h5py.File(str(save_path), 'r')
+        self.hfile = h5py.File(str(save_path), 'r', libver='latest')
 
         # device
         self.device = "cuda" if torch.cuda.is_available() else "cpu"

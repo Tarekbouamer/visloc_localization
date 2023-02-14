@@ -1,9 +1,9 @@
-[02/13 18:59 loc]: init visloc_localization
-[02/13 18:59 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
-[02/13 18:59 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
-[02/13 18:59 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-[02/13 18:59 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
-[02/13 18:59 loc]: name: loc
+[02/14 17:30 loc]: init visloc_localization
+[02/14 17:30 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+[02/14 17:30 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
+[02/14 17:30 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
+[02/14 17:30 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
+[02/14 17:30 loc]: name: loc
 num_workers: 12
 dataset:
   name: aachen
@@ -27,7 +27,7 @@ extractor:
   remove_borders: 4
   nms_radius: 3
 matcher:
-  name: nn
+  model_name: nn
   distance_thresh: 0.7
   cross_check: true
   good_matches: false
@@ -83,20 +83,21 @@ mapper_path: !!python/object/apply:pathlib.PosixPath
 - aachen
 - mapper
 
-[02/13 18:59 loc]: convert 3D model to colmap format
-[02/13 18:59 loc]: init mapper
-[02/13 18:59 loc]: init Colmap Mapper
-[02/13 18:59 loc]: compute database covisibility pairs
-[02/13 18:59 loc]: extract database features
-[02/13 18:59 loc]: perform databse matching
-[02/13 18:59 loc]: import features to database
-[02/13 18:59 loc]: import matches to database
-[02/13 18:59 loc]: geometric verification
-[02/13 18:59 loc]: triangulation
-[02/13 18:59 loc]: init retrieval sfm_resnet50_gem_2048
-[02/13 18:59 loc]: found 4479 images with None intrinsics
-[02/13 19:01 loc]: extraction done 104.9 seconds saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/db_global_features.h5
-[02/13 19:01 loc]: init nn matcher
-[02/13 19:01 loc]: loading visloc model
-[02/13 19:01 loc]: found 947 images with 922 intrinsics
-[02/13 19:01 loc]: starting localization
+[02/14 17:30 loc]: convert 3D model to colmap format
+[02/14 17:30 loc]: convert 3d model from nvm to colmap format
+[02/14 17:30 loc]: 3D model has 13026 images and 13026 cameras in database.
+[02/14 17:30 loc]: reading the NVM model...
+[02/14 17:30 loc]: reading 4328 cameras
+[02/14 17:30 loc]: reading 4328 images...
+[02/14 17:30 loc]: reading 1652687 points...
+[02/14 17:31 loc]: parsing image data
+[02/14 17:31 loc]: writing Colmap model...
+[02/14 17:34 loc]: NVM to Colmap conversion done !
+[02/14 17:34 loc]: init mapper
+[02/14 17:34 loc]: init Colmap Mapper
+[02/14 17:34 loc]: compute database covisibility pairs
+[02/14 17:34 loc]: reading Colmap model
+[02/14 17:35 loc]: model successfully loaded
+[02/14 17:35 loc]: searching for 20 covisibility pairs 
+[02/14 17:36 loc]: found 85515 covisible pairs saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/sfm_pairs_20.txt
+[02/14 17:36 loc]: extract database features

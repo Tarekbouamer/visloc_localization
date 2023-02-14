@@ -30,10 +30,10 @@ class Writer:
         else:
             x = x.numpy()
         
-        # if x.dtype == np.float32 or x.dtype == np.float64:
-        #     x = x.astype(np.float16)
-        # elif x.dtype == np.int32 or x.dtype == np.int64:
-        #     x = x.astype(np.int16)
+        if x.dtype == np.float32 or x.dtype == np.float64:
+            x = x.astype(np.float32)
+        elif x.dtype == np.int32 or x.dtype == np.int64:
+            x = x.astype(np.int16)
 
         return x
         

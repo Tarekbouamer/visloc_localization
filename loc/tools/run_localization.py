@@ -9,7 +9,7 @@ from loc.datasets.dataset import ImagesFromList
 from loc.extractors import LocalExtractor
 from loc.localize import ImageLocalizer
 from loc.matchers import MatchQueryDatabase
-from loc.tools.retrieval import Retrieval, do_retrieve
+from loc.tools.retrieval import Retrieval
 
 from loc.utils.io import (dump_logs,
                           write_poses_txt)
@@ -21,12 +21,12 @@ def run_localization(cfg, mapper):
 
     # extractor
     extractor = LocalExtractor(cfg)
-
+    
     # retrieval
     retrieval = Retrieval(workspace=cfg.workspace,
                           save_path=cfg.visloc_path, cfg=cfg)
 
-    retrieval.extract_database()
+    retrieval.load_database_features()
 
     # matcher
     matcher = MatchQueryDatabase(cfg=cfg)
@@ -56,10 +56,7 @@ def run_localization(cfg, mapper):
         item["camera"] = query_set.cameras[qname]
 
         # localize
-        qpose = localizer(item)
-
-        # logger.info(f"{item['name'][0]} estimated pose")
-        # logger.info(qpose)
+        qpose = localizer.localize_image(item)
 
     #
     poses = localizer.poses
