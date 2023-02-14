@@ -1,217 +1,165 @@
-import collections.abc as collections
-from os import path
-
-import torch
-import torch.utils.data as data
-
-import numpy as np
-
-from pathlib import Path
-from types import SimpleNamespace
-
-from PIL import Image, ImageFile
-
-from    torchvision.transforms import functional as tfn
-import  torchvision.transforms as transforms
-from  timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
-
-import pycolmap 
-import cv2
-import h5py
-
-from loc.utils.io import load_aachen_intrinsics, path2key
-
 # logger
 import logging
+from os import path
+from pathlib import Path
+from typing import Any, Dict, Tuple, List
+
+import cv2
+import numpy as np
+import pycolmap
+from torch.utils.data import Dataset
+
+from loc.utils.io import load_aachen_intrinsics
+
 logger = logging.getLogger("loc")
 
 
 _EXT = ['*.jpg', '*.png', '*.jpeg', '*.JPG', '*.PNG']
 
 
-def list_h5_names(path):
-    names = []
-    
-    with h5py.File(str(path), 'r', libver='latest') as fd:
-        def visit_fn(_, obj):
-            if isinstance(obj, h5py.Dataset):
-                names.append(obj.parent.name.strip('/'))
-        fd.visititems(visit_fn)
-      
-    return list(set(names))
+class ImagesFromList(Dataset):
 
-  
-def parse_image_list(path, with_intrinsics=False, logger=None):
-    images = []
-    with open(path, 'r') as f:
-        for line in f:
-            line = line.strip('\n')
-            if len(line) == 0 or line[0] == '#':
-                continue
-            name, *data = line.split()
-            if with_intrinsics:
-                model, width, height, *params = data
-                params = np.array(params, float)
-                cam = pycolmap.Camera(model, int(width), int(height), params)
-                images.append((name, cam))
-            else:
-                images.append(name)
+    def __init__(self,
+                 root: Path,
+                 split: str = None,
+                 cfg={}) -> None:
 
-    assert len(images) > 0
-    
-    if logger:
-        logger.info(f'Imported {len(images)} images from {path.name}')
-    return 
-  
-def parse_image_lists(paths, with_intrinsics=False):
-    images = []
-    files = list(Path(paths.parent).glob(paths.name))
-    assert len(files) > 0
-    for lfile in files:
-        images += parse_image_list(lfile, with_intrinsics=with_intrinsics)
-    return images
-  
-
-
-class ImagesFromList(data.Dataset):
-    
-    def __init__(self, root, cfg, split=None, **kwargs): 
-        
-        # 
+        #
         self.split = split
-  
-        # options
-        self.root           = Path(root)
-        
+        self.root = Path(root)
+
         if split == "db":
             self.max_size = cfg.retrieval.max_size
         elif split == "query":
-            self.max_size = cfg.extractor.max_size    
+            self.max_size = cfg.extractor.max_size
         else:
-            self.max_size = None    
-        
+            self.max_size = None
+
         # camera path
         self.cameras_path = None
         if cfg[split]['cameras'] is not None:
-            self.cameras_path   = Path(root) / str(cfg[split]['cameras'])
+            self.cameras_path = Path(root) / str(cfg[split]['cameras'])
 
-        # split path
-        self.split_images_path  = Path(root) / str(cfg[split]["images"])
-        self.images_rel_path    = self.split_images_path.parents[0]
+        # images split path
+        self.split_images_path = Path(root) / str(cfg[split]["images"])
+        self.images_rel_path = self.split_images_path.parents[0]
 
         # load images
         paths = []
         for ext in _EXT:
-            paths += list(Path(self.split_images_path).glob('**/'+ ext)) 
-                                        
+            paths += list(Path(self.split_images_path).glob('**/' + ext))
+
         if len(paths) == 0:
-            raise ValueError(f'could not find any image in path: {self.split_images_path}.')
-        
-        # sort   
+            raise ValueError(
+                f'could not find any image in path: {self.split_images_path}.')
+
+        # sort
         self.images_fn = sorted(list(set(paths)))
-        
-        # all names 
-        self.names = [i.relative_to(self.images_rel_path).as_posix() for i in self.images_fn]         
-        
+
+        # all names
+        self.names = [i.relative_to(self.images_rel_path).as_posix()
+                      for i in self.images_fn]
+
         # load intrinsics
         if self.cameras_path is not None:
             self.cameras = load_aachen_intrinsics(self.cameras_path)
         else:
             self.cameras = None
-                                        
-        # cv
-        self.resize_force   = False
-        self.interpolation  = 'cv2_area'
-        
-        #
-        logger.info(f'found {len(self.images_fn)} images with {self.num_cameras()} intrinsics') 
 
-    def __len__(self):
+        # cv
+        self.interpolation = 'cv2_area'
+
+        #
+        logger.info(
+            f'found {len(self.images_fn)} images with {self.num_cameras()} intrinsics')
+
+    def __len__(self) -> None:
         return len(self.images_fn)
 
-    def resize(self, image, size, interp=cv2.INTER_AREA):
-        
-        if self.max_size and (self.resize_force or max(size) > self.max_size):
-            
-            scale       = self.max_size / max(size)
-            size_new    = tuple(int(round(x*scale)) for x in size)
-            
+    def resize(self,
+               image: np.ndarray,
+               size: Tuple[int],
+               interp: Any = cv2.INTER_AREA
+               ) -> np.ndarray:
+
+        if self.max_size and max(size) > self.max_size:
+
+            scale = self.max_size / max(size)
+            size_new = tuple(int(round(x*scale)) for x in size)
+
             h, w = image.shape[:2]
-            
+
             if interp == cv2.INTER_AREA and (w < size_new[0] or h < size_new[1]):
                 interp = cv2.INTER_LINEAR
-            
+
+            #
             image = cv2.resize(image, size_new, interpolation=interp)
-        
+
         return image
-            
-    def read_image(self, path):
-        
-        # mode
-        mode = cv2.IMREAD_COLOR
-      
-        # read 
-        image = cv2.imread(str(path), mode)
-        
+
+    def read_image(self, 
+                   path: Path
+                   ) -> Tuple[np.ndarray, np.ndarray]:
+
+        # read
+        image = cv2.imread(str(path), cv2.IMREAD_COLOR)
+
         if image is None:
-            raise ValueError(f'Cannot read image {path}.')
-        
+            raise ValueError(f'error in read image {path}.')
+
         # BGR to RGB
         if len(image.shape) == 3:
-            image = image[:, :, ::-1]  
-        # 
-        image   = image.astype(np.float32)
-        size    = image.shape[:2][::-1]
-        
-        return image , size  
-    
-    def load_img(self, img_path):
-          
-        # truncated images
-        ImageFile.LOAD_TRUNCATED_IMAGES = True     
-        
-        # open 
-        with open(img_path, 'rb') as f:
-            img = Image.open(f).convert('RGB')
-                
-        return img
-    
-    def num_cameras(self):
-        return len(self.cameras) if self.cameras is not None else None
-    
-    def get_cameras(self):
-        return self.cameras     
-
-    def get_names(self):
-        return self.names 
-             
-    def get_name(self, _path):
-        name = _path.relative_to(self.images_rel_path).as_posix()    
-        return name
-     
-    def __getitem__(self, item):
+            image = image[:, :, ::-1]
         #
+        image = image.astype(np.float32)
+        size = image.shape[:2][::-1]
+
+        return image, size
+
+    def num_cameras(self) -> int:
+        return len(self.cameras) if self.cameras is not None else None
+
+    def get_cameras(self) -> Dict[str, pycolmap.Camera]:
+        return self.cameras
+
+    def get_names(self) -> List[str]:
+        return self.names
+
+    def get_name(self, 
+                 _path: Path
+                 ) -> str:
+        name = _path.relative_to(self.images_rel_path).as_posix()
+        return name
+
+    def __getitem__(self, item) -> Dict:
+
         out = {}
         
         #
-        img_path    = self.images_fn[item]
-        img_name    = self.get_name(img_path)
-                    
-        # cv
+        img_path = self.images_fn[item]
+        img_name = self.get_name(img_path)
+
+        # read image
         img, size = self.read_image(img_path)
 
-        # resize
+        # resize image
         img = self.resize(img, size=size)
-        
-        # CHW
+
+        # --> CHW
         img = img.transpose((2, 0, 1))
-        
-        # 
+
+        # normalize [0, 1.]
         img = img / 255.
-        
-        # dict
-        out["img"]      = img.astype(np.float32)
-        out["name"]     = img_name
-        out["size"]     = np.array(size, dtype=np.float32)
-        
+
+        # out
+        out["img"]  = img.astype(np.float32)
+        out["name"] = img_name
+        out["size"] = np.array(size, dtype=np.float32)
+
         return out
+
+    def __repr__(self) -> str:
+        msg = f" {self.__class__.__name__}"
+        msg += f" split: {self.split}  max_size: {self.max_size}"
+        msg += f" num_images: {self.__len__()}"
+        return msg
