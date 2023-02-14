@@ -1,28 +1,19 @@
-from typing import Any, Union, Dict, List, Tuple
-
-from pathlib import Path
-
+# logging
+import logging
 import time
-from tqdm import tqdm
-import numpy as np
+from pathlib import Path
+from typing import Any, Dict, List, Tuple, Union
 
 import torch
-import torch.nn as nn
-
-from torch.utils.data import Dataset, DataLoader
-
-from .base import FeaturesExtractor
-from retrieval.datasets import ImagesListDataset
-from retrieval.models import create_model, get_pretrained_cfg
-from retrieval.utils.logging import setup_logger
+from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 from loc.utils.writers import FeaturesWriter
-
 # third
 from thirdparty.SuperGluePretrainedNetwork.models.superpoint import SuperPoint
 
-# logging
-import logging
+from .base import FeaturesExtractor
+
 logger = logging.getLogger("loc")
 
 
@@ -41,6 +32,8 @@ class LocalExtractor(FeaturesExtractor):
 
         #
         model_name = self.cfg.extractor.model_name
+        self.model_name = model_name
+
         self.extractor = create_model(model_name=model_name,
                                       cfg=cfg)
 
@@ -68,11 +61,11 @@ class LocalExtractor(FeaturesExtractor):
         original_size = data['size'][0]
 
         # prepare inputs
-        data = self._prepare_inputs(data, **kwargs)
+        data = self._prepare_input_data(data, **kwargs)
 
         # extract
         preds = self.extractor({'image': data["img"]})
-        
+
         # unpack
         preds = self._unpack(preds)
 
@@ -80,7 +73,7 @@ class LocalExtractor(FeaturesExtractor):
         current_size = data["img"].shape[-2:][::-1]
         scales = torch.Tensor(
             (original_size[0] / current_size[0], original_size[1] / current_size[1])).to(original_size).cuda()
-        
+
         #
         preds['keypoints'] = (preds['keypoints'] + .5) * scales[None] - .5
         preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()
@@ -108,7 +101,7 @@ class LocalExtractor(FeaturesExtractor):
         for it, data in enumerate(tqdm(_dataloader, total=len(_dataloader), colour='green', desc='extract locals'.rjust(15))):
             #
             it_name = data['name'][0]
-                    
+
             #
             preds = self.extract_image(data, scales=scales, **kwargs)
 
@@ -127,5 +120,10 @@ class LocalExtractor(FeaturesExtractor):
 
         logger.info(f'extraction done {end_time:.4} seconds saved {save_path}')
 
-
         return save_path
+
+    def __repr__(self) -> str:
+        msg = f"{self.__class__.__name__}"
+        msg += f"   extractor: {self.model_name}   device: {self.device}"
+        msg += f"   is_training: {self.extractor.training}"
+        return msg

@@ -1,55 +1,49 @@
-from typing import Any, Union, Dict, List
-
-from pathlib import Path
-
+# logging
+import logging
 import time
-from tqdm import tqdm
-import numpy as np
+from pathlib import Path
+from typing import Any, Dict, List, Union
 
 import torch
-import torch.nn as nn
-
-from torch.utils.data import Dataset, DataLoader
-
-from .base import FeaturesExtractor
-from retrieval.datasets import ImagesListDataset
-from retrieval.models import create_model, get_pretrained_cfg
-from retrieval.utils.logging import setup_logger
+from retrieval.models import create_model
+from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 from loc.utils.writers import FeaturesWriter
 
-# logging
-import logging
-logger = logging.getLogger("loc")
+from .base import FeaturesExtractor
 
+logger = logging.getLogger("loc")
 
 class GlobalExtractor(FeaturesExtractor):
     def __init__(self,
-               cfg: Dict = None
-               ) -> None:
+                 cfg: Dict = None
+                 ) -> None:
         super().__init__(cfg)
       
         #
         model_name  = self.cfg.retrieval.model_name
-        self.extractor  = create_model(model_name=model_name)
+        self.model_name = model_name
+
+        self.extractor  = create_model(model_name=model_name, pretrained=True)
 
         # init
         self._set_device()
         self._eval()
             
     @torch.no_grad()     
-    def extract_image(self, 
-                        data: Dict, 
-                        scales: List=[1.0],
+    def extract_image(self,
+                      data: Dict,
+                      scales: List=[1.0],
                         **kwargs 
                         ) -> dict:          
         
         # prepare inputs
-        data  = self._prepare_inputs(data, **kwargs)
-                    
+        data  = self._prepare_input_data(data, **kwargs)
+        
         # extract
         preds = self.extractor.extract_global(data['img'], scales=scales, do_whitening=True)  
-        
+            
         # 
         preds["features"]  = preds["features"][0]  
         
@@ -63,7 +57,6 @@ class GlobalExtractor(FeaturesExtractor):
                         save_path:Path=None,
                         **kwargs
                         ) -> Dict:
-        
         # features writer 
         self.writer = FeaturesWriter(save_path)
             
@@ -72,23 +65,15 @@ class GlobalExtractor(FeaturesExtractor):
         
         # time
         start_time = time.time()
-        
-        #
-        features = []
-        names = []
                 
         # run --> 
         for it, data in enumerate(tqdm(_dataloader, total=len(_dataloader), colour='green', desc='extract global'.rjust(15))):
             
             #
             it_name = data['name'][0] 
-            print(data['img'].shape)
                        
             # extract
             preds = self.extract_image(data, scales, **kwargs)
-            
-            features.append(preds["features"])
-            names.append(it_name)
 
             # write preds
             self.writer.write_items(key=it_name, data=preds)
@@ -104,14 +89,6 @@ class GlobalExtractor(FeaturesExtractor):
         end_time = time.time() - start_time  
             
         logger.info(f'extraction done {end_time:.4} seconds saved {save_path}')
-      
-        #
-        out = {
-            "features": torch.stack(features),
-            "names": np.stack(names)
-            }
-
-        return out
        
         return save_path
             

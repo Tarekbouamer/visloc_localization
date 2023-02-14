@@ -17,11 +17,8 @@ class FeaturesExtractor:
     def __init__(self, 
                  cfg:Dict=None
                  ) -> None:
-
         #
         self.cfg    = cfg
-        
-        # device
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
                        
     def _set_device(self) -> None:      
@@ -43,7 +40,7 @@ class FeaturesExtractor:
                 ) -> torch.Tensor:
         return to_gray(x)         
     
-    def _prepare_inputs(self, 
+    def _prepare_input_data(self, 
                         data: Dict,
                         **kwargs
                         ) -> Dict:
@@ -51,11 +48,14 @@ class FeaturesExtractor:
         __to_gray__     =  kwargs.pop("gray", False)
         __normalize__   =  kwargs.pop("normalize", False)
         
+        #
+        assert len(data["img"].shape) > 2, len(data["img"].shape)
+        
         # bached
         if len(data["img"].shape) < 4:
             data["img"] = data["img"].unsqueeze(0)
         
-        # device
+        # to device
         for k, v in data.items():
             if isinstance(v, torch.Tensor):
                 data[k] = v.to(device=self.device)
@@ -71,16 +71,13 @@ class FeaturesExtractor:
         return data
 
     def _dataloader(self, 
-                    _iter
+                    _iter: Any
                     )-> DataLoader:
         
         if isinstance(_iter, DataLoader):
             return _iter
         else:
-            return DataLoader(_iter, 
-                              num_workers=self.cfg.num_workers, 
-                              shuffle=False, 
-                              drop_last=False)
+            return DataLoader(_iter, num_workers=self.cfg.num_workers)
                 
     @torch.no_grad()     
     def extract_image(self, 
@@ -114,6 +111,12 @@ class FeaturesExtractor:
             dict: extraction output
         """ 
         raise NotImplementedError
+    
+    def __repr__(self) -> str:
+        msg  = f" {self.__class__.__name__}"
+        msg += f"  extractor: {self.model_name}  device: {self.device}"
+        return msg
+
             
             
             
