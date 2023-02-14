@@ -8,12 +8,12 @@ logger = logging.getLogger("loc")
 
 
 class AbsolutePoseEstimation:
-    def __init__(self, sfm_model, config=None):
+    def __init__(self, sfm_model, cfg=None):
         self.sfm_model = sfm_model
 
-        config = {"estimation": {"ransac": {"max_error": 18}}}
+        cfg = {"estimation": {"ransac": {"max_error": 18}}}
 
-        self.config = {**self.default_config, **config}
+        self.cfg = {**self.default_cfg, **cfg}
 
     def _to_numpy(self, x):
         if isinstance(x, torch.Tensor):
@@ -25,23 +25,20 @@ class AbsolutePoseEstimation:
         raise NotImplementedError
 
     def __repr__(self):
-        cls = self.__class__.__name__
-
-        msg = f'{cls}('
-        for k, v in self.config.items():
-            msg += f'\t {k}: {v}'
-        msg += f')'
-
+        msg  = f" {self.__class__.__name__}"
+        msg += f" ransac: max_reproj_error {self.cfg.solver.ransac.max_reproj_error}"
+        msg += f" max_epipolar_error {self.cfg.solver.ransac.max_epipolar_error}"
+        msg += f" bundle: max_iterations {self.cfg.solver.bundle.max_iterations}"
         return msg
 
 
 class AbsolutePoseEstimationPyColmap(AbsolutePoseEstimation):
 
-    default_config = {
+    default_cfg = {
         "estimation": {"ransac": {"max_error": 12}}}
 
-    def __init__(self, sfm_model, config=None):
-        super().__init__(sfm_model=sfm_model, config=config)
+    def __init__(self, sfm_model, cfg=None):
+        super().__init__(sfm_model=sfm_model, cfg=cfg)
 
     def estimate(self, points2D_all, points2D_idxs, points3D_id, query_camera):
 
@@ -86,14 +83,6 @@ class AbsolutePoseEstimationPoseLib(AbsolutePoseEstimation):
         camera = {'model':  camera.model_name,  'width':  camera.width,
                   'height': camera.height,      'params': camera.params}
         
-        # print(points2D)
-        # print(points3D)
-        
-        # print(points2D.shape)
-        # print(points3D.shape)
-
-        # print(camera)
-        # input()
         # estimation
         pose, info = poselib.estimate_absolute_pose(points2D, points3D, camera,
                                                     self.config.get(
