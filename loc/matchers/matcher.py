@@ -20,7 +20,7 @@ logger = logging.getLogger("loc")
 
 def make_matcher(cfg):
 
-    matcher_name = cfg.matcher.name
+    matcher_name = cfg.matcher.model_name
 
     if matcher_name == "nn":
         return MutualNearestNeighbor(cfg.matcher)
@@ -47,7 +47,7 @@ class Matcher(BaseMatcher):
         self._load_weights()
 
         #
-        logger.info(f"init {cfg.matcher.name} matcher")
+        logger.info(f"init {cfg.matcher.model_name} matcher")
 
     def _prepare_input_data(self,
                         data: Dict[str, Union[torch.Tensor, List, Tuple]]

@@ -194,13 +194,13 @@ class ColmapMapper(Mapper):
                 sfm_pairs.append(pair)
 
         # save
-        with open(self.sfm_pairs_path, 'w') as f:
+        with open(sfm_pairs_path, 'w') as f:
             f.write('\n'.join(' '.join([i, j]) for i, j in sfm_pairs))
 
         logger.info(
-            f'found {len(sfm_pairs)} covisible pairs saved {self.sfm_pairs_path}')
+            f'found {len(sfm_pairs)} covisible pairs saved {sfm_pairs_path}')
 
-        return self.sfm_pairs_path
+        return sfm_pairs_path
 
     def create_database(self):
         """create reconstruction database

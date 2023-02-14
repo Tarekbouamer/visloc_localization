@@ -1,9 +1,9 @@
-[02/14 17:30 loc]: init visloc_localization
-[02/14 17:30 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
-[02/14 17:30 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
-[02/14 17:30 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-[02/14 17:30 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
-[02/14 17:30 loc]: name: loc
+[02/15 00:06 loc]: init visloc_localization
+[02/15 00:06 loc]: workspace /media/dl/Data/datasets/aachen
+[02/15 00:06 loc]: images /media/dl/Data/datasets/aachen/images
+[02/15 00:06 loc]: visloc /media/dl/Data/datasets/aachen/visloc
+[02/15 00:06 loc]: mapper /media/dl/Data/datasets/aachen/mapper
+[02/15 00:06 loc]: name: loc
 num_workers: 12
 dataset:
   name: aachen
@@ -47,57 +47,157 @@ db:
   cameras: null
 convert:
   type: nvm
-  nvm_path: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/aachen_cvpr2018_db.nvm
-  intrinsics: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/database_intrinsics.txt
-  database: /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/aachen.db
+  nvm_path: /media/dl/Data/datasets/aachen/3D-models/aachen_cvpr2018_db.nvm
+  intrinsics: /media/dl/Data/datasets/aachen/3D-models/database_intrinsics.txt
+  database: /media/dl/Data/datasets/aachen/aachen.db
 workspace: !!python/object/apply:pathlib.PosixPath
 - /
 - media
-- loc
-- D0AE6539AE65196C
-- VisualLocalization2020
+- dl
+- Data
+- datasets
 - aachen
 config: loc/configurations/default.yml
 images_path: !!python/object/apply:pathlib.PosixPath
 - /
 - media
-- loc
-- D0AE6539AE65196C
-- VisualLocalization2020
+- dl
+- Data
+- datasets
 - aachen
 - images
 visloc_path: !!python/object/apply:pathlib.PosixPath
 - /
 - media
-- loc
-- D0AE6539AE65196C
-- VisualLocalization2020
+- dl
+- Data
+- datasets
 - aachen
 - visloc
 mapper_path: !!python/object/apply:pathlib.PosixPath
 - /
 - media
-- loc
-- D0AE6539AE65196C
-- VisualLocalization2020
+- dl
+- Data
+- datasets
 - aachen
 - mapper
 
-[02/14 17:30 loc]: convert 3D model to colmap format
-[02/14 17:30 loc]: convert 3d model from nvm to colmap format
-[02/14 17:30 loc]: 3D model has 13026 images and 13026 cameras in database.
-[02/14 17:30 loc]: reading the NVM model...
-[02/14 17:30 loc]: reading 4328 cameras
-[02/14 17:30 loc]: reading 4328 images...
-[02/14 17:30 loc]: reading 1652687 points...
-[02/14 17:31 loc]: parsing image data
-[02/14 17:31 loc]: writing Colmap model...
-[02/14 17:34 loc]: NVM to Colmap conversion done !
-[02/14 17:34 loc]: init mapper
-[02/14 17:34 loc]: init Colmap Mapper
-[02/14 17:34 loc]: compute database covisibility pairs
-[02/14 17:34 loc]: reading Colmap model
-[02/14 17:35 loc]: model successfully loaded
-[02/14 17:35 loc]: searching for 20 covisibility pairs 
-[02/14 17:36 loc]: found 85515 covisible pairs saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/sfm_pairs_20.txt
-[02/14 17:36 loc]: extract database features
+[02/15 00:06 loc]: convert 3D model to colmap format
+[02/15 00:06 loc]: init mapper
+[02/15 00:06 loc]: init Colmap Mapper
+[02/15 00:06 loc]: compute database covisibility pairs
+[02/15 00:06 loc]: extract database features
+[02/15 00:06 loc]: perform databse matching
+[02/15 00:06 loc]: import features to database
+[02/15 00:06 loc]: import matches to database
+[02/15 00:06 loc]: geometric verification
+[02/15 00:06 loc]: triangulation
+[02/15 00:06 loc]: init retrieval sfm_resnet50_gem_2048
+[02/15 00:06 loc]: load global features from /media/dl/Data/datasets/aachen/visloc/db_global_features.h5
+[02/15 00:06 loc]: found 4479 images with None intrinsics
+[02/15 00:07 loc]: init nn matcher
+[02/15 00:07 loc]: loading visloc model
+[02/15 00:07 loc]: init nn matcher
+[02/15 00:07 loc]: found 947 images with 922 intrinsics
+[02/15 00:07 loc]: starting localization
+[02/15 00:07 loc]: zero 3D points for db/3791.jpg.
+[02/15 00:07 loc]: zero 3D points for db/3938.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2043.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2222.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2223.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2224.jpg.
+[02/15 00:07 loc]: zero 3D points for db/3970.jpg.
+[02/15 00:07 loc]: zero 3D points for db/3312.jpg.
+[02/15 00:07 loc]: zero 3D points for db/3970.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:07 loc]: zero 3D points for db/1228.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2976.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2976.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2593.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2593.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2593.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2593.jpg.
+[02/15 00:07 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:07 loc]: zero 3D points for db/1228.jpg.
+[02/15 00:08 loc]: zero 3D points for db/1228.jpg.
+[02/15 00:08 loc]: zero 3D points for db/4043.jpg.
+[02/15 00:08 loc]: zero 3D points for db/4083.jpg.
+[02/15 00:08 loc]: zero 3D points for db/4043.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2043.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2045.jpg.
+[02/15 00:08 loc]: zero 3D points for db/1228.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:08 loc]: zero 3D points for db/257.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2593.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:08 loc]: zero 3D points for db/1228.jpg.
+[02/15 00:08 loc]: zero 3D points for db/3970.jpg.
+[02/15 00:08 loc]: zero 3D points for db/1228.jpg.
+[02/15 00:08 loc]: zero 3D points for db/1228.jpg.
+[02/15 00:08 loc]: zero 3D points for db/3970.jpg.
+[02/15 00:08 loc]: zero 3D points for db/3970.jpg.
+[02/15 00:08 loc]: zero 3D points for db/4043.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2053.jpg.
+[02/15 00:08 loc]: zero 3D points for db/1228.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2426.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2656.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2043.jpg.
+[02/15 00:08 loc]: zero 3D points for db/4083.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2593.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2976.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2976.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2004.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2593.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2656.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2593.jpg.
+[02/15 00:08 loc]: zero 3D points for db/557.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2426.jpg.
+[02/15 00:08 loc]: zero 3D points for db/3312.jpg.
+[02/15 00:08 loc]: zero 3D points for db/1246.jpg.
+[02/15 00:08 loc]: zero 3D points for db/557.jpg.
+[02/15 00:08 loc]: zero 3D points for db/557.jpg.
+[02/15 00:08 loc]: zero 3D points for db/557.jpg.
+[02/15 00:08 loc]: zero 3D points for db/557.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2593.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2505.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2223.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2224.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2222.jpg.
+[02/15 00:08 loc]: zero 3D points for db/3312.jpg.
+[02/15 00:08 loc]: zero 3D points for db/1228.jpg.
+[02/15 00:08 loc]: zero 3D points for db/3970.jpg.
+[02/15 00:08 loc]: zero 3D points for db/3312.jpg.
+[02/15 00:08 loc]: zero 3D points for db/3970.jpg.
+[02/15 00:08 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:09 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:09 loc]: zero 3D points for db/1246.jpg.
+[02/15 00:09 loc]: zero 3D points for db/2976.jpg.
+[02/15 00:09 loc]: zero 3D points for db/3839.jpg.
+[02/15 00:09 loc]: zero 3D points for db/2656.jpg.
+[02/15 00:09 loc]: zero 3D points for db/2606.jpg.
+[02/15 00:09 loc]: zero 3D points for db/4043.jpg.
+[02/15 00:09 loc]: zero 3D points for db/2435.jpg.
+[02/15 00:09 loc]: zero 3D points for db/2045.jpg.
+[02/15 00:09 loc]: writing poses to /media/dl/Data/datasets/aachen/visloc/visloc.poses.txt...
+[02/15 00:09 loc]: writing logs to /media/dl/Data/datasets/aachen/visloc/visloc.logs.pkl 
+[02/15 00:09 loc]: done!
+[02/15 00:09 loc]: Done

@@ -52,6 +52,9 @@ class Retrieval(object):
         self.pairs_path = save_path / Path('pairs' + '_' +
                                            str(model_name) + '_' +
                                            str(num_topK) + '.txt')
+        
+        #
+        self.db_features_preds = None
 
     def _make_images_loader(self, split=None):
 
@@ -76,7 +79,7 @@ class Retrieval(object):
         features_reader = GlobalFeaturesLoader(features_path)
 
         # loader
-        loader = self._make_database_images_loader(split=split)
+        loader = self._make_images_loader(split=split)
 
         #
         features = []
@@ -106,10 +109,9 @@ class Retrieval(object):
         return self.load_features(split="query")
     
     def get_database_features(self):
-        if self.db_features_preds is not None:
-            return self.db_features_preds
-        else:
-            return self.load_database_features()
+        if self.db_features_preds is None:
+            self.db_features_preds = self.load_database_features()            
+        return self.db_features_preds
     
     def _search(self, q_preds, db_preds):
         """descriptor bases matcher
@@ -199,6 +201,9 @@ class Retrieval(object):
 
     def __call__(self, item: Dict) -> Any:
         
+        #
+        db_preds = self.get_database_features()
+        
         # extract query features
         q_preds = self.extractor.extract_image(
             item, normalize=True, gray=False)
@@ -208,7 +213,7 @@ class Retrieval(object):
         q_preds["features"] = q_preds["features"].unsqueeze(0)
 
         # search for pairs
-        pairs = self._search(q_preds, self.db_features_preds)
+        pairs = self._search(q_preds, db_preds)
 
         #
         return pairs

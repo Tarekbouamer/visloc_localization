@@ -26,7 +26,7 @@ def run_localization(cfg, mapper):
     retrieval = Retrieval(workspace=cfg.workspace,
                           save_path=cfg.visloc_path, cfg=cfg)
 
-    retrieval.load_database_features()
+    retrieval.get_database_features()
 
     # matcher
     matcher = MatchQueryDatabase(cfg=cfg)

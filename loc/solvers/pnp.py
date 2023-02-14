@@ -54,21 +54,21 @@ class AbsolutePoseEstimationPyColmap(AbsolutePoseEstimation):
         ret = pycolmap.absolute_pose_estimation(points2D,
                                                 points3D,
                                                 query_camera,
-                                                estimation_options=self.config.get(
+                                                estimation_options=self.cfg.get(
                                                     'estimation', {}),
-                                                refinement_options=self.config.get('refinement', {}))
+                                                refinement_options=self.cfg.get('refinement', {}))
         return ret
 
 
 class AbsolutePoseEstimationPoseLib(AbsolutePoseEstimation):
 
-    default_config = {
+    default_cfg = {
         'ransac': {'max_reproj_error': 12.0, 'max_epipolar_error': 1.0},
         'bundle': {'max_iterations': 100}
     }
 
-    def __init__(self, sfm_model, config=None):
-        super().__init__(sfm_model=sfm_model, config=config)
+    def __init__(self, sfm_model, cfg=None):
+        super().__init__(sfm_model=sfm_model, cfg=cfg)
 
     def estimate(self, points2D_all, points2D_idxs, points3D_id, camera):
 
@@ -85,9 +85,9 @@ class AbsolutePoseEstimationPoseLib(AbsolutePoseEstimation):
         
         # estimation
         pose, info = poselib.estimate_absolute_pose(points2D, points3D, camera,
-                                                    self.config.get(
+                                                    self.cfg.get(
                                                         'ransac', {}),
-                                                    self.config.get('bundle', {}))
+                                                    self.cfg.get('bundle', {}))
 
         #
         ret = {**info}

@@ -309,9 +309,6 @@ class ImageLocalizer(Localizer):
     def __init__(self, visloc_model, extractor, retrieval, matcher, cfg={}) -> None:
         super().__init__(visloc_model, cfg)
 
-        # pose estimator
-        pose_estimator = AbsolutePoseEstimationPoseLib(visloc_model, cfg)
-
         # extractor
         self.extractor = extractor
 

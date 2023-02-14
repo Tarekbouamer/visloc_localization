@@ -23,9 +23,9 @@ def feature_extraction(workspace, split, save_path, cfg):
 
     #
     loc_features_path = Path(str(save_path) + '/' +
-                             str(split) + 'local_features.h5')
+                             str(split) + '_local_features.h5')
     glb_path_features = Path(str(save_path) + '/' +
-                             str(split) + 'global_features.h5')
+                             str(split) + '_global_features.h5')
 
     # local
     local_extractor = LocalExtractor(cfg=cfg)
@@ -49,7 +49,7 @@ def feature_extraction(workspace, split, save_path, cfg):
 
 
 def database_feature_extraction(workspace, save_path, cfg):
-    return feature_extraction(workspace, save_path, cfg, split="db")
+    return feature_extraction(workspace=workspace, split="db", save_path=save_path, cfg=cfg)
     
 def query_feature_extraction(workspace, save_path, cfg):
-    return feature_extraction(workspace, save_path, cfg, split="query")
+    return feature_extraction(workspace=workspace, split="query", save_path=save_path, cfg=cfg)
