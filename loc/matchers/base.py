@@ -63,3 +63,8 @@ class BaseMatcher:
                        data: Dict[str, Union[torch.Tensor, List, Tuple]],
                         ) -> Dict:
         raise NotImplementedError
+    
+    def __repr__(self) -> str:
+        msg  = f" {self.__class__.__name__}"
+        msg += f"  matcher: {self.model_name}  device: {self.device}"
+        return msg

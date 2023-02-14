@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from loc.matchers import BaseMatcher, MutualNearestNeighbor, SuperGlueMatcher
-from loc.utils.io import pairs2key, read_pairs_list, remove_duplicate_pairs
+from loc.utils.io import pairs2key
 from loc.utils.writers import MatchesWriter
 from loc.utils.readers import LocalFeaturesLoader
 
@@ -37,7 +37,8 @@ class Matcher(BaseMatcher):
                  ) -> None:
         super().__init__(cfg=cfg)
 
-        # call from a factory
+        # from a factory
+        self.model_name = cfg.matcher.model_name
         self.matcher = make_matcher(cfg=cfg)
 
         # init
@@ -48,7 +49,7 @@ class Matcher(BaseMatcher):
         #
         logger.info(f"init {cfg.matcher.name} matcher")
 
-    def _prepare_inputs(self,
+    def _prepare_input_data(self,
                         data: Dict[str, Union[torch.Tensor, List, Tuple]]
                         ) -> Dict:
 
@@ -73,7 +74,7 @@ class Matcher(BaseMatcher):
         assert "descriptors1" in data, KeyError("descriptors1 missing")
 
         # prepare
-        data = self._prepare_inputs(data)
+        data = self._prepare_input_data(data)
 
         # match
         preds = self.matcher(data)

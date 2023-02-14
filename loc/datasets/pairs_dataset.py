@@ -7,8 +7,6 @@ from torch.utils.data import Dataset
 
 logger = logging.getLogger("loc")
 
-# TODO: work arround this
-
 
 def read_key_from_h5py(name, _path, suffix=""):
     data = {}
@@ -54,3 +52,8 @@ class PairsDataset(Dataset):
 
     def __len__(self):
         return len(self.pairs)
+
+    def __repr__(self) -> str:
+        msg = f" {self.__class__.__name__}"
+        msg += f" num_pairs: {self.__len__()}"
+        return msg
