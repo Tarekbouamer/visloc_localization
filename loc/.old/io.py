@@ -14,7 +14,6 @@ import h5py
 import pickle
 
 import pycolmap
-from loc import logger
 
 # 
 # logger

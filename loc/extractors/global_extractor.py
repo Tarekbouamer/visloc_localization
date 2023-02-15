@@ -91,6 +91,14 @@ class GlobalExtractor(FeaturesExtractor):
         logger.info(f'extraction done {end_time:.4} seconds saved {save_path}')
        
         return save_path
+
+    def __repr__(self) -> str:
+        msg  = f" {self.__class__.__name__}"
+        msg += f" ("
+        msg += f" model_name: {self.model_name} device: {self.device}"
+        msg += f" max_size: {self.cfg.retrieval.max_keypoints}"
+        msg += f" )"
+        return msg
             
               
             

@@ -1,6 +1,5 @@
 
 # General
-import sys
 from collections import OrderedDict
 import argparse
 from os import mkdir

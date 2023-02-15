@@ -1,18 +1,12 @@
-import argparse
-from pathlib import Path
-from typing import Optional
-import h5py
-import numpy as np
-import torch
-import collections.abc as collections
-import os
-
-from loc.datasets.dataset import ImagesFromList
-from loc.extractors import LocalExtractor, GlobalExtractor
-
-
 # logger
 import logging
+from pathlib import Path
+
+import numpy as np
+
+from loc.datasets.dataset import ImagesFromList
+from loc.extractors import GlobalExtractor, LocalExtractor
+
 logger = logging.getLogger("loc")
 
 
@@ -30,8 +24,8 @@ def feature_extraction(workspace, split, save_path, cfg):
     # local
     local_extractor = LocalExtractor(cfg=cfg)
 
-    logger.info(
-        f"local feature extractor {local_extractor} to {loc_features_path}")
+    logger.info(f" {local_extractor}")
+    logger.info(f" local feature extractor to {loc_features_path}")
 
     local_extractor.extract_dataset(
         images, save_path=loc_features_path, normalize=False, gray=True)
@@ -39,8 +33,8 @@ def feature_extraction(workspace, split, save_path, cfg):
     # global
     global_extractor = GlobalExtractor(cfg=cfg)
 
-    logger.info(
-        f"global feature extractor {global_extractor} to {glb_path_features}")
+    logger.info(f" {global_extractor}")
+    logger.info(f" global feature extractor to {glb_path_features}")
 
     global_extractor.extract_dataset(
         images, save_path=glb_path_features, normalize=True, gray=False)
@@ -50,6 +44,7 @@ def feature_extraction(workspace, split, save_path, cfg):
 
 def database_feature_extraction(workspace, save_path, cfg):
     return feature_extraction(workspace=workspace, split="db", save_path=save_path, cfg=cfg)
-    
+
+
 def query_feature_extraction(workspace, save_path, cfg):
     return feature_extraction(workspace=workspace, split="query", save_path=save_path, cfg=cfg)

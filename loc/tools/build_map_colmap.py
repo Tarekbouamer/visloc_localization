@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from loc.mappers.colmap_mapper import ColmapMapper
-from loc.tools.convert import do_convert_3d_model
+from loc.tools.model_converter import convert_model_to_colmap
 from loc.tools.extraction import database_feature_extraction
 from loc.tools.matching import exhaustive_matching
 
@@ -21,7 +21,7 @@ def build_map_colmap(cfg) -> None:
 
     # convert 3d model to colmap format
     logger.info('convert 3D model to colmap format')
-    # do_convert_3d_model(cfg=cfg)
+    convert_model_to_colmap(cfg=cfg)
 
     # mapper
     logger.info('init mapper')
@@ -29,40 +29,40 @@ def build_map_colmap(cfg) -> None:
 
     # covisibility
     logger.info('compute database covisibility pairs')
-    # sfm_pairs_path = mapper.covisible_pairs(sfm_pairs_path=sfm_pairs_path)
+    sfm_pairs_path = mapper.covisible_pairs(sfm_pairs_path=sfm_pairs_path)
 
     # features extraction
     logger.info('extract database features')
-    # database_feature_extraction(workspace=cfg.workspace,
-    #                             save_path=cfg.visloc_path,
-    #                             cfg=cfg)
+    database_feature_extraction(workspace=cfg.workspace,
+                                save_path=cfg.visloc_path,
+                                cfg=cfg)
 
     db_features_path = Path(str(cfg.visloc_path) +
                             '/' + 'db_local_features.h5')
 
     # exhaustive matching
     logger.info('perform databse matching')
-    # sfm_matches_path = exhaustive_matching(src_path=db_features_path,
-    #                                        dst_path=db_features_path,
-    #                                        pairs_path=sfm_pairs_path,
-    #                                        cfg=cfg,
-    #                                        save_path=sfm_matches_path)
+    sfm_matches_path = exhaustive_matching(src_path=db_features_path,
+                                           dst_path=db_features_path,
+                                           pairs_path=sfm_pairs_path,
+                                           cfg=cfg,
+                                           save_path=sfm_matches_path)
 
     # make colmap database
-    # mapper.create_database()
+    mapper.create_database()
 
     logger.info('import features to database')
-    # mapper.import_features(db_features_path)
+    mapper.import_features(db_features_path)
 
     logger.info('import matches to database')
-    # mapper.import_matches(sfm_pairs_path, sfm_matches_path)
+    mapper.import_matches(sfm_pairs_path, sfm_matches_path)
 
     logger.info('geometric verification')
-    # mapper.geometric_verification(
-    #     db_features_path, sfm_pairs_path, sfm_matches_path)
+    mapper.geometric_verification(
+        db_features_path, sfm_pairs_path, sfm_matches_path)
 
     # triangulate
     logger.info('triangulation')
-    # reconstruction = mapper.triangulate_points(verbose=True)
+    reconstruction = mapper.triangulate_points(verbose=True)
 
     return mapper, db_features_path

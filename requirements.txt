@@ -17,4 +17,4 @@ omegaconf
 pybind11
 flask
 open3d
-asmk
+# asmk

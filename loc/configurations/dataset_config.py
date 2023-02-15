@@ -6,49 +6,66 @@ from omegaconf import OmegaConf
 import logging
 logger = logging.getLogger("loc")
 
+DEFAULT_CFG = "loc/configurations/default.yml"
 
-def make_aachen_cfg(cfg):
+def make_aachen_cfg(args, cfg={}):
     
-    meta = {
+    data_cfg = {
         'query': {
             'images':   "images/query/",
-            'cameras':  'queries/*_time_queries_with_intrinsics.txt'
-            },
+            'cameras':  'queries/*_time_queries_with_intrinsics.txt'},
         'db': { 
             'images':   "images/db/",
-            'cameras':  None
-            },
-        
-        'convert':{
-            'type':         "nvm",
-            'nvm_path':     cfg.workspace + "/"  +'3D-models/aachen_cvpr2018_db.nvm',
-            'intrinsics':   cfg.workspace + "/"  + '3D-models/database_intrinsics.txt',
-            'database':     cfg.workspace + "/"  + 'aachen.db',
-        }
-        
-    } 
+            'cameras':  None}
+        } 
+    # 
+    cfg = OmegaConf.merge(cfg, data_cfg)
     
-    return meta 
+    #
+    args.type       = "nvm"
+    args.model      = Path(args.workspace + "/"  + '3D-models/aachen_cvpr2018_db.nvm')
+    args.intrinsics = Path(args.workspace + "/"  + '3D-models/database_intrinsics.txt')
+    args.database   = Path(args.workspace + "/"  + 'aachen.db')
+    args.save_path  = Path(args.workspace + "/"  + 'mapper')
+    
+    return args, cfg
           
           
-def make_config(name="default", cli_cfg={}) :
-    
-    # read cli cfg 
-    # base cfg
-    # dataset cfg --> TODO: to yml files for each dataset
-    # merger by order 
-    
-    # load config file
-    cfg = OmegaConf.load(cli_cfg.config)
+def make_workspace(args):
 
-    # make data confgi file
-    if name == "default":
-        data_cfg = {}
-    elif name == "aachen":
-        data_cfg = make_aachen_cfg(cli_cfg)
-        
-    # merge
-    cfg = OmegaConf.merge(cfg, data_cfg, cli_cfg)
+    # workspace
+    args.workspace = Path(args.workspace)
+    logger.info(f"workspace {args.workspace}")
+
+    # visloc
+    args.visloc_path = args.workspace / 'visloc'
+    args.visloc_path.mkdir(parents=True, exist_ok=True)
+    logger.info(f"visloc {args.visloc_path}")
+
+    # mapper
+    args.mapper_path = args.workspace / 'mapper'
+    args.mapper_path.mkdir(parents=True, exist_ok=True)
+    logger.info(f"mapper {args.mapper_path}")
+
+    return args
+
+         
+def make_config(args, default_cfg={}) :
     
-    return cfg
+    # ws paths
+    args = make_workspace(args)
+    
+    # dataset cfg
+    if args.dataset == "aachen":
+        args, cfg = make_aachen_cfg(args, default_cfg)
+    
+    else:
+        cfg = default_cfg
+        
+        
+    # 
+    logger.info(f"{args.__dict__}")
+    logger.info(f"config {OmegaConf.to_yaml(cfg)}")
+
+    return args, cfg
     

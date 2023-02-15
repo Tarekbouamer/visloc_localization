@@ -2,7 +2,8 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent / '../'))
-
+print(sys.path[-1])
+input()
 import logging
 import argparse
 from omegaconf import OmegaConf

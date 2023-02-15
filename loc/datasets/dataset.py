@@ -25,6 +25,7 @@ class ImagesFromList(Dataset):
                  cfg={}) -> None:
 
         #
+        self.name = cfg.dataset.name
         self.split = split
         self.root = Path(root)
 
@@ -159,7 +160,10 @@ class ImagesFromList(Dataset):
         return out
 
     def __repr__(self) -> str:
-        msg = f" {self.__class__.__name__}"
-        msg += f" split: {self.split}  max_size: {self.max_size}"
-        msg += f" num_images: {self.__len__()}"
+        msg  = f" {self.__class__.__name__}"
+        msg += f" ("
+        msg += f" name: {self.name}"
+        msg += f" split: {self.split}"
+        msg += f" max_size: {self.max_size}"
+        msg += f" )"
         return msg

@@ -66,5 +66,9 @@ class BaseMatcher:
     
     def __repr__(self) -> str:
         msg  = f" {self.__class__.__name__}"
-        msg += f"  matcher: {self.model_name}  device: {self.device}"
+        msg += f" ("
+        msg += f" model_name: {self.model_name} device: {self.device}"
+        msg += f" cross_check: {self.cfg.matcher.cross_check}"
+        msg += f" good_matches: {self.cfg.matcher.good_matches}"
+        msg += f" )"
         return msg

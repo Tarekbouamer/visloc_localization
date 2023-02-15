@@ -111,11 +111,6 @@ class FeaturesExtractor:
             dict: extraction output
         """ 
         raise NotImplementedError
-    
-    def __repr__(self) -> str:
-        msg  = f" {self.__class__.__name__}"
-        msg += f"  extractor: {self.model_name}  device: {self.device}"
-        return msg
 
             
             

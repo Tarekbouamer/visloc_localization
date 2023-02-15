@@ -123,7 +123,11 @@ class LocalExtractor(FeaturesExtractor):
         return save_path
 
     def __repr__(self) -> str:
-        msg = f"{self.__class__.__name__}"
-        msg += f"   extractor: {self.model_name}   device: {self.device}"
-        msg += f"   is_training: {self.extractor.training}"
+        msg  = f" {self.__class__.__name__}"
+        msg += f" ("
+        msg += f" model_name: {self.model_name} device: {self.device}"
+        msg += f" max_keypoints: {self.cfg.extractor.max_keypoints}"
+        msg += f" max_size: {self.cfg.extractor.max_size}"
+        msg += f" nms_radius: {self.cfg.extractor.nms_radius}"
+        msg += f" )"
         return msg
