@@ -425,7 +425,7 @@ class ColmapMapper(Mapper):
         db.commit()
         db.close()
 
-    def triangulate_points(self, options={}, verbose=False):
+    def triangulate_points(self, images_path, options={}, verbose=False):
         """triangulation 
 
         Args:
@@ -444,13 +444,15 @@ class ColmapMapper(Mapper):
         if options is None:
             options = {}
 
+        # 
         model = self.load_model()
 
+        #
         with OutputCapture(verbose):
             with pycolmap.ostream():
                 reconstruction = pycolmap.triangulate_points(model,
                                                              self.database_path,
-                                                             self.cfg.images_path,
+                                                             images_path,
                                                              output_path,
                                                              options=options)
 

@@ -141,7 +141,6 @@ def remove_duplicate_pairs(pairs_all: List[Tuple[str]],
                 if (pairs2key(i, j) in hfile or
                         pairs2key(j, i) in hfile):
                     continue
-
                 pairs_filtered.append((i, j))
 
         return pairs_filtered

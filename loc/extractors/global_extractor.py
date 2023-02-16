@@ -93,11 +93,12 @@ class GlobalExtractor(FeaturesExtractor):
         return save_path
 
     def __repr__(self) -> str:
-        msg  = f" {self.__class__.__name__}"
+        msg  = f"{self.__class__.__name__}"
         msg += f" ("
-        msg += f" model_name: {self.model_name} device: {self.device}"
-        msg += f" max_size: {self.cfg.retrieval.max_keypoints}"
-        msg += f" )"
+        msg += f" model_name: {self.model_name} "
+        msg += f" device: {self.device} "
+        msg += f" max_size: {self.cfg.retrieval.max_size}"
+        msg += f")"
         return msg
             
               

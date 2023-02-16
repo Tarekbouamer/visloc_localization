@@ -23,11 +23,12 @@ def make_aachen_cfg(args, cfg={}):
     
     #
     args.type       = "nvm"
-    args.model      = Path(args.workspace + "/"  + '3D-models/aachen_cvpr2018_db.nvm')
-    args.intrinsics = Path(args.workspace + "/"  + '3D-models/database_intrinsics.txt')
-    args.database   = Path(args.workspace + "/"  + 'aachen.db')
-    args.save_path  = Path(args.workspace + "/"  + 'mapper')
+    args.model      = args.workspace / '3D-models/aachen_cvpr2018_db.nvm'
+    args.intrinsics = args.workspace / '3D-models/database_intrinsics.txt'
+    args.database   = args.workspace / 'aachen.db'
+    args.save_path  = args.workspace / 'mapper'
     
+    #
     return args, cfg
           
           
@@ -37,6 +38,11 @@ def make_workspace(args):
     args.workspace = Path(args.workspace)
     logger.info(f"workspace {args.workspace}")
 
+    # images
+    args.images_path = args.workspace / 'images'
+    args.images_path.mkdir(parents=True, exist_ok=True)
+    logger.info(f"images {args.images_path}")
+    
     # visloc
     args.visloc_path = args.workspace / 'visloc'
     args.visloc_path.mkdir(parents=True, exist_ok=True)
