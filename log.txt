@@ -1,9 +1,9 @@
-[02/16 17:04 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
-[02/16 17:04 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
-[02/16 17:04 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-[02/16 17:04 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
-[02/16 17:04 loc]: {'split': 'db', 'workspace': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen'), 'config': PosixPath('loc/configurations/default.yml'), 'dataset': 'aachen', 'images_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images'), 'visloc_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc'), 'mapper_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper'), 'type': 'nvm', 'model': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/aachen_cvpr2018_db.nvm'), 'intrinsics': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/database_intrinsics.txt'), 'database': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/aachen.db'), 'save_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper')}
-[02/16 17:04 loc]: config name: loc
+[02/16 23:16 loc]: workspace /media/dl/Data/datasets/aachen
+[02/16 23:16 loc]: images /media/dl/Data/datasets/aachen/images
+[02/16 23:16 loc]: visloc /media/dl/Data/datasets/aachen/visloc
+[02/16 23:16 loc]: mapper /media/dl/Data/datasets/aachen/mapper
+[02/16 23:16 loc]: {'mode': 'sfm', 'workspace': PosixPath('/media/dl/Data/datasets/aachen'), 'config': PosixPath('loc/configurations/default.yml'), 'dataset': 'aachen', 'images_path': PosixPath('/media/dl/Data/datasets/aachen/images'), 'visloc_path': PosixPath('/media/dl/Data/datasets/aachen/visloc'), 'mapper_path': PosixPath('/media/dl/Data/datasets/aachen/mapper'), 'type': 'nvm', 'model': PosixPath('/media/dl/Data/datasets/aachen/3D-models/aachen_cvpr2018_db.nvm'), 'intrinsics': PosixPath('/media/dl/Data/datasets/aachen/3D-models/database_intrinsics.txt'), 'database': PosixPath('/media/dl/Data/datasets/aachen/aachen.db'), 'save_path': PosixPath('/media/dl/Data/datasets/aachen/mapper')}
+[02/16 23:16 loc]: config name: loc
 num_workers: 12
 dataset:
   name: aachen
@@ -46,14 +46,4 @@ db:
   images: images/db/
   cameras: null
 
-[02/16 17:04 loc]: run image retrieval
-[02/16 17:04 loc]: init retrieval sfm_resnet50_gem_2048
-[02/16 17:04 loc]: load global features from /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/db_global_features.h5
-[02/16 17:04 loc]: found 4479 images with None intrinsics
-[02/16 17:05 loc]: load global features from /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/query_global_features.h5
-[02/16 17:05 loc]: found 947 images with 922 intrinsics
-[02/16 17:05 loc]: load global features from /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/db_global_features.h5
-[02/16 17:05 loc]: found 4479 images with None intrinsics
-[02/16 17:05 loc]: load global features from /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/query_global_features.h5
-[02/16 17:05 loc]: found 947 images with 922 intrinsics
-[02/16 17:06 loc]: 23675 pairs have been found, saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/pairs_sfm_resnet50_gem_2048_25.txt
+[02/16 23:16 loc]: run visloc gui

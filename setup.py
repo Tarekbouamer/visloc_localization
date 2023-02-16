@@ -18,8 +18,10 @@ with open(str(root / '_version.py'), 'r') as f:
 with open(str(root / 'requirements.txt'), 'r') as f:
     dependencies = f.read().split('\n')
 
-scripts_list = [str(file) for file in scripts_path.glob("*py")]
-l = find_packages()
+
+# script list
+scripts_list = [str(file.relative_to(root)) for file in scripts_path.glob("*py")]
+
 
 setup(
     name='visloc_localization',
@@ -29,12 +31,11 @@ setup(
     author_email="tarekbouamer1788@gmail.com",
     description=description,
     long_description=readme,
-    long_description_content_type="text/markdown",
+    # long_description_content_type="text/markdown",
     url='https://github.com/Tarekbouamer',
 
     # pkgs
     packages=find_packages(),
-    include_package_data=True,
 
     # install
     install_requires=dependencies,
@@ -46,6 +47,8 @@ setup(
 
     # scripts
     scripts=scripts_list,
-    zip_safe=False
-
+    zip_safe=False,
+    
+    
+    include_package_data=True,
 )
