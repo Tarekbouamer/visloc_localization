@@ -1,7 +1,8 @@
-from setuptools import setup, find_packages
-from pathlib import Path
-from glob import glob
 import os
+from glob import glob
+from pathlib import Path
+
+from setuptools import find_packages, setup
 
 description = ['visloc_localization']
 
@@ -30,21 +31,21 @@ setup(
     long_description=readme,
     long_description_content_type="text/markdown",
     url='https://github.com/Tarekbouamer',
-    
+
     # pkgs
     packages=find_packages(),
+    include_package_data=True,
 
-    # install  
+    # install
     install_requires=dependencies,
 
-    # dependency_links=[
-    #     'git+https://github.com/jenicek/asmk#egg=asmk'
-    #     ],
-    
+    dependency_links=[
+        'git+https://github.com/jenicek/asmk#egg=asmk',
+        'git+https://github.com/Tarekbouamer/visloc_retrieval@dev#egg=retrieval'
+    ],
+
     # scripts
     scripts=scripts_list,
-    
-    include_package_data=True
-
+    zip_safe=False
 
 )
