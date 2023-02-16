@@ -1,13 +1,15 @@
-import argparse
-from typing import Dict
-from omegaconf import OmegaConf
-from loc.configurations.dataset_config import make_config
-from loc.tools.matching import exhaustive_matching
-from loc.utils.logging import setup_logger
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent / '../'))
+
+import argparse
+
+from omegaconf import OmegaConf
+from loc.configurations.dataset_config import make_config
+from loc.tools.matching import exhaustive_matching
+from loc.utils.logging import setup_logger
+
 
 
 def exhaustive_matching_argparser():
