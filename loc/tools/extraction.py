@@ -2,8 +2,6 @@
 import logging
 from pathlib import Path
 
-import numpy as np
-
 from loc.datasets.dataset import ImagesFromList
 from loc.extractors import GlobalExtractor, LocalExtractor
 
@@ -24,8 +22,8 @@ def feature_extraction(workspace, split, save_path, cfg):
     # local
     local_extractor = LocalExtractor(cfg=cfg)
 
-    logger.info(f" {local_extractor}")
-    logger.info(f" local feature extractor to {loc_features_path}")
+    logger.info(f"{local_extractor}")
+    logger.info(f"local feature extractor to {loc_features_path}")
 
     local_extractor.extract_dataset(
         images, save_path=loc_features_path, normalize=False, gray=True)
@@ -33,8 +31,8 @@ def feature_extraction(workspace, split, save_path, cfg):
     # global
     global_extractor = GlobalExtractor(cfg=cfg)
 
-    logger.info(f" {global_extractor}")
-    logger.info(f" global feature extractor to {glb_path_features}")
+    logger.info(f"{global_extractor}")
+    logger.info(f"global feature extractor to {glb_path_features}")
 
     global_extractor.extract_dataset(
         images, save_path=glb_path_features, normalize=True, gray=False)

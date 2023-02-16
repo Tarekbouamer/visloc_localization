@@ -9,7 +9,7 @@ from loc.datasets.dataset import ImagesFromList
 from loc.extractors import LocalExtractor
 from loc.localize import ImageLocalizer
 from loc.matchers import MatchQueryDatabase
-from loc.tools.retrieval import Retrieval
+from loc.retrieval.retrieval import Retrieval
 
 from loc.utils.io import (dump_logs,
                           write_poses_txt)
