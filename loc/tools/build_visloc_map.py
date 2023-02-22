@@ -59,6 +59,7 @@ def build_visloc_map(args, cfg) -> None:
 
     # triangulate
     logger.info('triangulation')
-    reconstruction = mapper.triangulate_points(verbose=True)
+    reconstruction = mapper.triangulate_points(images_path=args.images_path,
+                                               verbose=True)
 
     return mapper, db_features_path

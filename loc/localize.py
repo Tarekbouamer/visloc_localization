@@ -95,6 +95,7 @@ class Localizer:
                            img in self.visloc_model.images.items()}
 
     def get_cluster_ids(self, cluster_names):
+        
         # db indices
         db_ids = []
 
@@ -223,9 +224,6 @@ class DatasetLocalizer(Localizer):
         retrieval_pairs = read_pairs_dict(pairs_path)
 
         #
-        name_to_id = self.name_to_id()
-
-        #
         poses = {}
         logs = {
             'retrieval': retrieval_pairs,
@@ -306,7 +304,7 @@ class DatasetLocalizer(Localizer):
 
 class ImageLocalizer(Localizer):
 
-    def __init__(self, visloc_model, extractor, retrieval, matcher, cfg={}) -> None:
+    def __init__(self, visloc_model, extractor, retrieval, matcher, db_features_path, cfg={}) -> None:
         super().__init__(visloc_model, cfg)
 
         # extractor
@@ -318,10 +316,7 @@ class ImageLocalizer(Localizer):
         # matcher
         self.matcher = Matcher(cfg)
 
-        # matches
-        db_features_path = Path(
-            str(self.cfg.visloc_path) + '/' + 'db_local_features.h5')
-
+        # 
         self.db_features_loader = LocalFeaturesLoader(save_path=db_features_path)
 
         #
@@ -427,9 +422,6 @@ class ImageLocalizer(Localizer):
         # extract locals
         q_preds = self.extractor.extract_image(
             data, normalize=False,  gray=True)
-
-        # # match query to database
-        # pairs_matches = self.matcher.match_query_database(q_preds, pairs_names)
 
         # db indices and names
         db_names = [x[1] for x in pairs_names]

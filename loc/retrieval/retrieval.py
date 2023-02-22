@@ -49,7 +49,7 @@ class Retrieval(object):
         self.save_path = save_path
 
         # paris path
-        self.pairs_path = save_path / Path('pairs' + '_' +
+        self.pairs_path = save_path / Path('loc_pairs' + '_' +
                                            str(model_name) + '_' +
                                            str(num_topK) + '.txt')
         
@@ -192,10 +192,10 @@ class Retrieval(object):
         """
 
         # load 
-        if db_preds is not None:
+        if db_preds is None:
             db_preds = self.load_database_features()
 
-        if q_preds is not None:
+        if q_preds is None:
             q_preds  = self.load_query_features()
 
         # match

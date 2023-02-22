@@ -9,7 +9,7 @@ import argparse
 from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config
 from loc.tools.build_map_colmap import build_map_colmap
-from loc.tools.run_localization import run_localization
+from loc.tools.localization import run_localization
 from loc.utils.logging import setup_logger
 from loc.utils.viewer import VisualizerGui
 
