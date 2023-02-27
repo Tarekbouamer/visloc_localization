@@ -33,14 +33,16 @@ def run_build_visloc_map_argparser():
 
 
 def run_build_visloc_map():
+    """build a visloc map
+    """    
 
     # logger
     logger = setup_logger(output=".", name="loc")
 
-    # args, cfg
+    # args
     args = run_build_visloc_map_argparser()
-    default_cfg = OmegaConf.load(args.config)
-    args, cfg = make_config(args, default_cfg)
+    
+    args, cfg = make_config(args)
 
     logger.info(f"run build visloc map")
     

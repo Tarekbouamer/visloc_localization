@@ -1,4 +1,4 @@
-# logger
+from typing import Tuple
 from pathlib import Path
 
 from omegaconf import OmegaConf
@@ -32,7 +32,15 @@ def make_aachen_cfg(args, cfg={}):
     return args, cfg
           
           
-def make_workspace(args):
+def make_workspace(args) -> None :
+    """make workspace paths
+
+    Args:
+        args : arguments
+
+    Returns:
+        _type_: arguments
+    """    
 
     # workspace
     args.workspace = Path(args.workspace)
@@ -56,9 +64,20 @@ def make_workspace(args):
     return args
 
          
-def make_config(args, default_cfg={}) :
+def make_config(args) -> Tuple:
+    """get configuration and make necessary paths
+
+    Args:
+        args : arguments
+
+    Returns:
+        Tuple: arguments and configurations
+    """    
     
-    # ws paths
+    # default cfg
+    default_cfg = OmegaConf.load(args.config)
+
+    # make paths
     args = make_workspace(args)
     
     # dataset cfg
@@ -67,7 +86,6 @@ def make_config(args, default_cfg={}) :
     
     else:
         cfg = default_cfg
-        
         
     # 
     logger.info(f"{args.__dict__}")

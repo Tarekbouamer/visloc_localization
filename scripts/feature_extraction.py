@@ -33,14 +33,17 @@ def feature_extraction_argparser():
 
 
 def run_feature_extraction():
+    """features extraction
+    """    
 
     # logger
     logger = setup_logger(output=".", name="loc")
 
-    # args, cfg
+    # args
     args = feature_extraction_argparser()
-    default_cfg = OmegaConf.load(args.config)
-    args, cfg = make_config(args, default_cfg)
+
+    # cfg
+    args, cfg = make_config(args)
 
     logger.info(f"run feature extraction {args.split}")
    

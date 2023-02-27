@@ -29,9 +29,9 @@ def run_model_conversion(args, cfg={}):
         colmap_from_nvm(nvm=args.model, 
                         intrinsics=args.intrinsics, 
                         database=args.database, 
-                        output=args.save_path)
+                        output=args.mapper_path)
     
-    logger.info(f"converted model saved to {args.save_path}")
+    logger.info(f"converted model saved to {args.mapper_path}")
         
 
     

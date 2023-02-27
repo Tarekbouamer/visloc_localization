@@ -1,17 +1,35 @@
 import logging
+from typing import Dict, Any
 from pathlib import Path
 
 from loc.mappers.colmap_mapper import ColmapMapper
-from loc.tools.model_converter import convert_model_to_colmap
 from loc.tools.extraction import database_feature_extraction
 from loc.tools.matching import exhaustive_matching
 
-# logger
+import pycolmap
+
 logger = logging.getLogger("loc")
 
 
-def build_visloc_map(args, cfg) -> None:
-    """
+def build_visloc_map(args: Any, 
+                     cfg: Dict
+                     ) -> pycolmap.Reconstruction:
+    
+    """build a visloc map by running :
+    
+        * compute covisibility sfm pairs
+        * extract database features
+        * exhaustive matching
+        * make colmap databse, import features and matches
+        * geometric verification
+        * triangulation
+
+    Args:
+        args (Any): arguments
+        cfg (Dict): configuration 
+
+    Returns:
+        pycolmap.Reconstruction: model reconstruction
     """
 
     # sfm paths
@@ -59,7 +77,7 @@ def build_visloc_map(args, cfg) -> None:
 
     # triangulate
     logger.info('triangulation')
-    reconstruction = mapper.triangulate_points(images_path=args.images_path,
-                                               verbose=True)
+    model = mapper.triangulate_points(images_path=args.images_path,
+                                      verbose=True)
 
-    return mapper, db_features_path
+    return model

@@ -28,14 +28,17 @@ def visloc_gui_argparser():
 
 
 def run_visloc_gui():
+    """ visualizer gui 
+    """    
 
     # logger
     logger = setup_logger(output=".", name="loc")
 
-    # args, cfg
+    # args
     args = visloc_gui_argparser()
-    default_cfg = OmegaConf.load(args.config)
-    args, cfg = make_config(args, default_cfg)
+    
+    # cfg
+    args, cfg = make_config(args)
 
     #
     logger.info(f"run visloc gui")

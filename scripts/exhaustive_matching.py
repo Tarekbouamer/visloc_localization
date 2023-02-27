@@ -34,14 +34,20 @@ def exhaustive_matching_argparser():
 
 
 def run_exhaustive_matching():
+    """exhaustive matching:
+    
+        * sfm for databse images
+        * loc for queries vs database images
+    """    
 
     # logger
     logger = setup_logger(output=".", name="loc")
 
-    # args, cfg
+    # args,
     args = exhaustive_matching_argparser()
-    default_cfg = OmegaConf.load(args.config)
-    args, cfg = make_config(args, default_cfg)
+
+    # cfg
+    args, cfg = make_config(args)
 
     logger.info(f"run exhaustive matching {args.mode}")
 
@@ -50,7 +56,6 @@ def run_exhaustive_matching():
     query_features_path = args.visloc_path / 'query_local_features.h5'
 
     # matching mode
-    
     if args.mode == "sfm":
         src_features_path = dst_features_path = db_features_path
         pairs_path = args.visloc_path / \

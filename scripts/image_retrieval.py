@@ -32,14 +32,17 @@ def run_image_retrieval_argparser():
 
 
 def run_image_retrieval():
+    """image retrieval
+    """    
 
     # logger
     logger = setup_logger(output=".", name="loc")
 
-    # args, cfg
+    # args
     args = run_image_retrieval_argparser()
-    default_cfg = OmegaConf.load(args.config)
-    args, cfg = make_config(args, default_cfg)
+    
+    # cfg
+    args, cfg = make_config(args)
 
     logger.info(f"run image retrieval")
     

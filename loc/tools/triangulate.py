@@ -1,12 +1,20 @@
 import logging
+from typing import Any, Dict
 
 from loc.mappers.colmap_mapper import ColmapMapper
 
-# logger
 logger = logging.getLogger("loc")
 
 
-def geometric_verification_and_triangulation(args, cfg) -> None:
+def geometric_verification_and_triangulation(args: Any,
+                                             cfg: Dict
+                                             ) -> None:
+    """geometric verification and triangulation
+
+    Args:
+        args (Any): arguments
+        cfg (Dict): configuration
+    """
 
     # paths
     db_features_path = args.visloc_path / 'db_local_features.h5'
@@ -39,4 +47,4 @@ def geometric_verification_and_triangulation(args, cfg) -> None:
     mapper.triangulate_points(images_path=args.images_path,
                               verbose=True)
 
-    return mapper, db_features_path
+    return mapper

@@ -1,17 +1,18 @@
-import sys
-from pathlib import Path
-
-sys.path.append(str(Path(__file__).parent / '../'))
-print(sys.path[-1])
-input()
-import logging
-import argparse
-from omegaconf import OmegaConf
+from typing import Any, Dict
 
 from loc.utils.viewer import VisualizerGui
 
-def visualizer_gui(args, cfg):
-      
+
+def visualizer_gui(args: Any,
+                   cfg: Dict = None
+                   ) -> None:
+    """ visualizer gui
+
+    Args:
+        args (Any): arguments 
+        cfg (Dict, optional): configuration. Defaults to None.
+    """
+
     vis = VisualizerGui()
     vis.read_model(args.visloc_path)
     vis.create_window()

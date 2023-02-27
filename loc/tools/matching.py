@@ -1,5 +1,7 @@
 # logger
 import logging
+from pathlib import Path
+from typing import Dict
 
 from loc.datasets import PairsDataset
 from loc.matchers import MatchSequence
@@ -8,16 +10,27 @@ from loc.utils.io import read_pairs_list, remove_duplicate_pairs
 logger = logging.getLogger("loc")
 
 
-def exhaustive_matching(pairs_path, src_path, dst_path, cfg=None, save_path=None):
-    """exhaustive_matching
+def exhaustive_matching(pairs_path: Path, 
+                        src_path: Path, 
+                        dst_path: Path, 
+                        cfg: Dict = None, 
+                        save_path: Path = None
+                        ) -> Path:
+    """exhaustive matching:
+
+        * read pairs
+        * remove duplicates
+        * compute matches
 
     Args:
-        pairs_path (str): pairs path
-        src_path (str): src image features path
-        dst_path (str): dst image features path
-        save_path (str, optional): path to save matches. Defaults to None.
+        pairs_path (Path): image pairs path
+        src_path (Path): source image features path
+        dst_path (Path): destination image features path
+        cfg (Dict, optional): configuration. Defaults to None.
+        save_path (Path, optional): path to save matches. Defaults to None.
+
     Returns:
-        str: path to save matches 
+        Path: matches path
     """
 
     # assert
@@ -27,7 +40,7 @@ def exhaustive_matching(pairs_path, src_path, dst_path, cfg=None, save_path=None
 
     # load pairs
     pairs = read_pairs_list(pairs_path)
-    
+
     # remove duplicate pairs
     pairs = remove_duplicate_pairs(pairs)
 

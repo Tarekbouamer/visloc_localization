@@ -1,56 +1,71 @@
-# logger
 import logging
 from pathlib import Path
+from typing import Any, Dict
 
+import pycolmap
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from loc.datasets.dataset import ImagesFromList
 from loc.extractors import LocalExtractor
-from loc.localize import ImageLocalizer, DatasetLocalizer
-from loc.matchers import MatchQueryDatabase
+from loc.localize import DatasetLocalizer, ImageLocalizer
 from loc.retrieval.retrieval import Retrieval
-
-from loc.utils.io import (dump_logs,
-                          write_poses_txt)
+from loc.utils.io import dump_logs, write_poses_txt
 
 logger = logging.getLogger("loc")
 
 
-def dataset_localization(args, cfg):
-    
-    # 
-    num_topK    = cfg.retrieval.num_topK
-    model_name  = cfg.retrieval.model_name
-    
-    #    
-    features_path   = args.visloc_path / 'query_local_features.h5'
-    matches_path    = args.visloc_path / 'loc_matches.h5'
-    pairs_path    = args.visloc_path / Path('loc_pairs' + '_' +
-                                           str(model_name) + '_' +
-                                           str(num_topK) + '.txt')
+def dataset_localization(args: Any,
+                         cfg: Dict
+                         ) -> None:
+    """localize query set using extracted features.
+
+    Args:
+        args (Any): arguments
+        cfg (Dict): configurations
+    """
+
+    #
+    num_topK = cfg.retrieval.num_topK
+    model_name = cfg.retrieval.model_name
+
+    #
+    features_path = args.visloc_path / 'query_local_features.h5'
+    matches_path = args.visloc_path / 'loc_matches.h5'
+    pairs_path = args.visloc_path / Path('loc_pairs' + '_' +
+                                         str(model_name) + '_' +
+                                         str(num_topK) + '.txt')
 
     #
     query_set = ImagesFromList(root=args.workspace, split="query", cfg=cfg)
 
     # localizer
-    localizer = DatasetLocalizer(visloc_model=args.visloc_path, 
-                                 features_path=features_path, 
-                                 matches_path=matches_path, 
+    localizer = DatasetLocalizer(visloc_model=args.visloc_path,
+                                 features_path=features_path,
+                                 matches_path=matches_path,
                                  cfg=cfg)
-    
+
     localizer(queries=query_set.get_cameras(),
               pairs_path=pairs_path,
               save_path=args.visloc_path)
 
-    pass
-    
 
-def image_localization(args, cfg):
+def image_localization(args: Any,
+                       cfg: Dict
+                       ) -> None:
+    """localize query set, extracting features and search for closest images from database
+
+        * load database features
+        * extract query features and compute camera pose
+
+    Args:
+        args (Any): arguments
+        cfg (Dict): configurations
+    """
 
     #
     db_features_path = args.visloc_path / 'db_local_features.h5'
-    features_path   = args.visloc_path / 'query_local_features.h5'
+    features_path = args.visloc_path / 'query_local_features.h5'
 
     # extractor
     extractor = LocalExtractor(cfg)
@@ -62,15 +77,14 @@ def image_localization(args, cfg):
                           cfg=cfg)
     #
     retrieval.get_database_features()
-    
-    matches_path    = args.visloc_path / 'loc_matches.h5'
 
+    matches_path = args.visloc_path / 'loc_matches.h5'
 
     # localizer
-    localizer = ImageLocalizer(visloc_model=args.visloc_path, 
-                               extractor=extractor, 
-                               retrieval=retrieval, 
-                               db_features_path=db_features_path, 
+    localizer = ImageLocalizer(visloc_model=args.visloc_path,
+                               extractor=extractor,
+                               retrieval=retrieval,
+                               db_features_path=db_features_path,
                                features_path=features_path,
                                matches_path=matches_path,
                                cfg=cfg)

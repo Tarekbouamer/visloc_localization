@@ -5,7 +5,6 @@ sys.path.append(str(Path(__file__).parent / '../'))
 
 import argparse
 
-from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config
 from loc.tools.localization import dataset_localization
 from loc.utils.logging import setup_logger
@@ -32,14 +31,17 @@ def run_dataset_localization_argparser():
 
 
 def run_dataset_localization():
+    """dataset localization
+    """    
 
     # logger
     logger = setup_logger(output=".", name="loc")
 
-    # args, cfg
+    # args
     args = run_dataset_localization_argparser()
-    default_cfg = OmegaConf.load(args.config)
-    args, cfg = make_config(args, default_cfg)
+    
+    # cfg
+    args, cfg = make_config(args)
 
     logger.info(f"run dataset localization")
     

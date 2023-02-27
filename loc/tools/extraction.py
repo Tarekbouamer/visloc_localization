@@ -1,6 +1,7 @@
 # logger
 import logging
 from pathlib import Path
+from typing import Dict
 
 from loc.datasets.dataset import ImagesFromList
 from loc.extractors import GlobalExtractor, LocalExtractor
@@ -8,8 +9,26 @@ from loc.extractors import GlobalExtractor, LocalExtractor
 logger = logging.getLogger("loc")
 
 
-def feature_extraction(workspace, split, save_path, cfg):
+def feature_extraction(workspace: Path, 
+                       split: str, 
+                       save_path: Path, 
+                       cfg: Dict
+                       ) -> Path:
+    """features extraction:
+    
+        * local features extraction
+        * global features extraction
 
+    Args:
+        workspace (Path): workspace directory 
+        split (str): dataset split
+        save_path (Path): features save path
+        cfg (Dict): configuration 
+
+    Returns:
+        Path: saved features path
+    """    
+    
     #
     images = ImagesFromList(root=workspace, split=split, cfg=cfg)
 
@@ -40,9 +59,35 @@ def feature_extraction(workspace, split, save_path, cfg):
     return save_path
 
 
-def database_feature_extraction(workspace, save_path, cfg):
+def database_feature_extraction(workspace: Path,
+                                save_path: Path,
+                                cfg: Dict
+                                ) -> Path:
+    """database feature extraction
+
+    Args:
+        workspace (Path): path to workspace
+        save_path (Path): path to save features
+        cfg (Dict): configurations
+
+    Returns:
+        Path: save databse features
+    """
     return feature_extraction(workspace=workspace, split="db", save_path=save_path, cfg=cfg)
 
 
-def query_feature_extraction(workspace, save_path, cfg):
+def query_feature_extraction(workspace: Path,
+                             save_path: Path,
+                             cfg: Dict
+                             ) -> Path:
+    """query feature extraction
+
+    Args:
+        workspace (Path): path to workspace
+        save_path (Path): path to save features
+        cfg (Dict): configurations
+
+    Returns:
+        Path: saved query features
+    """
     return feature_extraction(workspace=workspace, split="query", save_path=save_path, cfg=cfg)

@@ -34,14 +34,17 @@ def triangulation_argparser():
 
 
 def run_triangulation():
+    """geometric verification and triangulation 
+    """    
 
     # logger
     logger = setup_logger(output=".", name="loc")
 
-    # args, cfg
+    # args
     args = triangulation_argparser()
-    default_cfg = OmegaConf.load(args.config)
-    args, cfg = make_config(args, default_cfg)
+
+    # cfg
+    args, cfg = make_config(args)
 
     #
     logger.info(f"run geometric verification and triangulation")
