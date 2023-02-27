@@ -144,7 +144,7 @@ class DatasetLocalizer(Localizer):
         """
 
         # get 2D points
-        kpq, _ = self.keypoints_loader.load_keypoints(qname)
+        kpq, _ = self.keypoints_loader.load_as_numpy(qname)
         kpq += 0.5  # COLMAP coordinates
 
         # get 3D points
@@ -167,7 +167,7 @@ class DatasetLocalizer(Localizer):
                 [p.point3D_id if p.has_point3D() else -1 for p in image.points2D])
 
             # matches
-            matches, _ = self.matches_loader.load_matches(qname, image.name)
+            matches, _ = self.matches_loader.load_as_numpy(qname, image.name)
             matches = matches[points3D_ids[matches[:, 1]] != -1]
 
             num_matches += len(matches)
@@ -304,7 +304,7 @@ class DatasetLocalizer(Localizer):
 
 class ImageLocalizer(Localizer):
 
-    def __init__(self, visloc_model, extractor, retrieval, matcher, db_features_path, cfg={}) -> None:
+    def __init__(self, visloc_model, extractor, retrieval, db_features_path, features_path, matches_path, cfg={}) -> None:
         super().__init__(visloc_model, cfg)
 
         # extractor
@@ -319,6 +319,9 @@ class ImageLocalizer(Localizer):
         # 
         self.db_features_loader = LocalFeaturesLoader(save_path=db_features_path)
 
+        self.matches_loader = MatchesLoader(matches_path)
+        self.keypoints_loader = KeypointsLoader(features_path)
+
         #
         self.poses = {}
         self.logs = {
@@ -328,7 +331,8 @@ class ImageLocalizer(Localizer):
     def pose_from_cluster(self, qname, qcam, q_preds, db_ids):
 
         # get 2D points COLMAP coordinates
-        kpq = q_preds["keypoints"] + 0.5
+        kpq = q_preds["keypoints"]
+        kpq += 0.5 
 
         # get 3D points
         kp_idx_to_3D = defaultdict(list)
@@ -418,11 +422,11 @@ class ImageLocalizer(Localizer):
 
         # find best image pairs
         pairs_names = self.retrieval(data)
-
+        
         # extract locals
         q_preds = self.extractor.extract_image(
             data, normalize=False,  gray=True)
-
+        
         # db indices and names
         db_names = [x[1] for x in pairs_names]
         db_ids = self.get_cluster_ids(db_names)

@@ -4,6 +4,6 @@ clear
 python3 setup.py install
 
 WORKSPACE='/media/dl/Data/datasets/aachen'
-WORKSPACE='/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen'
+# WORKSPACE='/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen'
 
 feature_extraction.py --workspace $WORKSPACE --dataset aachen --split query

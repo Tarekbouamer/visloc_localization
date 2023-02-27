@@ -1,9 +1,9 @@
-[02/22 17:19 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
-[02/22 17:19 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
-[02/22 17:19 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-[02/22 17:19 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
-[02/22 17:19 loc]: {'split': 'db', 'workspace': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen'), 'config': PosixPath('loc/configurations/default.yml'), 'dataset': 'aachen', 'images_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images'), 'visloc_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc'), 'mapper_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper'), 'type': 'nvm', 'model': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/aachen_cvpr2018_db.nvm'), 'intrinsics': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/database_intrinsics.txt'), 'database': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/aachen.db'), 'save_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper')}
-[02/22 17:19 loc]: config name: loc
+[02/25 18:53 loc]: workspace /media/dl/Data/datasets/aachen
+[02/25 18:53 loc]: images /media/dl/Data/datasets/aachen/images
+[02/25 18:53 loc]: visloc /media/dl/Data/datasets/aachen/visloc
+[02/25 18:53 loc]: mapper /media/dl/Data/datasets/aachen/mapper
+[02/25 18:53 loc]: {'split': 'db', 'workspace': PosixPath('/media/dl/Data/datasets/aachen'), 'config': PosixPath('loc/configurations/default.yml'), 'dataset': 'aachen', 'images_path': PosixPath('/media/dl/Data/datasets/aachen/images'), 'visloc_path': PosixPath('/media/dl/Data/datasets/aachen/visloc'), 'mapper_path': PosixPath('/media/dl/Data/datasets/aachen/mapper'), 'type': 'nvm', 'model': PosixPath('/media/dl/Data/datasets/aachen/3D-models/aachen_cvpr2018_db.nvm'), 'intrinsics': PosixPath('/media/dl/Data/datasets/aachen/3D-models/database_intrinsics.txt'), 'database': PosixPath('/media/dl/Data/datasets/aachen/aachen.db'), 'save_path': PosixPath('/media/dl/Data/datasets/aachen/mapper')}
+[02/25 18:53 loc]: config name: loc
 num_workers: 12
 dataset:
   name: aachen
@@ -46,8 +46,59 @@ db:
   images: images/db/
   cameras: null
 
-[02/22 17:19 loc]: run dataset localization
-[02/22 17:19 loc]: found 947 images with 922 intrinsics
-[02/22 17:19 loc]: loading visloc model
-[02/22 17:19 loc]: load retrievals pairs
-[02/22 17:19 loc]: starting localization
+[02/25 18:53 loc]: run image localization
+[02/25 18:53 loc]: LocalExtractor ( model_name: superpoint  device: cuda  max_keypoints: 4096  max_size: 1024  nms_radius: 3 )
+[02/25 18:53 loc]: init retrieval sfm_resnet50_gem_2048
+[02/25 18:53 loc]: load global features from /media/dl/Data/datasets/aachen/visloc/db_global_features.h5
+[02/25 18:53 loc]: found 4479 images with None intrinsics
+[02/25 18:54 loc]: loading visloc model
+[02/25 18:54 loc]: init nn matcher
+[02/25 18:54 loc]: found 947 images with 922 intrinsics
+[02/25 18:54 loc]: starting localization
+[02/25 18:54 loc]: zero 3D points for db/257.jpg.
+[02/25 18:54 loc]: zero 3D points for db/3938.jpg.
+[02/25 18:54 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:54 loc]: zero 3D points for db/557.jpg.
+[02/25 18:54 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:54 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:54 loc]: zero 3D points for db/3312.jpg.
+[02/25 18:54 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:54 loc]: zero 3D points for db/2976.jpg.
+[02/25 18:55 loc]: zero 3D points for db/2976.jpg.
+[02/25 18:55 loc]: zero 3D points for db/257.jpg.
+[02/25 18:55 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:55 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:55 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:56 loc]: zero 3D points for db/2435.jpg.
+[02/25 18:56 loc]: zero 3D points for db/2976.jpg.
+[02/25 18:56 loc]: zero 3D points for db/2976.jpg.
+[02/25 18:56 loc]: zero 3D points for db/2048.jpg.
+[02/25 18:56 loc]: zero 3D points for db/2976.jpg.
+[02/25 18:57 loc]: zero 3D points for db/557.jpg.
+[02/25 18:57 loc]: zero 3D points for db/3312.jpg.
+[02/25 18:57 loc]: zero 3D points for db/557.jpg.
+[02/25 18:57 loc]: zero 3D points for db/557.jpg.
+[02/25 18:57 loc]: zero 3D points for db/557.jpg.
+[02/25 18:57 loc]: zero 3D points for db/557.jpg.
+[02/25 18:57 loc]: zero 3D points for db/557.jpg.
+[02/25 18:58 loc]: zero 3D points for db/3312.jpg.
+[02/25 18:58 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:58 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:58 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:58 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:58 loc]: zero 3D points for db/3312.jpg.
+[02/25 18:58 loc]: zero 3D points for db/3312.jpg.
+[02/25 18:58 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:58 loc]: zero 3D points for db/3966.jpg.
+[02/25 18:59 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:59 loc]: zero 3D points for db/2349.jpg.
+[02/25 18:59 loc]: zero 3D points for db/2976.jpg.
+[02/25 18:59 loc]: zero 3D points for db/3312.jpg.
+[02/25 18:59 loc]: zero 3D points for db/2435.jpg.
+[02/25 18:59 loc]: zero 3D points for db/3938.jpg.
+[02/25 18:59 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:59 loc]: zero 3D points for db/2435.jpg.
+[02/25 18:59 loc]: zero 3D points for db/3970.jpg.
+[02/25 18:59 loc]: writing poses to /media/dl/Data/datasets/aachen/visloc/visloc.poses.txt...
+[02/25 18:59 loc]: writing logs to /media/dl/Data/datasets/aachen/visloc/visloc.logs.pkl 
+[02/25 18:59 loc]: done!

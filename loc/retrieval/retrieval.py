@@ -216,7 +216,9 @@ class Retrieval(object):
 
         return self.pairs_path
 
-    def __call__(self, item: Dict) -> Any:
+    def __call__(self, data: Dict) -> Any:
+        
+        item = data.copy()
         
         #
         db_preds = self.get_database_features()

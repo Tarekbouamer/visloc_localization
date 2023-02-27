@@ -47,14 +47,13 @@ class FeaturesExtractor:
        # 
         __to_gray__     =  kwargs.pop("gray", False)
         __normalize__   =  kwargs.pop("normalize", False)
-        
+
         #
         assert len(data["img"].shape) > 2, len(data["img"].shape)
-        
         # bached
         if len(data["img"].shape) < 4:
             data["img"] = data["img"].unsqueeze(0)
-        
+
         # to device
         for k, v in data.items():
             if isinstance(v, torch.Tensor):

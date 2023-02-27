@@ -16,6 +16,7 @@ from loc.utils.io import (dump_logs,
 
 logger = logging.getLogger("loc")
 
+
 def dataset_localization(args, cfg):
     
     # 
@@ -49,26 +50,29 @@ def image_localization(args, cfg):
 
     #
     db_features_path = args.visloc_path / 'db_local_features.h5'
+    features_path   = args.visloc_path / 'query_local_features.h5'
 
     # extractor
     extractor = LocalExtractor(cfg)
+    logger.info(f"{extractor}")
 
     # retrieval
     retrieval = Retrieval(workspace=args.workspace,
                           save_path=args.visloc_path,
                           cfg=cfg)
-
+    #
     retrieval.get_database_features()
+    
+    matches_path    = args.visloc_path / 'loc_matches.h5'
 
-    # matcher
-    matcher = MatchQueryDatabase(cfg=cfg)
 
     # localizer
     localizer = ImageLocalizer(visloc_model=args.visloc_path, 
                                extractor=extractor, 
                                retrieval=retrieval, 
-                               matcher=matcher, 
                                db_features_path=db_features_path, 
+                               features_path=features_path,
+                               matches_path=matches_path,
                                cfg=cfg)
 
     # localize
