@@ -15,16 +15,23 @@ def model_convert_argparser():
 
     parser.add_argument('--type',  type=str,  default="nvm",
                         help='original model format')
+    
     parser.add_argument('--model', type=str, help='path to original model')
-    parser.add_argument('--intrinsics', type=str,
+    
+    parser.add_argument('--intrinsics', type=str, 
                         help='path to camera intrinsics')
+    
     parser.add_argument('--database', type=str, help='path to nvm database')
+    
     parser.add_argument('--save_path', type=str,
                         help='path to save converted model')
 
     parser.add_argument('--workspace',  type=str,
                         help='visloc folder format mapper, visloc, ... ')
 
+    parser.add_argument('--config',  type=str,  default=Path("loc/configurations/default.yml"),
+                        help='path to config file yml')
+    
     parser.add_argument('--dataset',  type=str,  default="default",
                         help='dataset, if it exsists load defaults configuration parameters')
 
@@ -37,13 +44,15 @@ def model_convert():
 
     #
     logger.info("run model convert")
+    
+    #
     args = model_convert_argparser()
 
     # make config
     args, cfg = make_config(args)
     
     # run
-    run_model_conversion(args)
+    run_model_conversion(args, cfg)
 
 
 if __name__ == '__main__':

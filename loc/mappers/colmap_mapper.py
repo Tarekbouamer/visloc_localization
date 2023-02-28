@@ -1,23 +1,20 @@
+# logger
 import logging
-from pathlib import Path
-import numpy as np
-
-from tqdm import tqdm
 from collections import defaultdict
+from pathlib import Path
+
+import numpy as np
+import pycolmap
+from tqdm import tqdm
 
 from loc.utils.colmap.database import COLMAPDatabase
 from loc.utils.colmap.read_write_model import read_model
-from loc.utils.io import path2key, find_pair, OutputCapture, read_pairs_dict
 from loc.utils.geometry import compute_epipolar_errors
-
-from loc.utils.readers import MatchesLoader, KeypointsLoader
+from loc.utils.io import OutputCapture, find_pair, path2key, read_pairs_dict
+from loc.utils.readers import KeypointsLoader, MatchesLoader
 
 from .base import Mapper
 
-import pycolmap
-
-# logger
-import logging
 logger = logging.getLogger("loc")
 
 

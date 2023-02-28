@@ -17,5 +17,6 @@ omegaconf
 pybind11
 flask
 open3d
+kornia
 asmk
 retrieval

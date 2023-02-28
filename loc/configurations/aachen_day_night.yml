@@ -1,0 +1,43 @@
+name: loc
+num_workers: 12
+
+dataset: 
+    name: aachen
+
+mapper:
+    name: colmap
+    num_covis: 20
+    min_match_score: None
+    skip_geometric_verification: False
+    max_num_trials: 20000
+    min_inlier_ratio: 0.1
+    max_epip_error: 4.0
+
+retrieval:
+    model_name: sfm_resnet101_gem_2048
+    max_size: 1024
+    num_topK : 50
+
+extractor:
+    model_name: superpoint
+    max_keypoints: 4096
+    max_size:  1024
+    keypoint_threshold: 0.005  
+    remove_borders: 4
+    nms_radius: 3                
+
+matcher:
+    model_name: nn
+    distance_thresh: 0.7
+    cross_check: True
+    good_matches: False
+
+solver:
+    ransac:
+        max_reproj_error: 12.0
+        max_epipolar_error: 1.0
+    bundle: 
+        max_iterations: 100
+
+localize:
+    covis_clustering : False
