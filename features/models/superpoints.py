@@ -4,9 +4,8 @@ from typing import Dict, List, Tuple
 import torch
 from torch import nn
 
-from features.factory import create_detector, load_pretrained
-from features.misc import detector_cfg
-from features.register import register_detector, get_pretrained_cfg
+from features.models.model_factory import create_model, load_pretrained
+from features.models.model_register import register_model, get_pretrained_cfg
 
 
 def simple_nms(scores, nms_radius: int):
@@ -58,7 +57,7 @@ def sample_descriptors(keypoints, descriptors, s: int = 8):
     return descriptors
 
 
-class SuperPointDetector(nn.Module):
+class SuperPoint(nn.Module):
 
     def __init__(self, cfg) -> None:
         super().__init__()
@@ -83,7 +82,13 @@ class SuperPointDetector(nn.Module):
         self.convPa = nn.Conv2d(c4, c5, kernel_size=3, stride=1, padding=1)
         self.convPb = nn.Conv2d(c5, 65, kernel_size=1, stride=1, padding=0)
 
-    def forward(self, data):
+
+        self.convDa = nn.Conv2d(c4, c5, kernel_size=3, stride=1, padding=1)
+        self.convDb = nn.Conv2d(
+            c5, self.cfg['descriptor_dim'],
+            kernel_size=1, stride=1, padding=0)
+        
+    def detect(self, data):
         """ Compute keypoints, scores, descriptors for image """
         # Shared Encoder
         x = self.relu(self.conv1a(data['image']))
@@ -132,37 +137,51 @@ class SuperPointDetector(nn.Module):
             'scores': scores,
         }
 
+    def forward(self, data):
+
+        x = self.detect(data)
+        x = self.compute(data)
+        return x
+
+
+def _cfg(url='', drive='', descriptor_dim=128, **kwargs):
+    return {
+        'url': url,
+        'drive': drive,
+        'descriptor_dim': descriptor_dim,
+        **kwargs}
+
 
 default_cfgs = {
     'superpoint':
-        detector_cfg(
+        _cfg(
             drive='https://drive.google.com/uc?id=1JjRJ5RLa3yx4VOSZ17mryJoXiWGbeCa1',
-            out_dim=128, nms_radius=4, keypoint_threshold=0.005, max_keypoints=-1, remove_borders=4, strict=False)
+            descriptor_dim=256, nms_radius=4, keypoint_threshold=0.005, max_keypoints=-1, remove_borders=4)
 }
 
-
-def make_detector(detector_name, cfg, pretrained=True):
+def _make_model(name, cfg=None, pretrained=True,**kwargs):
     
-    # use the name to parse default cfg
-    default_cfg = get_pretrained_cfg(detector_name)
+    #
+    default_cfg = get_pretrained_cfg(name)
     
-    # model
-    model = SuperPointDetector(default_cfg)
+    #
+    model = SuperPoint(cfg=default_cfg)
     
     if pretrained:
-        load_pretrained(model, detector_name, default_cfg) 
-    
+        load_pretrained(model, name, default_cfg) 
+        
     return model
+    
+    
 
-
-@register_detector
+@register_model
 def superpoint(cfg=None, **kwargs):
-    return make_detector(detector_name="superpoint", cfg=cfg)
+    return _make_model(name="superpoint", cfg=cfg)
 
 
 if __name__ == '__main__':
-    img  = torch.rand([1, 1, 1024, 1024])
-    detector = create_detector("superpoint")
-    preds = detector({'image': img})
-    
+    img = torch.rand([1, 1, 1024, 1024])
+    detector = create_model("superpoint")
+    preds = detector.detect({'image': img})
+    print(detector)
     print(preds['keypoints'][0].shape)

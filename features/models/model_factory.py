@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from torch.hub import load_state_dict_from_url
 
-from features.register import is_model, model_entrypoint
+from features.models.model_register import is_model, model_entrypoint
 
 logger = logging.getLogger("loc")
 
@@ -77,31 +77,22 @@ def load_pretrained(model, variant, pretrained_cfg):
     model.load_state_dict(state_dict, strict=strict)
 
 
-def create_local_feature(detector_name: str,
+def create_model(model_name: str,
                     cfg: Dict = {},
                     **kwargs
                     ) -> nn.Module:
-    """create a detector from regitred models in detector factory
-
-    Args:
-        detector_name (str): name of detector in factory
-        cfg (Dict, optional): configuration parameters. Defaults to None.
-
-    Returns:
-        nn.Module: detector model
-    """
-
+    
     #
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
 
-    # check if detector exsists
-    if not is_model(detector_name):
-        raise RuntimeError('Unknown detector (%s)' % detector_name)
+    # check if model exsists
+    if not is_model(model_name):
+        raise RuntimeError('Unknown model (%s)' % model_name)
 
     #
-    create_fn = model_entrypoint(detector_name)
+    create_fn = model_entrypoint(model_name)
 
-    # create detector
-    detector = create_fn(cfg=cfg, **kwargs)
+    # create model
+    model = create_fn(cfg=cfg, **kwargs)
 
-    return detector
+    return model

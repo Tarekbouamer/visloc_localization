@@ -3,8 +3,6 @@ import sys
 from copy import deepcopy
 from collections import defaultdict
 
-# inspired timm.models
-
 __all__ = ['list_models', 'is_model', 'model_entrypoint', 'list_modules', 'is_model_in_modules', 'is_model_pretrained']
 
 
@@ -50,7 +48,7 @@ def get_pretrained_cfg(model_name):
     return {}
 
 
-def register_local_feature(fn):
+def register_model(fn):
     """ register models in factory
     """
     # lookup containing module
@@ -60,6 +58,7 @@ def register_local_feature(fn):
 
     # add model to __all__ in module
     model_name = fn.__name__
+    
     if hasattr(mod, '__all__'):
         mod.__all__.append(model_name)
     else:
