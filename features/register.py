@@ -57,9 +57,9 @@ def register_local_feature(fn):
     mod = sys.modules[fn.__module__]
     module_name_split = fn.__module__.split('.')
     module_name = module_name_split[-1] if len(module_name_split) else ''
-
     # add model to __all__ in module
     model_name = fn.__name__
+
     if hasattr(mod, '__all__'):
         mod.__all__.append(model_name)
     else:

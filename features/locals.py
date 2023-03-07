@@ -5,7 +5,7 @@ import torch
 from torch import nn
 
 from features.factory import create_local_feature, load_pretrained
-from features.register import register_local_feature, get_pretrained_cfg
+from features.register import register_local_feature, get_pretrained_cfg, list_modules
 from features.models.model_factory import create_model
 
 
@@ -16,16 +16,20 @@ class LocalFeature(nn.Module):
         self.detector = detector
         self.descriptor = descriptor
 
-    def forward(self, img: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        kpts, kpts_res = self.detector.detect(img)
-        descs = self.descriptor.compute(img, kpts)
-        return (kpts, kpts_res, descs)
+    def forward(self, data: Dict) -> Dict:
+        #
+        preds, x = self.detector.detect(data)
+        
+        #
+        preds = self.descriptor.compute({**data, **preds}, x)
+        
+        return preds
       
       
 def _make_local_feature(detector_name, descriptor_name, cfg=None, **kwargs):
     #
     detector = create_model(detector_name, cfg=cfg)
-  
+    #
     descriptor = create_model(descriptor_name, cfg=cfg)
     
     model = LocalFeature(detector=detector, descriptor=descriptor)
@@ -40,7 +44,10 @@ def superpoint(cfg=None, **kwargs):
 
 if __name__ == '__main__':
     img = torch.rand([1, 1, 1024, 1024])
-    detector = create_local_feature("superpoint")
-    preds = detector.detect({'image': img})
-    print(detector)
-    print(preds['keypoints'][0].shape)
+    model = create_local_feature("superpoint")
+    print(model)
+
+    preds = model({'image': img})
+    
+    for k, v in preds.items():
+        print(k,"   ", v[0].shape)

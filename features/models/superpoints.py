@@ -132,16 +132,37 @@ class SuperPoint(nn.Module):
         # Convert (h, w) to (x, y)
         keypoints = [torch.flip(k, [1]).float() for k in keypoints]
 
+        #
+        out = {
+            'keypoints': keypoints,
+            'scores': scores}
+        
+        return out, x
+        
+    def compute(self, data, x):
+        #
+        keypoints = data["keypoints"]
+        scores = data["scores"]
+        
+        cDa = self.relu(self.convDa(x))
+        descriptors = self.convDb(cDa)
+        descriptors = torch.nn.functional.normalize(descriptors, p=2, dim=1)
+
+        # Extract descriptors
+        descriptors = [sample_descriptors(k[None], d[None], 8)[0]
+                       for k, d in zip(keypoints, descriptors)]
+        
         return {
             'keypoints': keypoints,
             'scores': scores,
+            'descriptors': descriptors
         }
+    
 
     def forward(self, data):
-
-        x = self.detect(data)
-        x = self.compute(data)
-        return x
+        preds, x = self.detect(data)
+        preds = self.compute({**data, **preds}, x)
+        return preds
 
 
 def _cfg(url='', drive='', descriptor_dim=128, **kwargs):
