@@ -26,7 +26,7 @@ def load_state_dict(checkpoint_path):
         raise FileNotFoundError()
 
 
-def load_pretrained(model, variant, pretrained_cfg):
+def load_pretrained(model, variant, pretrained_cfg, state_key=None):
 
     #
     pretrained_file = pretrained_cfg.get('file',  None)
@@ -72,9 +72,11 @@ def load_pretrained(model, variant, pretrained_cfg):
             "No pretrained weights exist or were found for this model. Using random initialization.")
         return
     
-    # load body and head weights
-    strict = pretrained_cfg.get("strict", True)
-    model.load_state_dict(state_dict, strict=strict)
+    if state_key is not None:
+        state_dict = state_dict[state_key]
+    
+    # load state
+    model.load_state_dict(state_dict, strict=True)
 
 
 def create_model(model_name: str,

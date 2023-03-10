@@ -17,10 +17,16 @@ class LocalFeature(nn.Module):
         self.descriptor = descriptor
 
     def forward(self, data: Dict) -> Dict:
-        #
+        """detect & computer
+
+        Args:
+            data (Dict): _description_
+
+        Returns:
+            Dict: _description_
+        """        
         preds, x = self.detector.detect(data)
         
-        #
         preds = self.descriptor.compute({**data, **preds}, x)
         
         return preds
