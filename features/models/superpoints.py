@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 
 import torch
 from torch import nn
+from features.models.transforms import tfn_grayscale
 
 from features.models.model_factory import create_model, load_pretrained
 from features.models.model_register import register_model, get_pretrained_cfg
@@ -57,6 +58,9 @@ def sample_descriptors(keypoints, descriptors, s: int = 8):
     return descriptors
 
 
+    
+ 
+
 class SuperPoint(nn.Module):
 
     def __init__(self, cfg) -> None:
@@ -64,7 +68,7 @@ class SuperPoint(nn.Module):
 
         # cfg
         self.cfg = cfg
-
+        
         # model
         self.relu = nn.ReLU(inplace=True)
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
@@ -88,8 +92,17 @@ class SuperPoint(nn.Module):
             c5, self.cfg['descriptor_dim'],
             kernel_size=1, stride=1, padding=0)
         
-    def detect(self, data):
-        """ Compute keypoints, scores, descriptors for image """
+    def transform_inputs(self, data):
+        """ transform model inputs   """        
+        data["image"] = tfn_grayscale(data["image"])
+        
+        return data
+        
+    def extract_features(self, data):
+                
+        # transform
+        data = self.transform_inputs(data)
+        
         # Shared Encoder
         x = self.relu(self.conv1a(data['image']))
         x = self.relu(self.conv1b(x))
@@ -102,28 +115,39 @@ class SuperPoint(nn.Module):
         x = self.pool(x)
         x = self.relu(self.conv4a(x))
         x = self.relu(self.conv4b(x))
+        
+        return x
+        
+                
+    def detect(self, data, features=None):
+        """ Compute keypoints, scores, descriptors for image """
 
+        # extract
+        if features is None:
+            features = self.extract_features(data)
+            
         # Compute the dense keypoint scores
-        cPa = self.relu(self.convPa(x))
+        cPa = self.relu(self.convPa(features))
         scores = self.convPb(cPa)
+        
         scores = torch.nn.functional.softmax(scores, 1)[:, :-1]
         b, _, h, w = scores.shape
+        
         scores = scores.permute(0, 2, 3, 1).reshape(b, h, w, 8, 8)
         scores = scores.permute(0, 1, 3, 2, 4).reshape(b, h*8, w*8)
+        
         scores = simple_nms(scores, self.cfg['nms_radius'])
 
-        # Extract keypoints
-        keypoints = [
-            torch.nonzero(s > self.cfg['keypoint_threshold'])
-            for s in scores]
+        # extract keypoints
+        keypoints = [torch.nonzero(s > self.cfg['keypoint_threshold']) for s in scores]
         scores = [s[tuple(k.t())] for s, k in zip(scores, keypoints)]
 
-        # Discard keypoints near the image borders
+        # discard keypoints near the image borders
         keypoints, scores = list(zip(*[
-            remove_borders(k, s, self.cfg['remove_borders'], h*8, w*8)
-            for k, s in zip(keypoints, scores)]))
+            remove_borders(k, s, self.cfg['remove_borders'], h*8, w*8) for k, s in zip(keypoints, scores)
+            ]))
 
-        # Keep the k keypoints with highest score
+        # keep the k keypoints with highest score
         if self.cfg['max_keypoints'] >= 0:
             keypoints, scores = list(zip(*[
                 top_k_keypoints(k, s, self.cfg['max_keypoints'])
@@ -137,15 +161,17 @@ class SuperPoint(nn.Module):
             'keypoints': keypoints,
             'scores': scores}
         
-        return out, x
+        return out
         
-    def compute(self, data, x):
+    def compute(self, data, features):
         #
         keypoints = data["keypoints"]
         scores = data["scores"]
         
-        cDa = self.relu(self.convDa(x))
+        cDa = self.relu(self.convDa(features))
         descriptors = self.convDb(cDa)
+        
+        #
         descriptors = torch.nn.functional.normalize(descriptors, p=2, dim=1)
 
         # Extract descriptors
@@ -160,8 +186,16 @@ class SuperPoint(nn.Module):
     
 
     def forward(self, data):
-        preds, x = self.detect(data)
-        preds = self.compute({**data, **preds}, x)
+        
+        #
+        features = self.extract_features(data)
+
+        # detect
+        preds = self.detect(data, features)
+        
+        # compute
+        preds = self.compute({**data, **preds}, features)
+        
         return preds
 
 
@@ -180,6 +214,7 @@ default_cfgs = {
             descriptor_dim=256, nms_radius=4, keypoint_threshold=0.005, max_keypoints=-1, remove_borders=4)
 }
 
+
 def _make_model(name, cfg=None, pretrained=True,**kwargs):
     
     #
@@ -193,7 +228,6 @@ def _make_model(name, cfg=None, pretrained=True,**kwargs):
         
     return model
     
-    
 
 @register_model
 def superpoint(cfg=None, **kwargs):
@@ -201,8 +235,19 @@ def superpoint(cfg=None, **kwargs):
 
 
 if __name__ == '__main__':
-    img = torch.rand([1, 1, 1024, 1024])
+    from features.utils.io import read_image, show_cv_image, \
+        cv_to_tensor, show_cv_image_keypoints
+    
+    img_path = "features/graffiti.png"
+
+    image, image_size = read_image(img_path)
+
+    image = cv_to_tensor(image)
+    
     detector = create_model("superpoint")
-    preds = detector.detect({'image': img})
-    print(detector)
-    print(preds['keypoints'][0].shape)
+    with torch.no_grad():
+        preds = detector.detect({'image': image})
+        preds = detector({'image': image})
+
+    kpts = preds['keypoints'][0]
+    show_cv_image_keypoints(image, kpts)

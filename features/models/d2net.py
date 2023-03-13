@@ -169,6 +169,7 @@ def upscale_positions(pos, scaling_steps=0):
 
 def downscale_positions(pos, scaling_steps=0):
     for _ in range(scaling_steps):
+        
         pos = (pos - 0.5) / 2
     return pos
 
@@ -252,135 +253,12 @@ def interpolate_dense_features(pos, dense_features, return_corners=False):
         return [descriptors, pos, ids, corners]
 
 
-def process_multiscale(image, model, scales=[.5, 1, 2]):
-    b, _, h_init, w_init = image.size()
-    device = image.device
-    assert(b == 1)
-
-    all_keypoints = torch.zeros([3, 0])
-    all_descriptors = torch.zeros([
-        model.dense_feature_extraction.num_channels, 0
-    ])
-    all_scores = torch.zeros(0)
-
-    previous_dense_features = None
-    banned = None
-    for idx, scale in enumerate(scales):
-        current_image = F.interpolate(
-            image, scale_factor=scale,
-            mode='bilinear', align_corners=True
-        )
-        _, _, h_level, w_level = current_image.size()
-
-        dense_features = model.dense_feature_extraction(current_image)
-        del current_image
-
-        _, _, h, w = dense_features.size()
-
-        # Sum the feature maps.
-        if previous_dense_features is not None:
-            dense_features += F.interpolate(
-                previous_dense_features, size=[h, w],
-                mode='bilinear', align_corners=True
-            )
-            del previous_dense_features
-
-        # Recover detections.
-        detections = model.detection(dense_features)
-        if banned is not None:
-            banned = F.interpolate(banned.float(), size=[h, w]).bool()
-            detections = torch.min(detections, ~banned)
-            banned = torch.max(
-                torch.max(detections, dim=1)[0].unsqueeze(1), banned
-            )
-        else:
-            banned = torch.max(detections, dim=1)[0].unsqueeze(1)
-        fmap_pos = torch.nonzero(detections[0].cpu()).t()
-        del detections
-
-        # Recover displacements.
-        displacements = model.localization(dense_features)[0].cpu()
-        displacements_i = displacements[
-            0, fmap_pos[0, :], fmap_pos[1, :], fmap_pos[2, :]
-        ]
-        displacements_j = displacements[
-            1, fmap_pos[0, :], fmap_pos[1, :], fmap_pos[2, :]
-        ]
-        del displacements
-
-        mask = torch.min(
-            torch.abs(displacements_i) < 0.5,
-            torch.abs(displacements_j) < 0.5
-        )
-        fmap_pos = fmap_pos[:, mask]
-        valid_displacements = torch.stack([
-            displacements_i[mask],
-            displacements_j[mask]
-        ], dim=0)
-        del mask, displacements_i, displacements_j
-
-        fmap_keypoints = fmap_pos[1 :, :].float() + valid_displacements
-        del valid_displacements
-
-        try:
-            raw_descriptors, _, ids = interpolate_dense_features(
-                fmap_keypoints.to(device),
-                dense_features[0]
-            )
-        except EmptyTensorError:
-            continue
-        fmap_pos = fmap_pos[:, ids]
-        fmap_keypoints = fmap_keypoints[:, ids]
-        del ids
-
-        keypoints = upscale_positions(fmap_keypoints, scaling_steps=2)
-        del fmap_keypoints
-
-        descriptors = F.normalize(raw_descriptors, dim=0).cpu()
-        del raw_descriptors
-
-        keypoints[0, :] *= h_init / h_level
-        keypoints[1, :] *= w_init / w_level
-
-        fmap_pos = fmap_pos.cpu()
-        keypoints = keypoints.cpu()
-
-        keypoints = torch.cat([
-            keypoints,
-            torch.ones([1, keypoints.size(1)]) * 1 / scale,
-        ], dim=0)
-
-        scores = dense_features[
-            0, fmap_pos[0, :], fmap_pos[1, :], fmap_pos[2, :]
-        ].cpu() / (idx + 1)
-        del fmap_pos
-
-        all_keypoints = torch.cat([all_keypoints, keypoints], dim=1)
-        all_descriptors = torch.cat([all_descriptors, descriptors], dim=1)
-        all_scores = torch.cat([all_scores, scores], dim=0)
-        del keypoints, descriptors
-
-        previous_dense_features = dense_features
-        del dense_features
-    del previous_dense_features, banned
-
-    keypoints = all_keypoints.t().numpy()
-    del all_keypoints
-    scores = all_scores.numpy()
-    del all_scores
-    descriptors = all_descriptors.t().numpy()
-    del all_descriptors
-    return keypoints, scores, 
-  
-  
-  
 class D2Net(nn.Module):
     def __init__(self, cfg={}):
         super(D2Net, self).__init__()
-        
+
         # cfg
         self.cfg = cfg
-        print(cfg)
 
         #
         self.dense_feature_extraction = DenseFeatureExtractionModule(
@@ -390,76 +268,111 @@ class D2Net(nn.Module):
         self.detection = HardDetectionModule()
 
         self.localization = HandcraftedLocalizationModule()
+    
+    
+    def transform_inputs(self, data):
+        """ transform model inputs   """ 
+        image = data["image"]       
+        # caffe normalization
+        norm = image.new_tensor([103.939, 116.779, 123.68])
+        image = (image * 255 - norm.view(1, 3, 1, 1))  
+        
+        data["image"] = image
+        return data
+    
+    
+    def extract_features(self, data):
+        
+        data = self.transform_inputs(data)
+        
+        return self.dense_feature_extraction(data["image"])
+    
+    
+    def detect(self, data, features=None):
+        
+        if features is None:
+            features = self.extract_features(data)
+        
+        # detections 
+        detections = self.detection(features)[0]        #list [0]
+        fmap_pos = torch.nonzero(detections).t()        #     cpu()
+        
+        # displacements
+        displacements = self.localization(features)[0]
 
-    def detect(self, data):
+        displacements_i = displacements[0, fmap_pos[0, :], fmap_pos[1, :], fmap_pos[2, :]]
+        displacements_j = displacements[1, fmap_pos[0, :], fmap_pos[1, :], fmap_pos[2, :]]
         
-        if self.cfg['multiscale']:
-            keypoints, scores, _ = process_multiscale(data["image"], self)
-        else:
-            keypoints, scores, descriptors = process_multiscale(data["image"], self, scales=[1])
+        # msk
+        mask = torch.min(torch.abs(displacements_i) < 0.5,
+                         torch.abs(displacements_j) < 0.5
+                         )
         
-        keypoints = keypoints[:, [1, 0]]
+        # valid map and displacement 
+        fmap_pos = fmap_pos[:, mask]
+        valid_displacements = torch.stack([displacements_i[mask],
+                                           displacements_j[mask]
+                                           ], dim=0)  
         
+        # 
+        fmap_keypoints = fmap_pos[1:, :].float() + valid_displacements
+
+        
+        #
+        keypoints = upscale_positions(fmap_keypoints, scaling_steps=2)
+        scores = features[0, fmap_pos[0, :], fmap_pos[1, :], fmap_pos[2, :]]
+
+        
+        keypoints = keypoints.transpose(1,0)  # N, 2
+        keypoints = keypoints[:, [1, 0]]    # x, y
+
         out = {
             'keypoints': keypoints,
             'scores': scores}
-        
-        return out, None
 
-    def forward(self, data):
+        return out
+
+
+    def compute(self, data, features):
+
         #
-        image = data["image"]
+        keypoints = data["keypoints"]
+        scores = data["scores"]
         
-        #
-        dense_features = self.dense_feature_extraction(image)
-        
-        #
-        detections = self.detection(dense_features)
-        fmap_pos = torch.nonzero(detections[0].cpu()).t()
-        
-        
-        displacements = self.localization(dense_features)[0].cpu()
-        displacements_i = displacements[
-            0, fmap_pos[0, :], fmap_pos[1, :], fmap_pos[2, :]
-        ]
-        displacements_j = displacements[
-            1, fmap_pos[0, :], fmap_pos[1, :], fmap_pos[2, :]
-        ]
-        del displacements
-        
-        mask = torch.min(
-            torch.abs(displacements_i) < 0.5,
-            torch.abs(displacements_j) < 0.5
-        )
-        fmap_pos = fmap_pos[:, mask]
-        valid_displacements = torch.stack([
-            displacements_i[mask],
-            displacements_j[mask]
-        ], dim=0)
-        
-        
-        fmap_keypoints = fmap_pos[1 :, :].float() + valid_displacements
-        
-        raw_descriptors, _, ids = interpolate_dense_features(
-                fmap_keypoints,
-                dense_features[0]
-            )
-        
-        # scores
-        scores = dense_features[0, fmap_pos[0, :], fmap_pos[1, :], fmap_pos[2, :]]
-        
-        # keypoints
-        keypoints = upscale_positions(fmap_keypoints, scaling_steps=2)
-        
+        # kpts (fmap)
+        keypoints_t = keypoints[:, [1, 0]]          # swap x y
+        keypoints_t = keypoints_t.transpose(1,0)    # N, 2
+
+        # downscale 
+        fmap_keypoints = downscale_positions(keypoints_t, scaling_steps=2)
+
         # descriptors
-        descriptors = F.normalize(raw_descriptors, dim=0).cpu()
+        raw_descriptors, _, ids = interpolate_dense_features(fmap_keypoints, features[0])
+        descriptors = F.normalize(raw_descriptors, dim=0)
         
         #
-        return {
+        out =  {
             'keypoints': keypoints,
             'scores': scores,
             'descriptors': descriptors
         }
+        
+        return out
+          
+            
+    def forward(self, data):
+        
+        # features
+        features = self.extract_features(data)
+
+        # detect
+        preds = self.detect(data, features)
+        
+        # compute
+        preds = self.compute({**preds, **data}, features)
+        
+        return preds
+
 
 
 def _cfg(url='', drive='', descriptor_dim=128, **kwargs):
@@ -468,28 +381,29 @@ def _cfg(url='', drive='', descriptor_dim=128, **kwargs):
         'drive': drive,
         'descriptor_dim': descriptor_dim,
         **kwargs}
-    
-        
+
+
 default_cfgs = {
     'd2net_ots': _cfg(url='https://dsmn.ml/files/d2-net/d2_ots.pth',
-                     multiscale=False),
+                      multiscale=False),
     'd2net_tf': _cfg(url='https://dsmn.ml/files/d2-net/d2_tf.pth',
-                    multiscale=False),
+                     multiscale=False),
     'd2_tf_no_phototourism': _cfg(url='https://dsmn.ml/files/d2-net/d2_tf_no_phototourism.pth',
-                     multiscale=False)
+                                  multiscale=False)
 }
 
-def _make_model(name, cfg=None, pretrained=True,**kwargs):
-    
+
+def _make_model(name, cfg=None, pretrained=True, **kwargs):
+
     #
     default_cfg = get_pretrained_cfg(name)
-    
+
     #
     model = D2Net(cfg=default_cfg)
-    
+
     if pretrained:
-        load_pretrained(model, name, default_cfg, state_key="model") 
-        
+        load_pretrained(model, name, default_cfg, state_key="model")
+
     return model
 
 
@@ -506,13 +420,21 @@ def d2net_tf(cfg=None, **kwargs):
 @register_model
 def d2_tf_no_phototourism(cfg=None, **kwargs):
     return _make_model(name="d2_tf_no_phototourism", cfg=cfg)
-  
-  
+
+
 if __name__ == '__main__':
-    img = torch.rand([1, 3, 1024, 1024])
-    detector = create_model("d2net_ots")
-    preds = detector({'image': img})
-    print(detector)
-    print(preds['keypoints'][0].shape)
-    print(preds['scores'].shape)
-    print(preds['descriptors'][0].shape)
+    from features.utils.io import read_image, cv_to_tensor, show_cv_image_keypoints
+    
+    img_path = "features/graffiti.png"
+
+    image, image_size = read_image(img_path)
+    image = cv_to_tensor(image)
+    detector = create_model("d2_tf_no_phototourism")
+    
+    with torch.no_grad():
+        preds = detector.detect({'image': image})
+        preds = detector({'image': image})
+    
+    print(preds["keypoints"].shape)
+    
+    show_cv_image_keypoints(image, preds['keypoints'])
