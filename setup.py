@@ -8,6 +8,7 @@ description = ['visloc_localization']
 
 root = Path(__file__).parent
 scripts_path = root / 'scripts'
+benchmarks_path = root / 'benchmark'
 
 with open(str(root / 'README.md'), 'r', encoding='utf-8') as f:
     readme = f.read()
@@ -20,7 +21,10 @@ with open(str(root / 'requirements.txt'), 'r') as f:
 
 
 # script list
-scripts_list = [str(file.relative_to(root)) for file in scripts_path.glob("*py")]
+scripts_list    = [str(file.relative_to(root)) for file in scripts_path.glob("*py")]
+benchmarks_list = [str(file.relative_to(root)) for file in benchmarks_path.glob("*py")]
+
+scripts = scripts_list + benchmarks_list
 
 
 setup(
@@ -46,7 +50,7 @@ setup(
     ],
 
     # scripts
-    scripts=scripts_list,
+    scripts=scripts,
     zip_safe=False,
     
     

@@ -12,6 +12,8 @@ from loc.utils.writers import FeaturesWriter
 # third
 from thirdparty.SuperGluePretrainedNetwork.models.superpoint import SuperPoint
 
+from models.extractors import create_extractor
+
 from .base import FeaturesExtractor
 
 logger = logging.getLogger("loc")
@@ -34,9 +36,12 @@ class LocalExtractor(FeaturesExtractor):
         model_name = self.cfg.extractor.model_name
         self.model_name = model_name
 
-        self.extractor = create_model(model_name=model_name,
-                                      cfg=cfg)
+        # self.extractor = create_model(model_name=model_name,
+        #                               cfg=cfg)
 
+        self.extractor = create_extractor(model_name=model_name,
+                                      cfg=cfg.extractor)
+                
         # init
         self._set_device()
         self._eval()
@@ -73,7 +78,6 @@ class LocalExtractor(FeaturesExtractor):
         current_size = data["img"].shape[-2:][::-1]
         scales = torch.Tensor(
             (original_size[0] / current_size[0], original_size[1] / current_size[1])).to(original_size).cuda()
-
         #
         preds['keypoints'] = (preds['keypoints'] + .5) * scales[None] - .5
         preds['uncertainty'] = preds.pop('uncertainty', 1.) * scales.mean()

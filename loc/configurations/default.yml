@@ -5,7 +5,7 @@ dataset:
 
 mapper:
     name: colmap
-    num_covis: 20
+    num_covis: 10
     min_match_score: None
     skip_geometric_verification: False
     max_num_trials: 20000
@@ -18,8 +18,8 @@ retrieval:
     num_topK : 20
 
 extractor:
-    model_name: superpoint
-    max_keypoints: 2048
+    model_name: d2net_tf
+    max_keypoints: 4096
     max_size:  1024
     keypoint_threshold: 0.005  
     remove_borders: 4

@@ -147,7 +147,7 @@ class MatchSequence(Matcher):
 
             # match
             preds = self.match_pair(data)
-            
+
             # get key
             pair_key = pairs2key(src_name[0], dst_name[0])
 

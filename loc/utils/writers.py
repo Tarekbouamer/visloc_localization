@@ -77,10 +77,11 @@ class FeaturesWriter(Writer):
 
         try:
             # create new group
-            if key not in self.hfile:
-                grp = self.hfile.create_group(key)
-            else:
-                grp = self.hfile[key]
+            if key in self.hfile:
+                del self.hfile[key]
+            
+            grp = self.hfile.create_group(key)
+
                 
             # write dict items
             for k, v in data.items():
@@ -90,10 +91,7 @@ class FeaturesWriter(Writer):
                     v = self._to_numpy(v)
                 
                 # insert 
-                if k in grp:
-                    grp[k][...] = v
-                else:
-                    grp.create_dataset(k, data=v)
+                grp.create_dataset(k, data=v)
                     
         except OSError as error:
             raise error

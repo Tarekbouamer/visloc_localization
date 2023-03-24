@@ -1,26 +1,26 @@
-[02/28 02:16 loc]: workspace /media/dl/Data/datasets/aachen
-[02/28 02:16 loc]: images /media/dl/Data/datasets/aachen/images
-[02/28 02:16 loc]: visloc /media/dl/Data/datasets/aachen/visloc
-[02/28 02:16 loc]: mapper /media/dl/Data/datasets/aachen/mapper
-[02/28 02:16 loc]: {'split': 'query', 'workspace': PosixPath('/media/dl/Data/datasets/aachen'), 'config': 'loc/configurations/aachen_day_night.yml', 'dataset': 'aachen', 'images_path': PosixPath('/media/dl/Data/datasets/aachen/images'), 'visloc_path': PosixPath('/media/dl/Data/datasets/aachen/visloc'), 'mapper_path': PosixPath('/media/dl/Data/datasets/aachen/mapper'), 'type': 'nvm', 'model': PosixPath('/media/dl/Data/datasets/aachen/3D-models/aachen_cvpr2018_db.nvm'), 'intrinsics': PosixPath('/media/dl/Data/datasets/aachen/3D-models/database_intrinsics.txt'), 'database': PosixPath('/media/dl/Data/datasets/aachen/aachen.db'), 'save_path': PosixPath('/media/dl/Data/datasets/aachen/mapper')}
-[02/28 02:16 loc]: config name: loc
+[03/24 11:46 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+[03/24 11:46 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
+[03/24 11:46 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
+[03/24 11:46 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
+[03/24 11:46 loc]: {'split': 'db', 'workspace': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen'), 'config': 'loc/configurations/default.yml', 'dataset': 'aachen', 'images_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images'), 'visloc_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc'), 'mapper_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper'), 'type': 'nvm', 'model': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/aachen_cvpr2018_db.nvm'), 'intrinsics': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/database_intrinsics.txt'), 'database': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/aachen.db'), 'save_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper')}
+[03/24 11:46 loc]: config name: loc
 num_workers: 12
 dataset:
   name: aachen
 mapper:
   name: colmap
-  num_covis: 20
+  num_covis: 10
   min_match_score: None
   skip_geometric_verification: false
   max_num_trials: 20000
   min_inlier_ratio: 0.1
   max_epip_error: 4.0
 retrieval:
-  model_name: sfm_resnet101_gem_2048
+  model_name: sfm_resnet50_gem_2048
   max_size: 1024
-  num_topK: 50
+  num_topK: 20
 extractor:
-  model_name: superpoint
+  model_name: d2net_tf
   max_keypoints: 4096
   max_size: 1024
   keypoint_threshold: 0.005
@@ -46,34 +46,34 @@ db:
   images: images/db/
   cameras: null
 
-[02/28 02:16 loc]: run dataset localization
-[02/28 02:16 loc]: found 947 images with 922 intrinsics
-[02/28 02:16 loc]: loading visloc model
-[02/28 02:16 loc]: load retrievals pairs
-[02/28 02:16 loc]: starting localization
-[02/28 02:16 loc]: zero 3D points for db/557.jpg.
-[02/28 02:17 loc]: zero 3D points for db/3970.jpg.
-[02/28 02:17 loc]: zero 3D points for db/557.jpg.
-[02/28 02:17 loc]: zero 3D points for db/557.jpg.
-[02/28 02:17 loc]: zero 3D points for db/557.jpg.
-[02/28 02:17 loc]: zero 3D points for db/3970.jpg.
-[02/28 02:17 loc]: zero 3D points for db/2976.jpg.
-[02/28 02:17 loc]: zero 3D points for db/3970.jpg.
-[02/28 02:17 loc]: zero 3D points for db/3970.jpg.
-[02/28 02:17 loc]: zero 3D points for db/2435.jpg.
-[02/28 02:18 loc]: zero 3D points for db/557.jpg.
-[02/28 02:18 loc]: zero 3D points for db/3970.jpg.
-[02/28 02:18 loc]: zero 3D points for db/3970.jpg.
-[02/28 02:18 loc]: zero 3D points for db/3312.jpg.
-[02/28 02:19 loc]: zero 3D points for db/2349.jpg.
-[02/28 02:19 loc]: zero 3D points for db/2350.jpg.
-[02/28 02:19 loc]: zero 3D points for db/3970.jpg.
-[02/28 02:19 loc]: zero 3D points for db/3970.jpg.
-[02/28 02:19 loc]: zero 3D points for db/3312.jpg.
-[02/28 02:19 loc]: zero 3D points for db/557.jpg.
-[02/28 02:20 loc]: zero 3D points for db/2435.jpg.
-[02/28 02:20 loc]: zero 3D points for db/3312.jpg.
-[02/28 02:20 loc]: writing poses to /media/dl/Data/datasets/aachen/visloc/visloc.poses.txt...
-[02/28 02:20 loc]: writing logs to /media/dl/Data/datasets/aachen/visloc/visloc.logs.pkl 
-[02/28 02:20 loc]: localized 922 / 922 images.
-[02/28 02:20 loc]: done!
+[03/24 11:46 loc]: run build visloc map
+[03/24 11:46 loc]: init mapper
+[03/24 11:46 loc]: init Colmap Mapper
+[03/24 11:46 loc]: compute database covisibility pairs
+[03/24 11:46 loc]: reading Colmap model
+[03/24 11:47 loc]: model successfully loaded
+[03/24 11:47 loc]: searching for 10 covisibility pairs 
+[03/24 11:48 loc]: found 43169 covisible pairs saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/sfm_pairs_10.txt
+[03/24 11:48 loc]: extract database features
+[03/24 11:48 loc]: found 4479 images with None intrinsics
+[03/24 11:48 loc]: Loading pretrained weights from url (https://dsmn.ml/files/d2-net/d2_tf.pth)
+[03/24 11:48 loc]: LocalExtractor ( model_name: d2net_tf  device: cuda  max_keypoints: 4096  max_size: 1024  nms_radius: 3 )
+[03/24 11:48 loc]: local feature extractor to /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/db_local_features.h5
+[03/24 12:01 loc]: extraction done 764.2 seconds saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/db_local_features.h5
+[03/24 12:01 loc]: GlobalExtractor ( model_name: sfm_resnet50_gem_2048  device: cuda  max_size: 1024)
+[03/24 12:01 loc]: global feature extractor to /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/db_global_features.h5
+[03/24 12:03 loc]: extraction done 105.5 seconds saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/db_global_features.h5
+[03/24 12:03 loc]: perform databse matching
+[03/24 12:03 loc]: matching 29734 pairs
+[03/24 12:03 loc]: init nn matcher
+[03/24 12:21 loc]: matches saved to /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/sfm_matches.h5
+[03/24 12:21 loc]: The database already exists, deleting it.
+[03/24 12:22 loc]: import features to database
+[03/24 12:22 loc]: importing features into the database...
+[03/24 12:22 loc]: import matches to database
+[03/24 12:22 loc]: importing matches into the database...
+[03/24 12:23 loc]: geometric verification
+[03/24 12:23 loc]: performing geometric verification of the matches...
+[03/24 12:36 loc]: mean/med/min/max valid matches 49.01/56.68/0.00/100.00%.
+[03/24 12:36 loc]: triangulation
+[03/24 12:36 loc]: running 3D triangulation...
