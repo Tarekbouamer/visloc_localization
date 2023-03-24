@@ -18,5 +18,6 @@ pybind11
 flask
 open3d
 kornia
+pydegensac
 asmk
 retrieval
