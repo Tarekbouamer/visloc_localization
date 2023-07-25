@@ -6,7 +6,6 @@ from typing import Any, Dict, Tuple, List
 
 import cv2
 import numpy as np
-import pycolmap
 from torch.utils.data import Dataset
 
 from loc.utils.io import load_aachen_intrinsics
@@ -120,7 +119,7 @@ class ImagesFromList(Dataset):
     def num_cameras(self) -> int:
         return len(self.cameras) if self.cameras is not None else None
 
-    def get_cameras(self) -> Dict[str, pycolmap.Camera]:
+    def get_cameras(self) -> Dict[str, Any]:
         return self.cameras
 
     def get_names(self) -> List[str]:

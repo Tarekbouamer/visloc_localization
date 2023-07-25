@@ -18,8 +18,8 @@ retrieval:
     num_topK : 20
 
 extractor:
-    model_name: d2net_tf
-    max_keypoints: 4096
+    model_name: superpoint
+    max_keypoints: 2048
     max_size:  1024
     keypoint_threshold: 0.005  
     remove_borders: 4

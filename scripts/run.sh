@@ -1,6 +1,5 @@
 
-clear
-python3 setup.py install
+
 
 
 DATA_DIR='/media/dl/Data/datasets/aachen'

@@ -42,12 +42,12 @@ setup(
     packages=find_packages(),
 
     # install
-    install_requires=dependencies,
+    # install_requires=dependencies,
 
-    dependency_links=[
-        'git+https://github.com/jenicek/asmk#egg=asmk',
-        'git+https://github.com/Tarekbouamer/visloc_retrieval@dev#egg=retrieval'
-    ],
+    # dependency_links=[
+    #     'git+https://github.com/jenicek/asmk#egg=asmk',
+    #     'git+https://github.com/Tarekbouamer/visloc_retrieval@dev#egg=retrieval'
+    # ],
 
     # scripts
     scripts=scripts,

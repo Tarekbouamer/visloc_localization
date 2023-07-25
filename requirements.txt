@@ -10,7 +10,7 @@ scipy
 matplotlib
 termcolor  
 gdown
-timm
+timm==0.5.4
 tabulate
 PyOpenGL
 omegaconf
@@ -19,5 +19,3 @@ flask
 open3d
 kornia
 pydegensac
-asmk
-retrieval

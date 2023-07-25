@@ -1,6 +1,5 @@
 
-clear
-python3 setup.py install
+
 
 
 WORKSPACE='/media/dl/Data/datasets/aachen'
