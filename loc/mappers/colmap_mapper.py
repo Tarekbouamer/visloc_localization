@@ -452,7 +452,7 @@ class ColmapMapper(Mapper):
                                                              output_path,
                                                              options=options)
 
-        logger.info('finished the triangulation with statistics:\n%s',
+        logger.info('finished the triangulation with statistics:\n%',
                     reconstruction.summary())
 
         return reconstruction

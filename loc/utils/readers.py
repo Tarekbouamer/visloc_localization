@@ -112,7 +112,7 @@ class MatchesLoader(Loader):
         pair_key, reversed = find_pair(self.hfile, name0, name1)
 
         matches = self.hfile[pair_key]['matches'].__array__()
-        scores = self.hfile[pair_key]['scores'].__array__()
+        scores = self.hfile[pair_key]['matches_scores'].__array__()
 
         idx = np.where(matches != -1)[0]
         matches = np.stack([idx, matches[idx]], -1)

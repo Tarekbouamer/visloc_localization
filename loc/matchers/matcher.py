@@ -1,5 +1,5 @@
 # logger
-import logging
+import sys
 from functools import partial
 from pathlib import Path
 from queue import Queue
@@ -7,26 +7,15 @@ from threading import Thread
 from typing import Any, Dict, List, Tuple, Union
 
 import torch
+from loguru import logger
+from matching.models.matchers import create_matcher
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from loc.matchers import BaseMatcher, MutualNearestNeighbor, SuperGlueMatcher
+from loc.matchers import BaseMatcher
 from loc.utils.io import pairs2key
-from loc.utils.writers import MatchesWriter
 from loc.utils.readers import LocalFeaturesLoader
-
-from loguru import logger
-
-def make_matcher(cfg):
-
-    matcher_name = cfg.matcher.model_name
-
-    if matcher_name == "nn":
-        return MutualNearestNeighbor(cfg.matcher)
-    elif matcher_name == "superglue":
-        return SuperGlueMatcher(cfg.matcher)
-    else:
-        raise KeyError(matcher_name)
+from loc.utils.writers import MatchesWriter
 
 
 class Matcher(BaseMatcher):
@@ -38,8 +27,8 @@ class Matcher(BaseMatcher):
 
         # from a factory
         self.model_name = cfg.matcher.model_name
-        self.matcher = make_matcher(cfg=cfg)
-
+        self.matcher = create_matcher(model_name=cfg.matcher.model_name, 
+                                      cfg=cfg["matcher"])
         # init
         self._set_device()
         self._eval()
@@ -112,7 +101,11 @@ class WorkQueue():
     def put(self, data):
         self.queue.put(data)
 
-
+def progree_report(preds, pair_name):
+    tqdm.write(f"pair:              {pair_name}", file=sys.stdout)
+    tqdm.write(f"matches:           {preds['matches'].shape}", file=sys.stdout)
+    tqdm.write(f"matches_scores:    {preds['matches_scores'].shape}", file=sys.stdout, end='\n\n')
+    
 class MatchSequence(Matcher):
     def __init__(self, cfg: Dict = {}) -> None:
         super().__init__(cfg)
@@ -142,21 +135,26 @@ class MatchSequence(Matcher):
             partial(writer.write_matches), self.cfg.num_workers)
 
         # match
-        for _, (src_name, dst_name, data) in enumerate(tqdm(seq_dl, total=len(seq_dl))):
+        for it , (src_name, dst_name, data) in enumerate(tqdm(seq_dl, total=len(seq_dl))):
 
             # match
             preds = self.match_pair(data)
 
+
             # get key
             pair_key = pairs2key(src_name[0], dst_name[0])
-
+            
+            # for evry 100 pairs
+            if it % 100 == 0:
+                progree_report(preds, pair_name=pair_key)
+                
             # put
             writer_queue.put((pair_key, preds))
 
         writer_queue.join()
         writer.close()
 
-        logger.info("matches saved to %s", str(save_path))
+        logger.info("matches saved to ", )
 
         return save_path
 

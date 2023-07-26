@@ -1,9 +1,5 @@
 
 
-python3 setup.py build install
-
-
-
 WORKSPACE='/media/dl/Data/datasets/aachen'
 WORKSPACE='/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen'
 

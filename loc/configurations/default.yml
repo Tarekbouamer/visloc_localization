@@ -19,15 +19,15 @@ retrieval:
 
 extractor:
     model_name: superpoint
-    max_keypoints: 2048
-    max_size:  1024
+    max_keypoints: 1024
+    max_size:  640
     keypoint_threshold: 0.005  
     remove_borders: 4
     nms_radius: 3                
 
 matcher:
     model_name: nn
-    distance_thresh: 0.7
+    match_threshold: 0.7
     cross_check: True
     good_matches: False
 

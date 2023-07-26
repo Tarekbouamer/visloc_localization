@@ -1,29 +1,25 @@
 # logging
-import logging
+import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union
 
 import torch
+from loguru import logger
+from matching.models.extractors import create_extractor
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 from loc.utils.writers import FeaturesWriter
-# third
-from thirdparty.SuperGluePretrainedNetwork.models.superpoint import SuperPoint
 
 from .base import FeaturesExtractor
 
-from  matching.models.extractors import create_extractor
 
-
-from loguru import logger
-
-def create_model(model_name, cfg):
-    if model_name == "superpoint":
-        return SuperPoint(config=cfg.extractor)
-    else:
-        raise KeyError
+def progress_report(preds, it_name):
+    # report
+    tqdm.write(f"image:         {it_name}", file=sys.stdout)
+    tqdm.write(f"keypoints:     {preds['keypoints'].shape}", file=sys.stdout)
+    tqdm.write(f"descriptors:   {preds['descriptors'].shape}", file=sys.stdout, end='\n\n')
 
 
 class LocalExtractor(FeaturesExtractor):
@@ -35,10 +31,8 @@ class LocalExtractor(FeaturesExtractor):
         #
         model_name = self.cfg.extractor.model_name
         self.model_name = model_name
-
-        # self.extractor = create_model(model_name=model_name,
-        #                               cfg=cfg)
-
+        
+        #
         self.extractor = create_extractor(model_name=model_name,
                                       cfg=cfg.extractor)
                 
@@ -104,11 +98,16 @@ class LocalExtractor(FeaturesExtractor):
 
         # run -->
         for it, data in enumerate(tqdm(_dataloader, total=len(_dataloader), colour='green', desc='extract locals'.rjust(15))):
+            
             #
             it_name = data['name'][0]
 
             #
             preds = self.extract_image(data, scales=scales, **kwargs)
+            
+            # for each 20 iterations
+            if it % 20 == 0:
+                progress_report(preds, it_name)
 
             # write preds
             self.writer.write_items(key=it_name, data=preds)
@@ -129,11 +128,11 @@ class LocalExtractor(FeaturesExtractor):
 
     def __repr__(self) -> str:
         msg  = f"{self.__class__.__name__}"
-        msg += f" ("
+        msg += " ("
         msg += f" model_name: {self.model_name} "
         msg += f" device: {self.device} "
         msg += f" max_keypoints: {self.cfg.extractor.max_keypoints} "
         msg += f" max_size: {self.cfg.extractor.max_size} "
         msg += f" nms_radius: {self.cfg.extractor.nms_radius} "
-        msg += f")"
+        msg += ")"
         return msg

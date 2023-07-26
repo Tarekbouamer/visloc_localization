@@ -50,7 +50,7 @@ def exhaustive_matching(pairs_path: Path,
     # pair dataset loader
     pair_dataset = PairsDataset(
         pairs=pairs, src_path=src_path, dst_path=dst_path)
-    logger.info("matching %s pairs", len(pair_dataset))
+    logger.info(f"matching {len(pair_dataset)} pairs")
 
     # matcher
     matcher = MatchSequence(cfg=cfg)

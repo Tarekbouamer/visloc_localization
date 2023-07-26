@@ -19,8 +19,8 @@ def build_map_colmap(cfg) -> None:
     sfm_matches_path = Path(cfg.visloc_path) / 'sfm_matches.h5'
 
     # convert 3d model to colmap format
-    logger.info('convert 3D model to colmap format')
-    convert_model_to_colmap(cfg=cfg)
+    logger.warning('convert 3D model to colmap format')
+    # convert_model_to_colmap(cfg=cfg)
 
     # mapper
     logger.info('init mapper')

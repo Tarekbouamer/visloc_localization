@@ -1,9 +1,6 @@
-import logging
-from typing import Dict
-from loguru import loggerimport argparse
 from pathlib import Path
 
-from omegaconf import OmegaConf
+from loguru import logger
 
 from loc.utils.colmap.colmap_nvm import main as colmap_from_nvm
 

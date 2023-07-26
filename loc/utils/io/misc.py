@@ -20,5 +20,5 @@ class OutputCapture:
         if not self.verbose:
             self.capture.__exit__(exc_type, *args)
             if exc_type is not None:
-                print('Failed with output:\n%s', self.out.getvalue())
+                print(f'Failed with output:\n {self.out.getvalue()}', )
         sys.stdout.flush()
