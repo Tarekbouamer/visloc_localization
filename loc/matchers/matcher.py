@@ -15,8 +15,7 @@ from loc.utils.io import pairs2key
 from loc.utils.writers import MatchesWriter
 from loc.utils.readers import LocalFeaturesLoader
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def make_matcher(cfg):
 

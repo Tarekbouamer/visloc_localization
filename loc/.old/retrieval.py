@@ -16,8 +16,7 @@
 # from torchvision import transforms
 # from tqdm import tqdm
 
-# logger = logging.getLogger("loc")
-
+# from loguru import logger
 # __DEBUG__ = False
 
   

@@ -4,8 +4,7 @@ from typing import Any, Dict
 
 from loc.retrieval import Retrieval
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def image_retrieval(args: Any,
                     cfg: Dict = None

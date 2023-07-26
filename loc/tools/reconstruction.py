@@ -1,7 +1,6 @@
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def do_reconstruction(mapper, sfm_pairs_path, db_features_path, sfm_matches_path):
     """general reconstction function 

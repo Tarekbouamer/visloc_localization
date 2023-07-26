@@ -6,8 +6,7 @@ from typing import Dict, List, Tuple, Union
 
 import h5py
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def path2key(name: str) -> str:
     """key id for item from its path

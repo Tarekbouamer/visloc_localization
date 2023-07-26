@@ -7,8 +7,7 @@ from loc.datasets import PairsDataset
 from loc.matchers import MatchSequence
 from loc.utils.io import read_pairs_list, remove_duplicate_pairs
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def exhaustive_matching(pairs_path: Path, 
                         src_path: Path, 

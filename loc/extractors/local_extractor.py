@@ -17,8 +17,7 @@ from .base import FeaturesExtractor
 from  matching.models.extractors import create_extractor
 
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def create_model(model_name, cfg):
     if model_name == "superpoint":

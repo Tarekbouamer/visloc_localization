@@ -5,8 +5,7 @@ from pathlib import Path
 # typing
 from typing import Any, Dict, List, Tuple, Union
 
-logger = logging.getLogger("loc")
- 
+from loguru import logger 
 
 def dump_logs(logs: Any, 
               save_path:Path

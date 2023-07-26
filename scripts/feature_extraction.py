@@ -5,11 +5,9 @@ sys.path.append(str(Path(__file__).parent / '../'))
 
 import argparse
 
-from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config
 from loc.tools.extraction import database_feature_extraction, query_feature_extraction
-from loc.utils.logging import setup_logger
-
+from loc.utils.logging import init_loguru
 
 
 def feature_extraction_argparser():
@@ -37,7 +35,8 @@ def run_feature_extraction():
     """    
 
     # logger
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="feature_extraction .log")
+
 
     # args
     args = feature_extraction_argparser()

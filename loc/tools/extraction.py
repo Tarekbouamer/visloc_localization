@@ -1,12 +1,11 @@
 # logger
-import logging
 from pathlib import Path
 from typing import Dict
 
+from loguru import logger
+
 from loc.datasets.dataset import ImagesFromList
 from loc.extractors import GlobalExtractor, LocalExtractor
-
-logger = logging.getLogger("loc")
 
 
 def feature_extraction(workspace: Path, 
@@ -44,8 +43,8 @@ def feature_extraction(workspace: Path,
     logger.info(f"{local_extractor}")
     logger.info(f"local feature extractor to {loc_features_path}")
 
-    # local_extractor.extract_dataset(
-    #     images, save_path=loc_features_path, normalize=False, gray=True)
+    local_extractor.extract_dataset(
+        images, save_path=loc_features_path, normalize=False, gray=True)
 
     # global
     global_extractor = GlobalExtractor(cfg=cfg)

@@ -5,8 +5,7 @@ import sys
 
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 class OutputCapture:
     def __init__(self, verbose):

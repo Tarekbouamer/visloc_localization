@@ -4,8 +4,7 @@ import torch
 
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 class AbsolutePoseEstimation:
     def __init__(self, sfm_model, cfg=None):

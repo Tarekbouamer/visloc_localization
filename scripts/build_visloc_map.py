@@ -5,11 +5,9 @@ sys.path.append(str(Path(__file__).parent / '../'))
 
 import argparse
 
-from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config
 from loc.tools.build_visloc_map import build_visloc_map
-from loc.utils.logging import setup_logger
-
+from loc.utils.logging import init_loguru
 
 
 def run_build_visloc_map_argparser():
@@ -37,14 +35,14 @@ def run_build_visloc_map():
     """    
 
     # logger
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="build_visloc_map.log")
 
     # args
     args = run_build_visloc_map_argparser()
     
     args, cfg = make_config(args)
 
-    logger.info(f"run build visloc map")
+    logger.info("run build visloc map")
     
     #
     build_visloc_map(args, cfg)

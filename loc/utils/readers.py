@@ -9,8 +9,7 @@ import torch
 
 from loc.utils.io import find_pair
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 class Loader:
     def __init__(self,

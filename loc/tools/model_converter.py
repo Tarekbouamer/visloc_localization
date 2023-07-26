@@ -1,7 +1,6 @@
 import logging
 from typing import Dict
-logger = logging.getLogger("loc")
-import argparse
+from loguru import loggerimport argparse
 from pathlib import Path
 
 from omegaconf import OmegaConf

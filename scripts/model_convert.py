@@ -6,7 +6,7 @@ from omegaconf import OmegaConf
 
 from loc.configurations.dataset_config import make_config
 from loc.tools.model_converter import run_model_conversion
-from loc.utils.logging import setup_logger
+from loc.utils.logging import init_loguru
 
 
 def model_convert_argparser():
@@ -40,7 +40,7 @@ def model_convert_argparser():
 
 def model_convert():
     # logger
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="model_convert.log")
 
     #
     logger.info("run model convert")

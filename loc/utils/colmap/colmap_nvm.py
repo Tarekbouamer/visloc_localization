@@ -11,8 +11,7 @@ from .read_write_model import write_model
 
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def recover_database_images_and_ids(database_path):
     images = {}

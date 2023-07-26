@@ -8,8 +8,7 @@ import argparse
 from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config
 from loc.tools.triangulate import geometric_verification_and_triangulation
-from loc.utils.logging import setup_logger
-
+from loc.utils.logging import init_loguru
 
 
 def triangulation_argparser():
@@ -38,7 +37,7 @@ def run_triangulation():
     """    
 
     # logger
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="triangulation.log")
 
     # args
     args = triangulation_argparser()

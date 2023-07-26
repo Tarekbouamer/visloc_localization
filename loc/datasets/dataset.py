@@ -10,8 +10,7 @@ from torch.utils.data import Dataset
 
 from loc.utils.io import load_aachen_intrinsics
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 _EXT = ['*.jpg', '*.png', '*.jpeg', '*.JPG', '*.PNG']
 

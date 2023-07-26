@@ -8,7 +8,7 @@ import argparse
 from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config
 from loc.tools.matching import exhaustive_matching
-from loc.utils.logging import setup_logger
+from loc.utils.logging import init_loguru
 
 
 
@@ -41,7 +41,7 @@ def run_exhaustive_matching():
     """    
 
     # logger
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="exhaustive_matching.log")
 
     # args,
     args = exhaustive_matching_argparser()

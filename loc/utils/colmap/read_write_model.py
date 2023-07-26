@@ -38,8 +38,7 @@ import logging
 
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 CameraModel = collections.namedtuple(
     "CameraModel", ["model_id", "model_name", "num_params"])
 Camera = collections.namedtuple(

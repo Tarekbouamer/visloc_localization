@@ -42,8 +42,8 @@ pip install gdown timm==0.5.4
 ```
 
 ## Roadmap
-
-- [ ]  make a nice visualization.
+- [ ] dense matching tool for loftr ...
+- [ ] make a nice visualization.
 
 ## Results:
 

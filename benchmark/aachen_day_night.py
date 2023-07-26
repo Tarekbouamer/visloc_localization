@@ -3,7 +3,7 @@ import subprocess
 from pathlib import Path
 
 from loc.utils.io import run_command
-from loc.utils.logging import setup_logger
+from loc.utils.logging import init_loguru
 
 
 def run_aachen_day_night_argparser():
@@ -80,7 +80,7 @@ def run_aachen_day_night(args):
 if __name__ == '__main__':
 
     #
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="aachen_day_night.log")
 
     #
     args = run_aachen_day_night_argparser()

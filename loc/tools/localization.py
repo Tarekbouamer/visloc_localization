@@ -12,8 +12,7 @@ from loc.localize import DatasetLocalizer, ImageLocalizer
 from loc.retrieval.retrieval import Retrieval
 from loc.utils.io import dump_logs, write_poses_txt
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def dataset_localization(args: Any,
                          cfg: Dict

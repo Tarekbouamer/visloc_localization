@@ -7,8 +7,7 @@ from loc.tools.extraction import database_feature_extraction
 from loc.tools.matching import exhaustive_matching
 
 # logger
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def build_map_colmap(cfg) -> None:
     """

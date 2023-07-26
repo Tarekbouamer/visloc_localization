@@ -5,8 +5,7 @@ import torch.nn as nn
 
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 class BaseMatcher:
     """Base Matcher class

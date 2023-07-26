@@ -7,7 +7,7 @@ import argparse
 
 from loc.configurations.dataset_config import make_config
 from loc.tools.localization import dataset_localization
-from loc.utils.logging import setup_logger
+from loc.utils.logging import init_loguru
 
 
 def run_dataset_localization_argparser():
@@ -35,7 +35,7 @@ def run_dataset_localization():
     """    
 
     # logger
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="dataset_localization.log")
 
     # args
     args = run_dataset_localization_argparser()

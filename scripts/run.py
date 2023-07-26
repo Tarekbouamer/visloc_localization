@@ -10,7 +10,7 @@ from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config
 from loc.tools.build_map_colmap import build_map_colmap
 from loc.tools.localization import run_localization
-from loc.utils.logging import setup_logger
+from loc.utils.logging import init_loguru
 from loc.utils.viewer import VisualizerGui
 
 
@@ -39,8 +39,7 @@ def make_parser():
 def make_workspace(cfg):
 
     #
-    logger = logging.getLogger("loc")
-
+    from loguru import logger
     # workspace
     cfg.workspace = Path(cfg.workspace)
     logger.info(f"workspace {cfg.workspace}")
@@ -66,7 +65,7 @@ def make_workspace(cfg):
 def main(cli_cfg):
 
     # logger
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="run.log")
     logger.info("init visloc_localization")
 
     # make config

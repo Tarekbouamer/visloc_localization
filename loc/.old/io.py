@@ -18,8 +18,7 @@ import pycolmap
 # 
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 
 

@@ -1,9 +1,9 @@
-[07/25 17:21 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
-[07/25 17:21 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
-[07/25 17:21 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
-[07/25 17:21 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
-[07/25 17:21 loc]: {'split': 'query', 'workspace': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen'), 'config': PosixPath('loc/configurations/default.yml'), 'dataset': 'aachen', 'images_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images'), 'visloc_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc'), 'mapper_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper'), 'type': 'nvm', 'model': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/aachen_cvpr2018_db.nvm'), 'intrinsics': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/database_intrinsics.txt'), 'database': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/aachen.db'), 'save_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper')}
-[07/25 17:21 loc]: config name: loc
+[07/26 11:13 loc]: workspace /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen
+[07/26 11:13 loc]: images /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images
+[07/26 11:13 loc]: visloc /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc
+[07/26 11:13 loc]: mapper /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper
+[07/26 11:13 loc]: {'split': 'db', 'workspace': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen'), 'config': PosixPath('loc/configurations/default.yml'), 'dataset': 'aachen', 'images_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/images'), 'visloc_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc'), 'mapper_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper'), 'type': 'nvm', 'model': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/aachen_cvpr2018_db.nvm'), 'intrinsics': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/3D-models/database_intrinsics.txt'), 'database': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/aachen.db'), 'save_path': PosixPath('/media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/mapper')}
+[07/26 11:13 loc]: config name: loc
 num_workers: 12
 dataset:
   name: aachen
@@ -46,10 +46,8 @@ db:
   images: images/db/
   cameras: null
 
-[07/25 17:21 loc]: run feature extraction query
-[07/25 17:21 loc]: found 947 images with 922 intrinsics
-[07/25 17:21 loc]: LocalExtractor ( model_name: superpoint  device: cuda  max_keypoints: 2048  max_size: 1024  nms_radius: 3 )
-[07/25 17:21 loc]: local feature extractor to /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/query_local_features.h5
-[07/25 17:21 loc]: GlobalExtractor ( model_name: sfm_resnet50_gem_2048  device: cuda  max_size: 1024)
-[07/25 17:21 loc]: global feature extractor to /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/query_global_features.h5
-[07/25 17:22 loc]: extraction done 49.16 seconds saved /media/loc/D0AE6539AE65196C/VisualLocalization2020/aachen/visloc/query_global_features.h5
+[07/26 11:13 loc]: run build visloc map
+[07/26 11:13 loc]: init mapper
+[07/26 11:13 loc]: init Colmap Mapper
+[07/26 11:13 loc]: compute database covisibility pairs
+[07/26 11:13 loc]: reading Colmap model

@@ -3,8 +3,7 @@ from typing import Any, Dict
 
 from loc.mappers.colmap_mapper import ColmapMapper
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def geometric_verification_and_triangulation(args: Any,
                                              cfg: Dict

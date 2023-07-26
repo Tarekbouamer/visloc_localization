@@ -34,7 +34,7 @@ from loc.utils.colmap.database import COLMAPDatabase
 # utils
 from loc.utils.colmap.read_write_model import read_model
 from loc.utils.configurations import make_config
-from loc.utils.logging import setup_logger
+from loc.utils.logging import init_loguru
 from loc.utils.viewer import VisualizerGui, Visualizer
 
 # retrieval
@@ -69,7 +69,7 @@ def make_parser():
 def main(args):
  
     # logger
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="app.log")
     logger.info("init visloc_localization")
     
     args.directory = Path(args.directory)

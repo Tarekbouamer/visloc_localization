@@ -6,8 +6,7 @@ import numpy as np
 
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 class Writer:
     def __init__(self,

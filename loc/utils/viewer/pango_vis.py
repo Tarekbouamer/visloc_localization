@@ -11,8 +11,7 @@ import OpenGL.GL as gl
 
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 # [4x4] homogeneous inverse T^-1 from [4x4] T     
 def inv_T(T):

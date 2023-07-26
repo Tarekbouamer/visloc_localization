@@ -21,8 +21,7 @@ from torch.utils.data import DataLoader
 
 # logger
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 class Retrieval(object):
     """general retrieval class

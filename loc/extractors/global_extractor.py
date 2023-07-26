@@ -13,8 +13,7 @@ from loc.utils.writers import FeaturesWriter
 
 from .base import FeaturesExtractor
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 class GlobalExtractor(FeaturesExtractor):
     def __init__(self,
                  cfg: Dict = None

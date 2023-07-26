@@ -15,8 +15,7 @@ from loc.solvers.pnp import (AbsolutePoseEstimationPoseLib,
 from loc.utils.io import (dump_logs,
                           read_pairs_dict, write_poses_txt)
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 class VisLoc(object):
     """_summary_
 

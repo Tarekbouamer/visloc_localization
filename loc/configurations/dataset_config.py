@@ -4,8 +4,7 @@ from pathlib import Path
 from omegaconf import OmegaConf
 
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 DEFAULT_CFG = "loc/configurations/default.yml"
 
 def make_aachen_cfg(args, cfg={}):
@@ -88,7 +87,6 @@ def make_config(args) -> Tuple:
         cfg = default_cfg
         
     # 
-    logger.info(f"{args.__dict__}")
     logger.info(f"config {OmegaConf.to_yaml(cfg)}")
 
     return args, cfg

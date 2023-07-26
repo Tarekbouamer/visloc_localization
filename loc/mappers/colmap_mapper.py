@@ -15,8 +15,7 @@ from loc.utils.readers import KeypointsLoader, MatchesLoader
 
 from .base import Mapper
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 class ColmapMapper(Mapper):
     """ Colmap mapping class (SFM) 

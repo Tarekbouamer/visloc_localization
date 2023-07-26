@@ -4,8 +4,7 @@ import torch.nn as nn
 
 # logger
 import logging
-logger = logging.getLogger("loc")
- 
+from loguru import logger 
 class MutualNearestNeighbor(nn.Module):
     """mutual nearest neighboor matcher
     """    

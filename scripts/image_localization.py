@@ -8,7 +8,7 @@ import argparse
 from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config
 from loc.tools.localization import image_localization
-from loc.utils.logging import setup_logger
+from loc.utils.logging import init_loguru
 
 
 def run_image_localization_argparser():
@@ -36,7 +36,7 @@ def run_image_retrieval():
     """    
 
     # logger
-    logger = setup_logger(output=".", name="loc")
+    logger = init_loguru(name="loc", log_file="image_localization.log")
 
     # args
     args = run_image_localization_argparser()

@@ -17,8 +17,7 @@ from loc.utils.io import dump_logs, pairs2key, read_pairs_dict, write_poses_txt
 from loc.utils.readers import (KeypointsLoader, LocalFeaturesLoader,
                                MatchesLoader)
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def covisibility_clustering(frame_ids: List[int], visloc_model: pycolmap.Reconstruction):
     """_summary_

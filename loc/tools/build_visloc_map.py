@@ -1,14 +1,12 @@
-import logging
-from typing import Dict, Any
 from pathlib import Path
+from typing import Any, Dict
+
+import pycolmap
+from loguru import logger
 
 from loc.mappers.colmap_mapper import ColmapMapper
 from loc.tools.extraction import database_feature_extraction
 from loc.tools.matching import exhaustive_matching
-
-import pycolmap
-
-logger = logging.getLogger("loc")
 
 
 def build_visloc_map(args: Any, 

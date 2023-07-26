@@ -10,8 +10,7 @@ from torch.hub import load_state_dict_from_url
 
 from features.models.model_register import is_model, model_entrypoint
 
-logger = logging.getLogger("loc")
-
+from loguru import logger
 
 def load_state_dict(checkpoint_path):
     """ load weights """

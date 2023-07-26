@@ -11,8 +11,7 @@ from loc.utils.transforms import normalize_img_net, to_gray
 
 # logging
 import logging
-logger = logging.getLogger("loc")
-
+from loguru import logger
 class FeaturesExtractor:
     def __init__(self, 
                  cfg:Dict=None
