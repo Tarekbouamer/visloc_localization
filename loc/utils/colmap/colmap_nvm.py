@@ -10,7 +10,7 @@ from .read_write_model import write_model
 
 
 # logger
-import logging
+from loguru import logger
 from loguru import logger
 
 def recover_database_images_and_ids(database_path):

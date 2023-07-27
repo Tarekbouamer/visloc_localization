@@ -8,7 +8,6 @@ from typing import Any, Dict, List, Tuple, Union
 
 import torch
 from loguru import logger
-from matching.models.matchers import create_matcher
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -16,6 +15,8 @@ from loc.matchers import BaseMatcher
 from loc.utils.io import pairs2key
 from loc.utils.readers import LocalFeaturesLoader
 from loc.utils.writers import MatchesWriter
+
+from matching.models.matchers import create_matcher
 
 
 class Matcher(BaseMatcher):
@@ -27,7 +28,7 @@ class Matcher(BaseMatcher):
 
         # from a factory
         self.model_name = cfg.matcher.model_name
-        self.matcher = create_matcher(model_name=cfg.matcher.model_name, 
+        self.matcher = create_matcher(model_name=cfg.matcher.model_name,
                                       cfg=cfg["matcher"])
         # init
         self._set_device()
@@ -38,8 +39,8 @@ class Matcher(BaseMatcher):
         logger.info(f"init {cfg.matcher.model_name} matcher")
 
     def _prepare_input_data(self,
-                        data: Dict[str, Union[torch.Tensor, List, Tuple]]
-                        ) -> Dict:
+                            data: Dict[str, Union[torch.Tensor, List, Tuple]]
+                            ) -> Dict:
 
         for k, v in data.items():
             # device
@@ -101,11 +102,14 @@ class WorkQueue():
     def put(self, data):
         self.queue.put(data)
 
+
 def progree_report(preds, pair_name):
-    tqdm.write(f"pair:              {pair_name}", file=sys.stdout)
-    tqdm.write(f"matches:           {preds['matches'].shape}", file=sys.stdout)
-    tqdm.write(f"matches_scores:    {preds['matches_scores'].shape}", file=sys.stdout, end='\n\n')
-    
+    tqdm.write(f"pair:  {pair_name}", file=sys.stdout)
+    tqdm.write(f"matches:   {preds['matches'].shape}", file=sys.stdout)
+    tqdm.write(
+        f"matches_scores:   {preds['matches_scores'].shape}", file=sys.stdout, end='\n\n')  # noqa: E501
+
+
 class MatchSequence(Matcher):
     def __init__(self, cfg: Dict = {}) -> None:
         super().__init__(cfg)
@@ -135,19 +139,18 @@ class MatchSequence(Matcher):
             partial(writer.write_matches), self.cfg.num_workers)
 
         # match
-        for it , (src_name, dst_name, data) in enumerate(tqdm(seq_dl, total=len(seq_dl))):
+        for it, (src_name, dst_name, data) in enumerate(tqdm(seq_dl, total=len(seq_dl))):  # noqa: E501
 
             # match
             preds = self.match_pair(data)
 
-
             # get key
             pair_key = pairs2key(src_name[0], dst_name[0])
-            
+
             # for evry 100 pairs
             if it % 100 == 0:
                 progree_report(preds, pair_name=pair_key)
-                
+
             # put
             writer_queue.put((pair_key, preds))
 
@@ -162,7 +165,8 @@ class MatchSequence(Matcher):
 def wrap_keys_with_extenstion(data: Dict,
                               ext="0"
                               ):
-    return { k+ext:v for k,v in data.items()}
+    return {k+ext: v for k, v in data.items()}
+
 
 class MatchQueryDatabase(Matcher):
     def __init__(self, cfg: Dict = {}) -> None:
@@ -170,13 +174,14 @@ class MatchQueryDatabase(Matcher):
 
     def match_query_database(self, q_preds, pairs):
 
-        local_features_path = Path(str(self.cfg.visloc_path) + '/' + 'db_local_features.h5')
+        local_features_path = Path(
+            str(self.cfg.visloc_path) + '/' + 'db_local_features.h5')
 
         local_features_loader = LocalFeaturesLoader(
             save_path=local_features_path)
         #
         q_preds = wrap_keys_with_extenstion(q_preds, ext="0")
-        
+
         #
         pairs_matches = {}
 

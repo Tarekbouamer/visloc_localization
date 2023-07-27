@@ -1,6 +1,6 @@
 import argparse
 # logger
-import logging
+from loguru import logger
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple, Union

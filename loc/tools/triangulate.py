@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 from typing import Any, Dict
 
 from loc.mappers.colmap_mapper import ColmapMapper

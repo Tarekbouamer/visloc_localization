@@ -3,7 +3,7 @@ import poselib
 import torch
 
 # logger
-import logging
+from loguru import logger
 from loguru import logger
 
 class AbsolutePoseEstimation:

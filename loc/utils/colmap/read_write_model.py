@@ -34,10 +34,10 @@ import collections
 import numpy as np
 import struct
 import argparse
-import logging
+from loguru import logger
 
 # logger
-import logging
+from loguru import logger
 from loguru import logger
 CameraModel = collections.namedtuple(
     "CameraModel", ["model_id", "model_name", "num_params"])

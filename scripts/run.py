@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent / '../'))
 print(sys.path[-1])
 input()
-import logging
+from loguru import logger
 import argparse
 from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config

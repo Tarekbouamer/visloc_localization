@@ -1,21 +1,20 @@
 # logger
-import logging
 from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 import pycolmap
+from loguru import logger
 from tqdm import tqdm
 
 from loc.utils.colmap.database import COLMAPDatabase
 from loc.utils.colmap.read_write_model import read_model
 from loc.utils.geometry import compute_epipolar_errors
-from loc.utils.io import OutputCapture, find_pair, path2key, read_pairs_dict
+from loc.utils.io import OutputCapture, read_pairs_dict
 from loc.utils.readers import KeypointsLoader, MatchesLoader
 
 from .base import Mapper
 
-from loguru import logger
 
 class ColmapMapper(Mapper):
     """ Colmap mapping class (SFM) 
@@ -469,11 +468,6 @@ class ColmapMapper(Mapper):
         #     database_path.unlink()
 
         # extraction options
-        sift_options = {
-            "num_workers": 16,
-            "max_image_size": 640,
-            "max_num_features": 2048
-        }
 
         # extract features
         logger.info("colmap extract features")

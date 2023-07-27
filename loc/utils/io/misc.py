@@ -2,10 +2,8 @@ import contextlib
 import io
 import sys
 
-
 # logger
-import logging
-from loguru import logger
+
 
 class OutputCapture:
     def __init__(self, verbose):

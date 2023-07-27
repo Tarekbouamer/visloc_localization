@@ -8,7 +8,7 @@ import pycolmap
 
 # 
 # logger
-import logging
+from loguru import logger
 from loguru import logger
 def load_aachen_intrinsics(paths):
     """

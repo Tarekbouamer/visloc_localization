@@ -1,5 +1,5 @@
 # logging
-import logging
+from loguru import logger
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Union

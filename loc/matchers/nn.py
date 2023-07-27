@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 
 # logger
-import logging
+from loguru import logger
 from loguru import logger 
 class MutualNearestNeighbor(nn.Module):
     """mutual nearest neighboor matcher

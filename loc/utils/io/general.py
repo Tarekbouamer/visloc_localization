@@ -1,5 +1,5 @@
 # logger
-import logging
+from loguru import logger
 import pickle
 from pathlib import Path
 # typing

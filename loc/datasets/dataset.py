@@ -1,5 +1,5 @@
 # logger
-import logging
+from loguru import logger
 from os import path
 from pathlib import Path
 from typing import Any, Dict, Tuple, List

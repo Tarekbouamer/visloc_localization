@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 from pathlib import Path
 
 from loc.mappers.colmap_mapper import ColmapMapper

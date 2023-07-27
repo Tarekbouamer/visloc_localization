@@ -1,5 +1,5 @@
 # logger
-import logging
+from loguru import logger
 from loguru import logger
 
 def do_reconstruction(mapper, sfm_pairs_path, db_features_path, sfm_matches_path):

@@ -1,17 +1,13 @@
-from typing import Any, Union, Dict, List
-
 from pathlib import Path
+from typing import Any, Dict, List, Union
 
 import torch
-import torch.nn as nn
-
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from loc.utils.transforms import normalize_img_net, to_gray
 
+
 # logging
-import logging
-from loguru import logger
 class FeaturesExtractor:
     def __init__(self, 
                  cfg:Dict=None

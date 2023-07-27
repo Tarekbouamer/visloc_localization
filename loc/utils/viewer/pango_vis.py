@@ -10,7 +10,7 @@ import pypangolin as pango
 import OpenGL.GL as gl
 
 # logger
-import logging
+from loguru import logger
 from loguru import logger
 
 # [4x4] homogeneous inverse T^-1 from [4x4] T     

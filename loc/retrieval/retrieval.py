@@ -20,7 +20,7 @@ from loc.utils.readers import GlobalFeaturesLoader
 from torch.utils.data import DataLoader
 
 # logger
-import logging
+from loguru import logger
 from loguru import logger
 
 class Retrieval(object):

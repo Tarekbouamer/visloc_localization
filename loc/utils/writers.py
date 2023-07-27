@@ -5,7 +5,7 @@ import torch
 import numpy as np
 
 # logger
-import logging
+from loguru import logger
 from loguru import logger
 
 class Writer:

@@ -1,11 +1,9 @@
-from typing import Any, Union, Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple, Union
 
 import torch
 import torch.nn as nn
 
 # logger
-import logging
-from loguru import logger
 
 class BaseMatcher:
     """Base Matcher class
@@ -47,7 +45,8 @@ class BaseMatcher:
         """_summary_
 
         Args:
-            data (Dict[str, Union[torch.Tensor, List, Tuple]]): input data of pair of images 
+            data (Dict[str, Union[torch.Tensor, List, Tuple]]): input data of pair of
+            images 
 
         Returns:
             Dict: pair predictions {matches and scores }
@@ -65,9 +64,9 @@ class BaseMatcher:
     
     def __repr__(self) -> str:
         msg  = f" {self.__class__.__name__}"
-        msg += f" ("
+        msg += " ("
         msg += f" model_name: {self.model_name} device: {self.device}"
         msg += f" cross_check: {self.cfg.matcher.cross_check}"
         msg += f" good_matches: {self.cfg.matcher.good_matches}"
-        msg += f" )"
+        msg += " )"
         return msg

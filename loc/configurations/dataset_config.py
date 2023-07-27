@@ -3,7 +3,7 @@ from pathlib import Path
 
 from omegaconf import OmegaConf
 
-import logging
+from loguru import logger
 from loguru import logger
 DEFAULT_CFG = "loc/configurations/default.yml"
 

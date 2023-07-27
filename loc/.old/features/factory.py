@@ -1,5 +1,5 @@
 # logger
-import logging
+from loguru import logger
 import os
 from typing import Dict, List, Tuple
 

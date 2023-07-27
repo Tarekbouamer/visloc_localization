@@ -1,25 +1,20 @@
-import argparse
 # logger
-import logging
 from collections import defaultdict
-from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List
 
-import h5py
 import numpy as np
 import pycolmap
+from loguru import logger
 from tqdm import tqdm
 
 from loc.matchers import Matcher
-from loc.solvers.pnp import (AbsolutePoseEstimationPoseLib,
-                             AbsolutePoseEstimationPyColmap)
-from loc.utils.io import dump_logs, pairs2key, read_pairs_dict, write_poses_txt
-from loc.utils.readers import (KeypointsLoader, LocalFeaturesLoader,
-                               MatchesLoader)
+from loc.solvers.pnp import AbsolutePoseEstimationPoseLib
+from loc.utils.io import dump_logs, read_pairs_dict, write_poses_txt
+from loc.utils.readers import KeypointsLoader, LocalFeaturesLoader, MatchesLoader
 
-from loguru import logger
 
-def covisibility_clustering(frame_ids: List[int], visloc_model: pycolmap.Reconstruction):
+def covisibility_clustering(frame_ids: List[int], 
+                            visloc_model: pycolmap.Reconstruction):
     """_summary_
 
     Args:
@@ -58,7 +53,8 @@ def covisibility_clustering(frame_ids: List[int], visloc_model: pycolmap.Reconst
 
             connected_frames = {
                 obs.image_id
-                for p2D in observed if p2D.has_point3D() for obs in visloc_model.points3D[p2D.point3D_id].track.elements
+                for p2D in observed if p2D.has_point3D() \
+                    for obs in visloc_model.points3D[p2D.point3D_id].track.elements
             }
 
             connected_frames &= set(frame_ids)
@@ -303,7 +299,10 @@ class DatasetLocalizer(Localizer):
 
 class ImageLocalizer(Localizer):
 
-    def __init__(self, visloc_model, extractor, retrieval, db_features_path, features_path, matches_path, cfg={}) -> None:
+    def __init__(self, visloc_model, extractor, retrieval, db_features_path, 
+                 features_path, 
+                 matches_path, cfg={}
+                 ) -> None:
         super().__init__(visloc_model, cfg)
 
         # extractor
@@ -350,7 +349,8 @@ class ImageLocalizer(Localizer):
                 continue
 
             # get visible points
-            points3D_ids = np.array([p.point3D_id if p.has_point3D() else -1 for p in image.points2D])
+            points3D_ids = np.array([p.point3D_id if p.has_point3D() else -1 \
+                for p in image.points2D])
 
             # compute query db matches
             matches = self.compute_matches(q_preds, image.name)
