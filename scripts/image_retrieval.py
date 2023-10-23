@@ -1,14 +1,10 @@
-import sys
+import argparse
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).parent / '../'))
+from core.logging import init_loguru
 
-import argparse
-
-from omegaconf import OmegaConf
 from loc.configurations.dataset_config import make_config
 from loc.tools.retrieval import image_retrieval
-from loc.utils.logging import init_loguru
 
 
 def run_image_retrieval_argparser():
@@ -33,22 +29,21 @@ def run_image_retrieval_argparser():
 
 def run_image_retrieval():
     """image retrieval
-    """    
+    """
 
-    
     logger = init_loguru(name="loc", log_file="image_retrieval.log")
-
 
     # args
     args = run_image_retrieval_argparser()
-    
+
     # cfg
     args, cfg = make_config(args)
 
-    logger.info(f"run image retrieval")
-    
+    logger.info("run image retrieval")
+
     #
     image_retrieval(args, cfg)
-   
+
+
 if __name__ == '__main__':
     run_image_retrieval()

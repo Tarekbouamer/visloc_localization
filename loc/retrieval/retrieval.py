@@ -3,14 +3,12 @@ from typing import Any, Dict
 
 import numpy as np
 import torch
-
-
 from loguru import logger
+from retrieval.extractors import GlobalExtractor
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from loc.datasets.dataset import ImagesFromList
-from loc.extractors import GlobalExtractor
 from loc.utils.io import remove_duplicate_pairs
 from loc.utils.readers import GlobalFeaturesReader
 
@@ -33,7 +31,8 @@ class Retrieval(object):
 
         # extractor
         logger.info(f"init retrieval {model_name}")
-        self.extractor = GlobalExtractor(cfg=cfg)
+        self.extractor = GlobalExtractor(cfg=cfg,
+                                         model_name=model_name)
 
         #
         self.workspace = workspace

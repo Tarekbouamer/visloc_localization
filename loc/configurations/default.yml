@@ -13,7 +13,7 @@ mapper:
     max_epip_error: 4.0
 
 retrieval:
-    model_name: sfm_resnet50_gem_2048
+    model_name: sfm_resnet50_c4_gem_1024
     max_size: 1024
     num_topK : 20
 
