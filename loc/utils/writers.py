@@ -1,42 +1,12 @@
-from typing import Dict, Tuple
-import h5py
 from pathlib import Path
-import torch
+from typing import Dict, Tuple
+
 import numpy as np
+import torch
+from core.io import H5Writer
 
-# logger
-from loguru import logger
-from loguru import logger
 
-class Writer:
-    def __init__(self,
-                 save_path: Path
-                 ) -> None:
-        # save file
-        self.save_path = save_path
-
-        # writer
-        self.hfile = h5py.File(str(save_path), 'a')
-        
-    def close(self):
-        self.hfile.close()
-        
-    def _to_numpy(self,
-                  x: torch.Tensor
-                  ) -> torch.Tensor:
-        if x.is_cuda:
-            x = x.cpu().numpy()
-        else:
-            x = x.numpy()
-        
-        if x.dtype == np.float32 or x.dtype == np.float64:
-            x = x.astype(np.float32)
-        elif x.dtype == np.int32 or x.dtype == np.int64:
-            x = x.astype(np.int16)
-
-        return x
-        
-class FeaturesWriter(Writer):
+class FeaturesWriter(H5Writer):
     def __init__(self, save_path: Path) -> None:
         super().__init__(save_path)
 
@@ -96,7 +66,7 @@ class FeaturesWriter(Writer):
             raise error
 
 
-class MatchesWriter(Writer):
+class MatchesWriter(H5Writer):
     def __init__(self, save_path: Path) -> None:
         super().__init__(save_path)
         
@@ -118,5 +88,4 @@ class MatchesWriter(Writer):
                 v = self._to_numpy(v)
                 
             g.create_dataset(k, data=v)
-#TODO: add call function that calls write matches  
     

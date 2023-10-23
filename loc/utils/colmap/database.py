@@ -334,11 +334,10 @@ def example_usage():
     assert np.allclose(keypoints[image_id4], keypoints4)
 
     # Read and check matches.
-
-    pair_ids = [image_ids_to_pair_id(*pair) for pair in
+    pair_ids = [image_ids_to_pair_id(*pair) for pair in  # noqa: F841
                 ((image_id1, image_id2),
                  (image_id2, image_id3),
-                 (image_id3, image_id4))]
+                 (image_id3, image_id4))] 
 
     matches = dict(
         (pair_id_to_image_ids(pair_id),

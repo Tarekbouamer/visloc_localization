@@ -1,29 +1,29 @@
 
 
 from flask import Flask, jsonify, request
-import json
-
 from PIL import Image
 
-#declared an empty variable for reassignment
+# declared an empty variable for reassignment
 response = ''
 
-#creating the instance of our flask application
+# creating the instance of our flask application
 app = Flask(__name__)
 
-#route to entertain our post and get request from flutter app
-@app.route('/', methods = ['GET', 'POST'])
+# route to entertain our post and get request from flutter app
+
+
+@app.route('/', methods=['GET', 'POST'])
 def nameRoute():
 
-    #fetching the global response variable to manipulate inside the function
+    # fetching the global response variable to manipulate inside the function
     global response
 
-    #checking the request type we get from the app
-    if(request.method == 'POST'):
+    # checking the request type we get from the app
+    if (request.method == 'POST'):
         # file = request.files #getting the response data
         file = request.files
         print(file)
-        
+
         image = Image.open(file["image"]).resize((320, 320))
         print(image.size)
         image.show()
@@ -35,10 +35,11 @@ def nameRoute():
         # name = request_data['name'] #assigning it to name
         # print(name)
         # response = f'Hi {name}! this is Python' #re-assigning response with the name we got from the user
-        return " " #to avoid a type error 
+        return " "  # to avoid a type error
     else:
         print(response)
-        return jsonify({'name' : response}) #sending data back to your frontend app
+        # sending data back to your frontend app
+        return jsonify({'name': response})
 
 
 if __name__ == "__main__":

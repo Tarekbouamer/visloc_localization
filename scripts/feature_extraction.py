@@ -34,7 +34,7 @@ def run_feature_extraction():
     """features extraction
     """    
 
-    # logger
+    
     logger = init_loguru(name="loc", log_file="feature_extraction .log")
 
 

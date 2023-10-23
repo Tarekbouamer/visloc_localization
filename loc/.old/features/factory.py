@@ -1,16 +1,15 @@
-# logger
-from loguru import logger
+
 import os
-from typing import Dict, List, Tuple
+from typing import Dict
 
 import gdown
 import torch
 import torch.nn as nn
+from loguru import logger
 from torch.hub import load_state_dict_from_url
 
 from features.register import is_model, model_entrypoint
 
-from loguru import logger
 
 def load_state_dict(checkpoint_path):
     """ load weights """
@@ -70,16 +69,16 @@ def load_pretrained(model, variant, pretrained_cfg):
         logger.warning(
             "No pretrained weights exist or were found for this model. Using random initialization.")
         return
-    
+
     # load body and head weights
     strict = pretrained_cfg.get("strict", True)
     model.load_state_dict(state_dict, strict=strict)
 
 
 def create_local_feature(detector_name: str,
-                    cfg: Dict = {},
-                    **kwargs
-                    ) -> nn.Module:
+                         cfg: Dict = {},
+                         **kwargs
+                         ) -> nn.Module:
     """create a detector from regitred models in detector factory
 
     Args:

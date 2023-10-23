@@ -1,9 +1,9 @@
 import torch
 import torch.nn as nn
 
-
-from .utils import cut_to_match, size_is_pow2
 from .misc import NoOp
+from .utils import cut_to_match
+
 
 class Conv(nn.Sequential):
     def __init__(self, in_, out_, size, setup=None):
@@ -64,10 +64,11 @@ class UnetDownBlock(nn.Sequential):
         self.name = name
         self.in_ = in_
         self.out_ = out_
-        
+
         if is_first:
             downsample = NoOp()
-            conv1 = Conv(in_, out_, size, setup={**setup, 'gate': NoOp, 'norm': NoOp})
+            conv1 = Conv(in_, out_, size, setup={
+                         **setup, 'gate': NoOp, 'norm': NoOp})
         else:
             downsample = setup['downsample'](in_, size, setup=setup)
             conv1 = Conv(in_, out_, size, setup=setup)
@@ -83,10 +84,11 @@ class ThinUnetDownBlock(nn.Sequential):
         self.name = name
         self.in_ = in_
         self.out_ = out_
-        
+
         if is_first:
             downsample = NoOp()
-            conv = Conv(in_, out_, size, setup={**setup, 'gate': NoOp, 'norm': NoOp})
+            conv = Conv(in_, out_, size, setup={
+                        **setup, 'gate': NoOp, 'norm': NoOp})
         else:
             downsample = setup['downsample'](in_, size, setup=setup)
             conv = Conv(in_, out_, size, setup=setup)
@@ -113,8 +115,7 @@ class UnetUpBlock(nn.Module):
         self.seq = nn.Sequential(conv1, conv2)
 
     def forward(self, bot,
-                      hor):
-
+                hor):
 
         bot_big = self.upsample(bot)
         hor = cut_to_match(bot_big, hor, n_pref=2)
@@ -138,9 +139,8 @@ class ThinUnetUpBlock(nn.Module):
         self.upsample = setup['upsample'](bottom_, size, setup=setup)
         self.conv = Conv(self.cat_, self.out_, size, setup=setup)
 
-
     def forward(self, bot,
-                      hor):
+                hor):
 
         bot_big = self.upsample(bot)
         hor = cut_to_match(bot_big, hor, n_pref=2)

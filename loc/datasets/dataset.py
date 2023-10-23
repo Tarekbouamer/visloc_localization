@@ -1,16 +1,13 @@
-# logger
-from loguru import logger
-from os import path
+
 from pathlib import Path
-from typing import Any, Dict, Tuple, List
+from typing import Any, Dict, List, Tuple
 
 import cv2
 import numpy as np
+from loguru import logger
 from torch.utils.data import Dataset
 
 from loc.utils.io import load_aachen_intrinsics
-
-from loguru import logger
 
 _EXT = ['*.jpg', '*.png', '*.jpeg', '*.JPG', '*.PNG']
 
@@ -96,7 +93,7 @@ class ImagesFromList(Dataset):
 
         return image
 
-    def read_image(self, 
+    def read_image(self,
                    path: Path
                    ) -> Tuple[np.ndarray, np.ndarray]:
 
@@ -124,7 +121,7 @@ class ImagesFromList(Dataset):
     def get_names(self) -> List[str]:
         return self.names
 
-    def get_name(self, 
+    def get_name(self,
                  _path: Path
                  ) -> str:
         name = _path.relative_to(self.images_rel_path).as_posix()
@@ -133,7 +130,7 @@ class ImagesFromList(Dataset):
     def __getitem__(self, item) -> Dict:
 
         out = {}
-        
+
         #
         img_path = self.images_fn[item]
         img_name = self.get_name(img_path)
@@ -151,17 +148,17 @@ class ImagesFromList(Dataset):
         img = img / 255.
 
         # out
-        out["img"]  = img.astype(np.float32)
+        out["img"] = img.astype(np.float32)
         out["name"] = img_name
         out["size"] = np.array(size, dtype=np.float32)
 
         return out
 
     def __repr__(self) -> str:
-        msg  = f" {self.__class__.__name__}"
-        msg += f" ("
+        msg = f" {self.__class__.__name__}"
+        msg += " ("
         msg += f" name: {self.name}"
         msg += f" split: {self.split}"
         msg += f" max_size: {self.max_size}"
-        msg += f" )"
+        msg += " )"
         return msg

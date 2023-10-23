@@ -1,16 +1,15 @@
-# logger
-from loguru import logger
+
 import os
-from typing import Dict, List, Tuple
+from typing import Dict
 
 import gdown
 import torch
 import torch.nn as nn
+from loguru import logger
 from torch.hub import load_state_dict_from_url
 
 from features.models.model_register import is_model, model_entrypoint
 
-from loguru import logger
 
 def load_state_dict(checkpoint_path):
     """ load weights """
@@ -70,15 +69,16 @@ def load_pretrained(model, variant, pretrained_cfg, state_key=None, replace=None
         logger.warning(
             "No pretrained weights exist or were found for this model. Using random initialization.")
         return
-    
+
     print(state_dict.keys())
     # state key
     if state_key is not None:
         state_dict = state_dict[state_key]
-        
+
     # replace
     if replace is not None:
-        state_dict = {k.replace(replace[0], replace[1]): v for k, v in state_dict.items()}
+        state_dict = {
+            k.replace(replace[0], replace[1]): v for k, v in state_dict.items()}
 
     # load state
     model.load_state_dict(state_dict, strict=True)
@@ -88,7 +88,7 @@ def create_model(model_name: str,
                  cfg: Dict = {},
                  **kwargs
                  ) -> nn.Module:
-    
+
     #
     kwargs = {k: v for k, v in kwargs.items() if v is not None}
 

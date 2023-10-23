@@ -1,11 +1,9 @@
-# logger
-from loguru import logger
 
 import h5py
 import torch
+from loguru import logger
 from torch.utils.data import Dataset
 
-from loguru import logger
 
 def read_key_from_h5py(name, _path, suffix=""):
     data = {}

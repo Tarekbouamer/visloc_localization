@@ -31,7 +31,7 @@ def run_visloc_gui():
     """ visualizer gui 
     """    
 
-    # logger
+    
     logger = init_loguru(name="loc", log_file="gui.log")
 
     # args

@@ -29,16 +29,14 @@
 #
 # Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
-import os
-import collections
-import numpy as np
-import struct
 import argparse
+import collections
+import os
+import struct
+
+import numpy as np
 from loguru import logger
 
-# logger
-from loguru import logger
-from loguru import logger
 CameraModel = collections.namedtuple(
     "CameraModel", ["model_id", "model_name", "num_params"])
 Camera = collections.namedtuple(
@@ -268,16 +266,19 @@ def write_images_text(images, path):
     if len(images) == 0:
         mean_observations = 0
     else:
-        mean_observations = sum((len(img.point3D_ids) for _, img in images.items()))/len(images)
+        mean_observations = sum((len(img.point3D_ids)
+                                for _, img in images.items()))/len(images)
     HEADER = "# Image list with two lines of data per image:\n" + \
              "#   IMAGE_ID, QW, QX, QY, QZ, TX, TY, TZ, CAMERA_ID, NAME\n" + \
              "#   POINTS2D[] as (X, Y, POINT3D_ID)\n" + \
-             "# Number of images: {}, mean observations per image: {}\n".format(len(images), mean_observations)
+             "# Number of images: {}, mean observations per image: {}\n".format(
+                 len(images), mean_observations)
 
     with open(path, "w") as fid:
         fid.write(HEADER)
         for _, img in images.items():
-            image_header = [img.id, *img.qvec, *img.tvec, img.camera_id, img.name]
+            image_header = [img.id, *img.qvec, *
+                            img.tvec, img.camera_id, img.name]
             first_line = " ".join(map(str, image_header))
             fid.write(first_line + "\n")
 
@@ -374,10 +375,12 @@ def write_points3D_text(points3D, path):
     if len(points3D) == 0:
         mean_track_length = 0
     else:
-        mean_track_length = sum((len(pt.image_ids) for _, pt in points3D.items()))/len(points3D)
+        mean_track_length = sum((len(pt.image_ids)
+                                for _, pt in points3D.items()))/len(points3D)
     HEADER = "# 3D point list with one line of data per point:\n" + \
              "#   POINT3D_ID, X, Y, Z, R, G, B, ERROR, TRACK[] as (IMAGE_ID, POINT2D_IDX)\n" + \
-             "# Number of points: {}, mean track length: {}\n".format(len(points3D), mean_track_length)
+             "# Number of points: {}, mean track length: {}\n".format(
+                 len(points3D), mean_track_length)
 
     with open(path, "w") as fid:
         fid.write(HEADER)
@@ -410,8 +413,8 @@ def write_points3D_binary(points3D, path_to_model_file):
 
 
 def detect_model_format(path, ext):
-    if os.path.isfile(os.path.join(path, "cameras"  + ext)) and \
-       os.path.isfile(os.path.join(path, "images"   + ext)) and \
+    if os.path.isfile(os.path.join(path, "cameras" + ext)) and \
+       os.path.isfile(os.path.join(path, "images" + ext)) and \
        os.path.isfile(os.path.join(path, "points3D" + ext)):
         return True
 
@@ -430,22 +433,21 @@ def read_model(path, ext=""):
             return
 
     if ext == ".txt":
-        cameras     = read_cameras_text(os.path.join(path, "cameras" + ext))
-        images      = read_images_text(os.path.join(path, "images" + ext))
-        points3D    = read_points3D_text(os.path.join(path, "points3D") + ext)
-    
+        cameras = read_cameras_text(os.path.join(path, "cameras" + ext))
+        images = read_images_text(os.path.join(path, "images" + ext))
+        points3D = read_points3D_text(os.path.join(path, "points3D") + ext)
+
     else:
-        cameras     = read_cameras_binary(os.path.join(path, "cameras" + ext))
-        images      = read_images_binary(os.path.join(path, "images" + ext))
-        points3D    = read_points3D_binary(os.path.join(path, "points3D") + ext)
-    
+        cameras = read_cameras_binary(os.path.join(path, "cameras" + ext))
+        images = read_images_binary(os.path.join(path, "images" + ext))
+        points3D = read_points3D_binary(os.path.join(path, "points3D") + ext)
+
     return cameras, images, points3D
 
 
 def write_model(cameras, images, points3D, path, ext=".bin"):
-    
+
     logger.info('writing Colmap model...')
-    
 
     if ext == ".txt":
         write_cameras_text(cameras, os.path.join(path, "cameras" + ext))
@@ -485,8 +487,9 @@ def rotmat2qvec(R):
     return qvec
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Read and write COLMAP binary and text models")
+def main(cfg):
+    parser = argparse.ArgumentParser(
+        description="Read and write COLMAP binary and text models")
     parser.add_argument("--input_model", help="path to input model folder")
     parser.add_argument("--input_format", choices=[".bin", ".txt"],
                         help="input model format", default="")
@@ -494,16 +497,18 @@ def main():
                         help="path to output model folder")
     parser.add_argument("--output_format", choices=[".bin", ".txt"],
                         help="outut model format", default=".txt")
-    args = parser.parse_args()
+    parser.parse_args()
 
-    cameras, images, points3D = read_model(path=cfg.input_model, ext=cfg.input_format)
+    cameras, images, points3D = read_model(
+        path=cfg.input_model, ext=cfg.input_format)
 
     print("num_cameras:", len(cameras))
     print("num_images:", len(images))
     print("num_points3D:", len(points3D))
 
     if cfg.output_model is not None:
-        write_model(cameras, images, points3D, path=cfg.output_model, ext=cfg.output_format)
+        write_model(cameras, images, points3D,
+                    path=cfg.output_model, ext=cfg.output_format)
 
 
 if __name__ == "__main__":

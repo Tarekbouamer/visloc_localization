@@ -1,4 +1,4 @@
-# logger
+
 from collections import defaultdict
 from pathlib import Path
 
@@ -11,7 +11,7 @@ from loc.utils.colmap.database import COLMAPDatabase
 from loc.utils.colmap.read_write_model import read_model
 from loc.utils.geometry import compute_epipolar_errors
 from loc.utils.io import OutputCapture, read_pairs_dict
-from loc.utils.readers import KeypointsLoader, MatchesLoader
+from loc.utils.readers import KeypointsReader, MatchesReader
 
 from .base import Mapper
 
@@ -235,7 +235,7 @@ class ColmapMapper(Mapper):
 
         logger.info('importing features into the database...')
 
-        self.keypoints_loader = KeypointsLoader(features_path)
+        self.keypoints_loader = KeypointsReader(features_path)
         db = COLMAPDatabase.connect(self.database_path)
 
         image_ids = self.names_to_ids()
@@ -265,7 +265,7 @@ class ColmapMapper(Mapper):
         assert matches_path.exists, matches_path
 
         # loaders
-        self.matches_loader = MatchesLoader(matches_path)
+        self.matches_loader = MatchesReader(matches_path)
 
         with open(str(pairs_path), 'r') as f:
             pairs = [p.split() for p in f.readlines()]
@@ -337,8 +337,8 @@ class ColmapMapper(Mapper):
         assert matches_path.exists,     matches_path
 
         # loader
-        self.keypoints_loader = KeypointsLoader(features_path)
-        self.matches_loader = MatchesLoader(matches_path)
+        self.keypoints_loader = KeypointsReader(features_path)
+        self.matches_loader = MatchesReader(matches_path)
 
         # maximum epipolar error
         max_epip_error = self.cfg.mapper.max_epip_error

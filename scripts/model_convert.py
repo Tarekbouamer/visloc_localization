@@ -39,7 +39,7 @@ def model_convert_argparser():
 
 
 def model_convert():
-    # logger
+    
     logger = init_loguru(name="loc", log_file="model_convert.log")
 
     #

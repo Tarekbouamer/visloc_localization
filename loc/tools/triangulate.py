@@ -1,9 +1,9 @@
-from loguru import logger
 from typing import Any, Dict
+
+from loguru import logger
 
 from loc.mappers.colmap_mapper import ColmapMapper
 
-from loguru import logger
 
 def geometric_verification_and_triangulation(args: Any,
                                              cfg: Dict

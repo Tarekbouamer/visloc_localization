@@ -34,7 +34,7 @@ def run_dataset_localization():
     """dataset localization
     """    
 
-    # logger
+    
     logger = init_loguru(name="loc", log_file="dataset_localization.log")
 
     # args

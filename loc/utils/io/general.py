@@ -1,11 +1,10 @@
-# logger
-from loguru import logger
+
 import pickle
 from pathlib import Path
-# typing
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, List
 
-from loguru import logger 
+from loguru import logger
+
 
 def dump_logs(logs: Any, 
               save_path:Path

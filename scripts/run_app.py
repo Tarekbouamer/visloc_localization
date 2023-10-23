@@ -68,7 +68,7 @@ def make_parser():
 
 def main(args):
  
-    # logger
+    
     logger = init_loguru(name="loc", log_file="app.log")
     logger.info("init visloc_localization")
     

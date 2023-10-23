@@ -1,8 +1,8 @@
-from loguru import logger
+import matching
 import pycolmap
+from loguru import logger
 
 logger.info(f"pycolmap version {pycolmap.__version__}")
 
-import matching
-logger.info(f"matching version {matching.__version__}")
 
+logger.info(f"matching version {matching.__version__}")

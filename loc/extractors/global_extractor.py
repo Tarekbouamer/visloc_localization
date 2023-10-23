@@ -1,10 +1,10 @@
 # logging
-from loguru import logger
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Dict, List, Union
 
 import torch
+from loguru import logger
 from retrieval.models import create_model
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
@@ -13,7 +13,7 @@ from loc.utils.writers import FeaturesWriter
 
 from .base import FeaturesExtractor
 
-from loguru import logger
+
 class GlobalExtractor(FeaturesExtractor):
     def __init__(self,
                  cfg: Dict = None
@@ -93,11 +93,11 @@ class GlobalExtractor(FeaturesExtractor):
 
     def __repr__(self) -> str:
         msg  = f"{self.__class__.__name__}"
-        msg += f" ("
+        msg += " ("
         msg += f" model_name: {self.model_name} "
         msg += f" device: {self.device} "
         msg += f" max_size: {self.cfg.retrieval.max_size}"
-        msg += f")"
+        msg += ")"
         return msg
             
               

@@ -35,7 +35,7 @@ def run_image_retrieval():
     """image retrieval
     """    
 
-    # logger
+    
     logger = init_loguru(name="loc", log_file="image_retrieval.log")
 
 

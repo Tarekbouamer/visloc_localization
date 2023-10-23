@@ -1,8 +1,7 @@
-from loguru import logger
 from pathlib import Path
 from typing import Any, Dict
 
-import pycolmap
+from loguru import logger
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -12,7 +11,6 @@ from loc.localize import DatasetLocalizer, ImageLocalizer
 from loc.retrieval.retrieval import Retrieval
 from loc.utils.io import dump_logs, write_poses_txt
 
-from loguru import logger
 
 def dataset_localization(args: Any,
                          cfg: Dict
@@ -109,7 +107,7 @@ def image_localization(args: Any,
         item["camera"] = query_set.cameras[qname]
 
         # localize
-        qpose = localizer.localize_image(item)
+        localizer.localize_image(item)
 
     #
     poses = localizer.poses

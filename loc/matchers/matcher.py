@@ -1,4 +1,4 @@
-# logger
+
 import sys
 from functools import partial
 from pathlib import Path
@@ -13,7 +13,7 @@ from tqdm import tqdm
 
 from loc.matchers import BaseMatcher
 from loc.utils.io import pairs2key
-from loc.utils.readers import LocalFeaturesLoader
+from loc.utils.readers import LocalFeaturesReader
 from loc.utils.writers import MatchesWriter
 
 from matching.models.matchers import create_matcher
@@ -177,7 +177,7 @@ class MatchQueryDatabase(Matcher):
         local_features_path = Path(
             str(self.cfg.visloc_path) + '/' + 'db_local_features.h5')
 
-        local_features_loader = LocalFeaturesLoader(
+        local_features_loader = LocalFeaturesReader(
             save_path=local_features_path)
         #
         q_preds = wrap_keys_with_extenstion(q_preds, ext="0")

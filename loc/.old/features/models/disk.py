@@ -190,7 +190,7 @@ class Detector:
             torch.arange(H, device=dev),
             torch.arange(W, device=dev),
         )[::-1], dim=0).unsqueeze(0)
-        cgrid_tiled = self._tile(cgrid)
+        self._tile(cgrid)
 
         # extract xy coordinates from cgrid according to indices sampled
         # before
@@ -251,75 +251,77 @@ class DISK(nn.Module):
                  kernel_size=5
                  ):
         super(DISK, self).__init__()
-        
+
         #
         self.cfg = cfg
-        
-        #  
+
+        #
         self.desc_dim = cfg["descriptor_dim"]
         #
         self.unet = Unet(in_features=3, size=cfg["kernel_size"],
                          down=[16, 32, 64, 64, 64],
                          up=[64, 64, 64, cfg["descriptor_dim"]+1],
                          setup=setup)
-        
+
         #
         self.detector = Detector(window=cfg["window"])
 
     def transform_inputs(self, data):
-        """ transform model inputs   """ 
-        
+        """ transform model inputs   """
+
         orig_h, orig_w = data['image'].shape[-2:]
         new_h = round(orig_h / 16) * 16
         new_w = round(orig_w / 16) * 16
-        data['image'] = F.pad(data['image'], (0, new_w - orig_w, 0, new_h - orig_h))
+        data['image'] = F.pad(
+            data['image'], (0, new_w - orig_w, 0, new_h - orig_h))
         data['size'] = (orig_w, orig_h)
         return data
-      
+
     def extract_features(self, data):
         #
         data = self.transform_inputs(data)
-        
+
         return self.unet(data["image"])
 
     def detect(self, data, features=None):
 
         if features is None:
             features = self.extract_features(data)
-               
+
         assert features.shape[1] == self.desc_dim + 1
         heatmap = features[:, self.desc_dim:]
 
         _keypoints = self.detector.nms(heatmap)
-        
+
         # keypoints and scores
         keypoints = _keypoints[0].xys
         scores = _keypoints[0].logp
 
         # valid
         orig_w, orig_h = data['size']
-        valid = torch.all(keypoints <= keypoints.new_tensor([orig_w, orig_h]) - 1, 1)
+        valid = torch.all(keypoints <= keypoints.new_tensor(
+            [orig_w, orig_h]) - 1, 1)
         keypoints = keypoints[valid]
         scores = scores[valid]
-        
+
         # max and sort
         if self.cfg['max_keypoints'] > 0:
             idxs = (-scores).argsort()[:self.cfg['max_keypoints']]
             keypoints = keypoints[idxs]
             scores = scores[idxs]
-                    
+
         out = {
             'keypoints': keypoints,
             'scores': scores
-            }
+        }
 
         return out
-    
-    def compute(self, data, features):    
+
+    def compute(self, data, features):
 
         keypoints = data["keypoints"]
-        scores = data["scores"]    
-        
+        scores = data["scores"]
+
         # keypoints
         x, y = keypoints.T
 
@@ -327,28 +329,28 @@ class DISK(nn.Module):
         descriptors = features[:, :self.desc_dim][0]
 
         descriptors = descriptors[:, y, x].T
-        descriptors = F.normalize(descriptors, dim=-1)    
+        descriptors = F.normalize(descriptors, dim=-1)
 
-        data =  {
+        data = {
             'keypoints': keypoints,
             'scores': scores,
             'descriptors': descriptors
-            }
-        return data      
-      
+        }
+        return data
+
     def forward(self, data):
-            
+
         # features
         features = self.extract_features(data)
 
         # detect
         preds = self.detect(data, features)
-        
+
         # compute
         preds = self.compute({**preds, **data}, features)
-        
+
         return preds
-     
+
 
 def _cfg(url='', drive='', descriptor_dim=128, **kwargs):
     return {
@@ -359,15 +361,16 @@ def _cfg(url='', drive='', descriptor_dim=128, **kwargs):
 
 
 default_cfgs = {
-    'disk_depth': 
-      _cfg(drive='https://drive.google.com/uc?id=1SMNY0swehee2I9TNkvp2VMCJm0BTsRH5',
-           kernel_size=5, window=8),
-      
-    'disk_epipolar': 
-      _cfg(drive='https://drive.google.com/uc?id=1hldj_irmF2BXI_AzUktKM3Qg57TjIdyv',
-           kernel_size=5, window=8),
+    'disk_depth':
+    _cfg(drive='https://drive.google.com/uc?id=1SMNY0swehee2I9TNkvp2VMCJm0BTsRH5',
+         kernel_size=5, window=8),
+
+    'disk_epipolar':
+    _cfg(drive='https://drive.google.com/uc?id=1hldj_irmF2BXI_AzUktKM3Qg57TjIdyv',
+         kernel_size=5, window=8),
 
 }
+
 
 def _make_model(name, cfg=None, pretrained=True, **kwargs):
 
@@ -382,37 +385,37 @@ def _make_model(name, cfg=None, pretrained=True, **kwargs):
         load_pretrained(model, name, cfg, state_key="extractor")
 
     return model
-  
-  
+
+
 @register_model
 def disk_depth(cfg=None, **kwargs):
     return _make_model(name="disk_depth", cfg=cfg)
 
+
 @register_model
 def disk_epipolar(cfg=None, **kwargs):
     return _make_model(name="disk_epipolar", cfg=cfg)
-  
-  
+
+
 if __name__ == '__main__':
-    from features.utils.io import (cv_to_tensor, read_image,
-                                   show_cv_image_keypoints)
-    
+    from features.utils.io import cv_to_tensor, read_image, show_cv_image_keypoints
+
     img_path = "features/graffiti.png"
 
     image, image_size = read_image(img_path)
     image = cv_to_tensor(image)
     detector = create_model("disk_depth", cfg={"max_keypoints": -1})
-    
+
     # print(detector)
-    
+
     with torch.no_grad():
         preds = detector({'image': image})
-    
-    for k,v in preds.items():
+
+    for k, v in preds.items():
         if not isinstance(v, torch.Tensor):
             preds[k] = v[0]
-    
-    for k,v in preds.items():
-        print(k, "    ",v.shape)
-    
+
+    for k, v in preds.items():
+        print(k, "    ", v.shape)
+
     show_cv_image_keypoints(image, preds['keypoints'])

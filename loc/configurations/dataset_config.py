@@ -1,10 +1,9 @@
-from typing import Tuple
 from pathlib import Path
+from typing import Tuple
 
+from loguru import logger
 from omegaconf import OmegaConf
 
-from loguru import logger
-from loguru import logger
 DEFAULT_CFG = "loc/configurations/default.yml"
 
 def make_aachen_cfg(args, cfg={}):

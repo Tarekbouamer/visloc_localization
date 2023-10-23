@@ -3,7 +3,7 @@ from typing import Dict, List, Tuple, Union
 import torch
 import torch.nn as nn
 
-# logger
+
 
 class BaseMatcher:
     """Base Matcher class

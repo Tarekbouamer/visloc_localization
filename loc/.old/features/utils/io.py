@@ -1,17 +1,10 @@
-# logger
-from loguru import logger
+
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
 
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from torch.utils.data import Dataset
-
-from loc.utils.io import load_aachen_intrinsics
-
-from loguru import logger
 
 _EXT = ['*.jpg', '*.png', '*.jpeg', '*.JPG', '*.PNG']
 
@@ -42,9 +35,9 @@ def show_cv_image(image):
 
 
 def cv_to_tensor(image):
-  
+
     image = image.transpose((2, 0, 1))
-    
+
     # normalize [0, 1.]
     image = image / 255.
 
@@ -54,24 +47,24 @@ def cv_to_tensor(image):
     image = torch.from_numpy(image).unsqueeze(0)
 
     return image
-  
-  
+
+
 def show_cv_image_keypoints(image, kpts, mode="bgr"):
-  
+
     if isinstance(image, torch.Tensor):
         image = image.cpu().numpy()
 
     if isinstance(kpts, torch.Tensor):
-        kpts = kpts.cpu().numpy()      
-    
+        kpts = kpts.cpu().numpy()
+
     if len(image.shape) == 4:
-        image = image[0] 
-        
+        image = image[0]
+
     # CHW --> HWC
     image = image.transpose((1, 2, 0))
-    
+
     plt.imshow(image)
-   
+
     plt.scatter(kpts[:, 0], kpts[:, 1], c="r", s=3, linewidths=0)
-    
+
     plt.show()

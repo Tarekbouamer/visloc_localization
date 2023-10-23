@@ -1,10 +1,7 @@
-import pycolmap
 import poselib
+import pycolmap
 import torch
 
-# logger
-from loguru import logger
-from loguru import logger
 
 class AbsolutePoseEstimation:
     def __init__(self, sfm_model, cfg=None):
@@ -24,7 +21,7 @@ class AbsolutePoseEstimation:
         raise NotImplementedError
 
     def __repr__(self):
-        msg  = f" {self.__class__.__name__}"
+        msg = f" {self.__class__.__name__}"
         msg += f" ransac: max_reproj_error {self.cfg.solver.ransac.max_reproj_error}"
         msg += f" max_epipolar_error {self.cfg.solver.ransac.max_epipolar_error}"
         msg += f" bundle: max_iterations {self.cfg.solver.bundle.max_iterations}"
@@ -41,11 +38,11 @@ class AbsolutePoseEstimationPyColmap(AbsolutePoseEstimation):
 
     def estimate(self, points2D_all, points2D_idxs, points3D_id, query_camera):
 
-        # 
+        #
         points2D_all = self._to_numpy(points2D_all)
         points2D_idxs = self._to_numpy(points2D_idxs)
 
-        # 
+        #
         points2D = points2D_all[points2D_idxs]
         points3D = [self.sfm_model.points3D[j].xyz for j in points3D_id]
 
@@ -71,17 +68,17 @@ class AbsolutePoseEstimationPoseLib(AbsolutePoseEstimation):
 
     def estimate(self, points2D_all, points2D_idxs, points3D_id, camera):
 
-        # 
+        #
         points2D_all = self._to_numpy(points2D_all)
         points2D_idxs = self._to_numpy(points2D_idxs)
-        
+
         points2D = points2D_all[points2D_idxs]
         points3D = [self.sfm_model.points3D[j].xyz for j in points3D_id]
 
         # camera model
         camera = {'model':  camera.model_name,  'width':  camera.width,
                   'height': camera.height,      'params': camera.params}
-        
+
         # estimation
         pose, info = poselib.estimate_absolute_pose(points2D, points3D, camera,
                                                     self.cfg.get(

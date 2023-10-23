@@ -35,7 +35,7 @@ def run_image_retrieval():
     """image localization
     """    
 
-    # logger
+    
     logger = init_loguru(name="loc", log_file="image_localization.log")
 
     # args

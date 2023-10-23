@@ -1,14 +1,10 @@
 
 
-import functools
-import itertools
-
 import torch
 import torch.nn as nn
 from torch.utils.checkpoint import checkpoint
 
-from .blocks import (ThinUnetDownBlock, ThinUnetUpBlock, UnetDownBlock,
-                     UnetUpBlock)
+from .blocks import ThinUnetDownBlock, ThinUnetUpBlock, UnetDownBlock, UnetUpBlock
 from .misc import NoOp, TrivialDownsample, TrivialUpsample
 
 fat_setup = {

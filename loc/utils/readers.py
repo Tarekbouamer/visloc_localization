@@ -1,40 +1,14 @@
-# logger
-from loguru import logger
-from pathlib import Path
-from typing import Dict, List, Tuple, Union
 
-import h5py
+from pathlib import Path
+
 import numpy as np
 import torch
+from core.io import H5Reader
 
 from loc.utils.io import find_pair
 
-from loguru import logger
 
-class Loader:
-    def __init__(self,
-                 save_path: Path
-                 ) -> None:
-        # save file
-        self.save_path = save_path
-
-        # writer
-        self.hfile = h5py.File(str(save_path), 'r', libver='latest')
-
-        # device
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-
-    def load():
-        pass
-
-    def device(self):
-        return self.device
-
-    def close(self):
-        self.hfile.close()
-
-
-class KeypointsLoader(Loader):
+class KeypointsReader(H5Reader):
     def __init__(self, save_path: Path) -> None:
         super().__init__(save_path)
 
@@ -42,13 +16,13 @@ class KeypointsLoader(Loader):
         dset = self.hfile[name]['keypoints']
 
         keypoint = dset.__array__()
-        uncertainty = dset.attrs.get('uncertainty')    
-        
-        return keypoint, uncertainty    
-        
+        uncertainty = dset.attrs.get('uncertainty')
+
+        return keypoint, uncertainty
+
     def load(self, name):
-        
-        # 
+
+        #
         keypoint, uncertainty = self.load_as_numpy(name)
 
         #
@@ -62,15 +36,14 @@ class KeypointsLoader(Loader):
         return keypoint, uncertainty
 
 
-class GlobalFeaturesLoader(Loader):
+class GlobalFeaturesReader(H5Reader):
     def __init__(self, save_path: Path) -> None:
         super().__init__(save_path)
-    
+
     def load_as_numpy(self, name):
         x = self.hfile[name]["features"]
         return x.__array__()
 
-        
     def load(self, name):
         preds = {}
         keys = list(self.hfile[name].keys())
@@ -83,7 +56,7 @@ class GlobalFeaturesLoader(Loader):
         return preds
 
 
-class LocalFeaturesLoader(Loader):
+class LocalFeaturesReader(H5Reader):
     def __init__(self, save_path: Path) -> None:
         super().__init__(save_path)
 
@@ -100,7 +73,7 @@ class LocalFeaturesLoader(Loader):
         return preds
 
 
-class MatchesLoader(Loader):
+class MatchesReader(H5Reader):
     def __init__(self, save_path: Path) -> None:
         super().__init__(save_path)
 

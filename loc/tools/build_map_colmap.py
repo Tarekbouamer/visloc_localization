@@ -1,13 +1,11 @@
-from loguru import logger
 from pathlib import Path
 
+from loguru import logger
+
 from loc.mappers.colmap_mapper import ColmapMapper
-from loc.tools.model_converter import convert_model_to_colmap
 from loc.tools.extraction import database_feature_extraction
 from loc.tools.matching import exhaustive_matching
 
-# logger
-from loguru import logger
 
 def build_map_colmap(cfg) -> None:
     """
@@ -62,6 +60,6 @@ def build_map_colmap(cfg) -> None:
 
     # triangulate
     logger.info('triangulation')
-    reconstruction = mapper.triangulate_points(verbose=True)
+    mapper.triangulate_points(verbose=True)
 
     return mapper, db_features_path

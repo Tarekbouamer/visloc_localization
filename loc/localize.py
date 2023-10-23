@@ -1,4 +1,4 @@
-# logger
+
 from collections import defaultdict
 from typing import Dict, List
 
@@ -10,7 +10,7 @@ from tqdm import tqdm
 from loc.matchers import Matcher
 from loc.solvers.pnp import AbsolutePoseEstimationPoseLib
 from loc.utils.io import dump_logs, read_pairs_dict, write_poses_txt
-from loc.utils.readers import KeypointsLoader, LocalFeaturesLoader, MatchesLoader
+from loc.utils.readers import KeypointsReader, LocalFeaturesReader, MatchesReader
 
 
 def covisibility_clustering(frame_ids: List[int], 
@@ -122,8 +122,8 @@ class DatasetLocalizer(Localizer):
         assert features_path.exists(), features_path
         assert matches_path.exists(),  matches_path
 
-        self.keypoints_loader = KeypointsLoader(features_path)
-        self.matches_loader = MatchesLoader(matches_path)
+        self.keypoints_loader = KeypointsReader(features_path)
+        self.matches_loader = MatchesReader(matches_path)
 
     def pose_from_cluster(self, qname, qcam, db_ids, **kwargs):
         """cluster and find the best camera pose 
@@ -315,10 +315,10 @@ class ImageLocalizer(Localizer):
         self.matcher = Matcher(cfg)
 
         # 
-        self.db_features_loader = LocalFeaturesLoader(save_path=db_features_path)
+        self.db_features_loader = LocalFeaturesReader(save_path=db_features_path)
 
-        self.matches_loader = MatchesLoader(matches_path)
-        self.keypoints_loader = KeypointsLoader(features_path)
+        self.matches_loader = MatchesReader(matches_path)
+        self.keypoints_loader = KeypointsReader(features_path)
 
         #
         self.poses = {}

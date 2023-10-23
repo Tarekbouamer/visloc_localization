@@ -1,17 +1,14 @@
 import argparse
 import sqlite3
-from tqdm import tqdm
 from collections import defaultdict
-import numpy as np
 from pathlib import Path
 
-from .read_write_model import Camera, Image, Point3D, CAMERA_MODEL_NAMES
-from .read_write_model import write_model
-
-
-# logger
+import numpy as np
 from loguru import logger
-from loguru import logger
+from tqdm import tqdm
+
+from .read_write_model import CAMERA_MODEL_NAMES, Camera, Image, Point3D, write_model
+
 
 def recover_database_images_and_ids(database_path):
     images = {}
@@ -22,9 +19,10 @@ def recover_database_images_and_ids(database_path):
         images[name] = image_id
         cameras[name] = camera_id
     db.close()
-    
-    logger.info(f'3D model has {len(images)} images and {len(cameras)} cameras in database.')
-        
+
+    logger.info(
+        f'3D model has {len(images)} images and {len(cameras)} cameras in database.')
+
     return images, cameras
 
 
@@ -51,7 +49,7 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
         raw_intrinsics = f.readlines()
 
     logger.info(f'reading {len(raw_intrinsics)} cameras')
-        
+
     cameras = {}
     for intrinsics in raw_intrinsics:
         intrinsics = intrinsics.strip('\n').split(' ')
@@ -71,9 +69,9 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
         line = nvm_f.readline()
     num_images = int(line)
     assert num_images == len(cameras)
-    
+
     logger.info(f'reading {num_images} images...')
-        
+
     image_idx_to_db_image_id = []
     image_data = []
     i = 0
@@ -96,7 +94,7 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
         num_points = 0
     else:
         logger.info(f'reading {num_points} points...')
-            
+
     points3D = {}
     image_idx_to_keypoints = defaultdict(list)
     i = 0
@@ -130,10 +128,10 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
         i += 1
         pbar.update(1)
     pbar.close()
-    
-    # parsing 
+
+    # parsing
     logger.info('parsing image data')
-    
+
     images = {}
     for i, data in enumerate(image_data):
         # Skip the focal length. Skip the distortion and terminal 0.
@@ -173,20 +171,20 @@ def read_nvm_model(nvm_path, intrinsics_path, image_ids, camera_ids, skip_points
 
 
 def main(nvm, intrinsics, database, output, skip_points=False):
-    
+
     assert nvm.exists(),         nvm
     assert intrinsics.exists(), intrinsics
     assert database.exists(),   database
 
-
     image_ids, camera_ids = recover_database_images_and_ids(database)
-        
-    model = read_nvm_model(nvm, intrinsics, image_ids, camera_ids, skip_points=skip_points)
-        
+
+    model = read_nvm_model(nvm, intrinsics, image_ids,
+                           camera_ids, skip_points=skip_points)
+
     output.mkdir(exist_ok=True, parents=True)
-    
+
     write_model(*model, path=str(output), ext='.bin')
-    
+
     logger.info('NVM to Colmap conversion done !')
 
 
@@ -198,4 +196,4 @@ if __name__ == '__main__':
     parser.add_argument('--output', required=True, type=Path)
     parser.add_argument('--skip_points', action='store_true')
     args = parser.parse_args()
-    main(**cfg.__dict__)
+    main(**args.__dict__)

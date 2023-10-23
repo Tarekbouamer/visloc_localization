@@ -1,12 +1,11 @@
-from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict
 
 import torch
 from torch import nn
 
-from features.factory import create_local_feature, load_pretrained
-from features.register import register_local_feature, get_pretrained_cfg, list_modules
+from features.factory import create_local_feature
 from features.models.model_factory import create_model
+from features.register import register_local_feature
 
 
 class LocalFeature(nn.Module):
@@ -24,24 +23,24 @@ class LocalFeature(nn.Module):
 
         Returns:
             Dict: _description_
-        """        
+        """
         preds, x = self.detector.detect(data)
-        
+
         preds = self.descriptor.compute({**data, **preds}, x)
-        
+
         return preds
-      
-      
+
+
 def _make_local_feature(detector_name, descriptor_name, cfg=None, **kwargs):
     #
     detector = create_model(detector_name, cfg=cfg)
     #
     descriptor = create_model(descriptor_name, cfg=cfg)
-    
+
     model = LocalFeature(detector=detector, descriptor=descriptor)
-    
+
     return model
-    
+
 
 @register_local_feature
 def superpoint(cfg=None, **kwargs):
@@ -54,6 +53,6 @@ if __name__ == '__main__':
     print(model)
 
     preds = model({'image': img})
-    
+
     for k, v in preds.items():
-        print(k,"   ", v[0].shape)
+        print(k, "   ", v[0].shape)

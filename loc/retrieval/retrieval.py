@@ -1,27 +1,19 @@
-from typing import Dict, List, Tuple, Union, Any
-
-import argparse
 from pathlib import Path
-from typing import Optional
-import h5py
+from typing import Any, Dict
+
 import numpy as np
 import torch
-import collections.abc as collections
-import os
 
+
+from loguru import logger
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from loc.datasets.dataset import ImagesFromList
 from loc.extractors import GlobalExtractor
-
 from loc.utils.io import remove_duplicate_pairs
-from loc.utils.readers import GlobalFeaturesLoader
+from loc.utils.readers import GlobalFeaturesReader
 
-from torch.utils.data import DataLoader
-
-# logger
-from loguru import logger
-from loguru import logger
 
 class Retrieval(object):
     """general retrieval class
@@ -51,7 +43,7 @@ class Retrieval(object):
         self.pairs_path = save_path / Path('loc_pairs' + '_' +
                                            str(model_name) + '_' +
                                            str(num_topK) + '.txt')
-        
+
         #
         self.db_features_preds = None
 
@@ -67,13 +59,12 @@ class Retrieval(object):
 
     def load_features(self, features_path, split):
 
-
         assert features_path.exists(), features_path
 
         logger.info(f"load global features from {features_path}")
 
         # reader
-        features_reader = GlobalFeaturesLoader(features_path)
+        features_reader = GlobalFeaturesReader(features_path)
 
         # loader
         loader = self._make_images_loader(split=split)
@@ -100,30 +91,31 @@ class Retrieval(object):
         return out
 
     def load_database_features(self, save_path=None):
-        
+
         if save_path is None:
             save_path = self.save_path
-        
+
         features_path = save_path / 'db_global_features.h5'
         db_preds = self.load_features(features_path=features_path, split="db")
-        
+
         return db_preds
 
     def load_query_features(self, save_path=None):
-        
+
         if save_path is None:
             save_path = self.save_path
-        
+
         features_path = save_path / 'query_global_features.h5'
-        q_preds = self.load_features(features_path=features_path, split="query")
-        
-        return q_preds    
-    
+        q_preds = self.load_features(
+            features_path=features_path, split="query")
+
+        return q_preds
+
     def get_database_features(self):
         if self.db_features_preds is None:
-            self.db_features_preds = self.load_database_features()            
+            self.db_features_preds = self.load_database_features()
         return self.db_features_preds
-    
+
     def _search(self, q_preds, db_preds):
         """descriptor bases matcher
 
@@ -190,12 +182,12 @@ class Retrieval(object):
             str: path to retrieval pairs (*.txt)
         """
 
-        # load 
+        # load
         if db_preds is None:
             db_preds = self.load_database_features()
 
         if q_preds is None:
-            q_preds  = self.load_query_features()
+            q_preds = self.load_query_features()
 
         # match
         image_pairs = self._search(q_preds, db_preds)
@@ -205,7 +197,7 @@ class Retrieval(object):
             image_pairs = self._remove_duplicates(image_pairs)
 
         image_pairs = sorted(image_pairs)
-        
+
         # save pairs
         with open(self.pairs_path, 'w') as f:
             f.write('\n'.join(' '.join([i, j]) for i, j in image_pairs))
@@ -216,12 +208,12 @@ class Retrieval(object):
         return self.pairs_path
 
     def __call__(self, data: Dict) -> Any:
-        
+
         item = data.copy()
-        
+
         #
         db_preds = self.get_database_features()
-        
+
         # extract query features
         q_preds = self.extractor.extract_image(
             item, normalize=True, gray=False)

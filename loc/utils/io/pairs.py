@@ -1,12 +1,10 @@
-# logger
-from loguru import logger
+
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
 import h5py
 
-from loguru import logger
 
 def path2key(name: str) -> str:
     """key id for item from its path
@@ -99,7 +97,7 @@ def find_pair(hfile: h5py.File,
     Returns:
         Tuple[str, bool]: return key and if reverse
     """
-    
+
     if pairs2key(name0, name1) in hfile:
         return pairs2key(name0, name1), False
 

@@ -36,7 +36,7 @@ def run_triangulation():
     """geometric verification and triangulation 
     """    
 
-    # logger
+    
     logger = init_loguru(name="loc", log_file="triangulation.log")
 
     # args

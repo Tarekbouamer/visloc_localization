@@ -34,7 +34,7 @@ def run_build_visloc_map():
     """build a visloc map
     """    
 
-    # logger
+    
     logger = init_loguru(name="loc", log_file="build_visloc_map.log")
 
     # args

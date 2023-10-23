@@ -40,7 +40,7 @@ def run_exhaustive_matching():
         * loc for queries vs database images
     """    
 
-    # logger
+    
     logger = init_loguru(name="loc", log_file="exhaustive_matching.log")
 
     # args,

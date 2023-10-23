@@ -1,10 +1,8 @@
-from loguru import logger
 from pathlib import Path
 from typing import Any, Dict
 
 from loc.retrieval import Retrieval
 
-from loguru import logger
 
 def image_retrieval(args: Any,
                     cfg: Dict = None

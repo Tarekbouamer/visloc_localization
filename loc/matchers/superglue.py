@@ -1,10 +1,5 @@
 
 # General
-from collections import OrderedDict
-import argparse
-from os import mkdir
-import numpy as np
-from pathlib import Path
 
 # torch
 import torch
@@ -15,6 +10,7 @@ from thirdparty.SuperGluePretrainedNetwork.models.superglue import SuperGlue
 
 class SuperGlueMatcher(torch.nn.Module):
     """ Image Matching Frontend SuperGlue """
+
     def __init__(self, config={}):
         super().__init__()
         self.superglue = SuperGlue(config.get('superglue', {}))

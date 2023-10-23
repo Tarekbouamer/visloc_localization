@@ -64,7 +64,7 @@ def make_workspace(cfg):
 
 def main(cli_cfg):
 
-    # logger
+    
     logger = init_loguru(name="loc", log_file="run.log")
     logger.info("init visloc_localization")
 
